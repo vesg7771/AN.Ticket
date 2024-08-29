@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\AN.Ticket.Application\AN.Ticket.Application.csproj" />
-    <ProjectReference Include="..\src\AN.Ticket.Domain\AN.Ticket.Domain.csproj" />
+    <ProjectReference Include="..\AN.Ticket.Application\AN.Ticket.Application.csproj" />
+    <ProjectReference Include="..\AN.Ticket.Domain\AN.Ticket.Domain.csproj" />
   </ItemGroup>
 
 </Project>
