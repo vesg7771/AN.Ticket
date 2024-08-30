@@ -47,8 +47,123 @@ button.accept-policy {
   line-height: 60px;
 }
 
-#sidebar {
-    width: 250px;
-    height: 100vh;
-    display: none;
+/* Offcanvas Header */
+.offcanvas-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid #dee2e6;
 }
+
+.offcanvas-header .offcanvas-title {
+    display: flex;
+    align-items: center;
+}
+
+.offcanvas-header .offcanvas-title img {
+    height: 40px;
+    margin-right: 10px;
+}
+
+.offcanvas-close-btn {
+    background: none;
+    border: none;
+    color: #000;
+    font-size: 1.5rem;
+}
+
+/* Offcanvas Body */
+.offcanvas-body .nav-item .nav-link {
+    color: #495057;
+    transition: color 0.3s;
+    position: relative;
+}
+
+.offcanvas-body .nav-item .nav-link:hover {
+    color: #0D6EFD;
+}
+
+.offcanvas-body .nav-item ul.navbar-nav {
+    margin-top: 10px;
+}
+
+.offcanvas-body .nav-item ul.navbar-nav .nav-item .nav-link {
+    padding-left: 30px;
+    font-size: 1rem;
+    color: #6c757d;
+}
+
+.offcanvas-body .nav-item ul.navbar-nav .nav-item .nav-link:hover {
+    color: #dc3545;
+}
+
+/* Chevron Rotation */
+.nav-link .bi-chevron-down {
+    transition: transform 0.3s;
+}
+
+.nav-link[aria-expanded="true"] .bi-chevron-down {
+    transform: rotate(180deg);
+}
+
+/* Wrapper */
+.wrapper {
+    display: flex;
+    flex: 1;
+    margin-left: 0;
+    transition: margin-left 0.3s;
+}
+
+.wrapper.show-sidebar {
+    margin-left: 250px;
+}
+
+/* Content */
+.content {
+    flex: 1;
+    padding: 20px;
+    transition: margin-left 0.3s;
+}
+
+/* Navbar */
+.navbar-custom {
+    background-color: #fff;
+    padding: 10px 20px;
+}
+
+.navbar-custom .navbar-brand {
+    font-weight: bold;
+    color: #333;
+}
+
+.navbar-custom .btn-offcanvas {
+    box-shadow: none;
+}
+
+.navbar-custom .navbar-nav .nav-item .nav-link {
+    color: #6c757d;
+    font-size: 1.25rem;
+    transition: color 0.3s;
+}
+
+.navbar-custom .navbar-nav .nav-item .nav-link:hover {
+    color: #0D6EFD;
+}
+
+/* Input Group */
+.input-group .form-control {
+    border-radius: 0 20px 20px 0;
+    box-shadow: none;
+}
+
+.input-group .input-group-text {
+    border-radius: 20px 0 0 20px;
+    background-color: #f8f9fa;
+}
+
+.input-group .form-control:focus, .input-group .input-group-text:focus {
+    border-color: #ced4da;
+    box-shadow: none;
+}
+

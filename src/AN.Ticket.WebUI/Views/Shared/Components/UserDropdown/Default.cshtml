@@ -1,0 +1,35 @@
+﻿@model AN.Ticket.WebUI.ViewModels.Account.UserDropdownViewModel
+
+<style>
+    .navbar-custom .user-info {
+        display: flex;
+        align-items: center;
+        background-color: #f8f9fa;
+        border-radius: 20px;
+        padding: 5px 10px;
+    }
+
+    .navbar-custom .user-info img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-right: 10px;
+    }
+</style>
+
+<div class="user-info ms-3 dropdown">
+    <a class="d-flex align-items-center text-decoration-none dropdown-toggle" href="#" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+        @{
+            var profilePicture = string.IsNullOrEmpty(Model.ProfilePicture) ? "/img/user-default.webp" : Model.ProfilePicture;
+        }
+        <img src="@profilePicture" alt="User Avatar" style="object-fit:cover;">
+        <span class="ms-2">@Model.FullName</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+        <li>
+            <form asp-controller="Account" asp-action="Logout" method="post" asp-antiforgery="true">
+                <button type="submit" class="dropdown-item">Sair</button>
+            </form>
+        </li>
+    </ul>
+</div>

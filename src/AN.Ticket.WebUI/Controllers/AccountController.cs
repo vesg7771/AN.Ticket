@@ -251,4 +251,13 @@ public class AccountController : Controller
             return View(model);
         }
     }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Logout()
+    {
+        await _signInManager.SignOutAsync();
+        _logger.LogInformation("Usuário deslogado.");
+        return RedirectToAction(nameof(Login), "Account");
+    }
 }
