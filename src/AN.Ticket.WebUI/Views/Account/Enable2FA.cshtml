@@ -1,0 +1,14 @@
+﻿@model AN.Ticket.WebUI.ViewModels.Account.Enable2FAViewModel
+
+<h2>Configurar Autenticação de Dois Fatores</h2>
+
+<p>Use o aplicativo de autenticação para escanear o código QR ou insira a chave manualmente:</p>
+<p><strong>Chave do Autenticador:</strong> @Model.AuthenticatorKey</p>
+
+<form asp-action="Enable2FA" method="post">
+    <div class="form-group">
+        <label for="code">Código de Verificação</label>
+        <input type="text" class="form-control" id="code" name="Code" required />
+    </div>
+    <button type="submit" class="btn btn-primary">Verificar</button>
+</form>

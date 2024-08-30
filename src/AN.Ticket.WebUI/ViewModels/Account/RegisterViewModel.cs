@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace AN.Ticket.WebUI.ViewModels;
+namespace AN.Ticket.WebUI.ViewModels.Account;
 
 public class RegisterViewModel
 {

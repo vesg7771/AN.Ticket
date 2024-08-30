@@ -1,0 +1,10 @@
+﻿@model AN.Ticket.WebUI.ViewModels.Account.DisplayBackupCodesViewModel
+
+<h2>Códigos de Backup</h2>
+<p>Guarde esses códigos em um local seguro. Você pode usá-los para acessar sua conta se perder o acesso ao seu dispositivo de autenticação de dois fatores.</p>
+<ul>
+    @foreach (var code in Model.BackupCodes)
+    {
+        <li>@code</li>
+    }
+</ul>

@@ -1,0 +1,28 @@
+﻿@model AN.Ticket.WebUI.ViewModels.Account.VerifyEmailViewModel
+
+@{
+    ViewData["Title"] = "Verificação de E-mail";
+    Layout = "~/Views/Shared/_LayoutAuth.cshtml";
+}
+
+<div class="container d-flex align-items-center justify-content-center" style="min-height: 90vh;">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-8">
+            <div class="card p-3">
+                <div class="card-body text-center">
+                    <h2 class="card-title">@ViewData["Title"]</h2>
+                    <h5 class="card-subtitle mb-3 text-muted">Quase lá!</h5>
+                    <p class="card-text">Um e-mail de verificação foi enviado para o seu endereço de e-mail. Por favor, clique no link do e-mail para confirmar seu endereço de e-mail.</p>
+                    <hr />
+                    <a asp-action="ResendVerificationEmail" class="btn btn-outline-primary btn-block">Reenviar e-mail de verificação</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

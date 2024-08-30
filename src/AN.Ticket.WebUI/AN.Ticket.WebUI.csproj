@@ -22,4 +22,11 @@
     <ProjectReference Include="..\AN.Ticket.Infra.Data\AN.Ticket.Infra.Data.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="Views\Shared\_LayoutAuth.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

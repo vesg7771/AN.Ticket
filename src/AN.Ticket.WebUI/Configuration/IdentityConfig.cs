@@ -8,10 +8,16 @@ public static class IdentityConfig
 {
     public static IServiceCollection AddCustomAuthentication(this IServiceCollection services)
     {
-        services.AddIdentity<ApplicationUser, IdentityRole>()
-            .AddSignInManager<SignInManager<ApplicationUser>>()
-            .AddEntityFrameworkStores<ApplicationDbContext>()
-            .AddDefaultTokenProviders();
+        services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+        {
+            options.Password.RequireDigit = true;
+            options.Password.RequiredLength = 6;
+            options.Password.RequireNonAlphanumeric = false;
+            options.Password.RequireUppercase = true;
+            options.Password.RequireLowercase = false;
+        })
+        .AddEntityFrameworkStores<ApplicationDbContext>()
+        .AddDefaultTokenProviders();
 
         services.ConfigureApplicationCookie(options =>
         {

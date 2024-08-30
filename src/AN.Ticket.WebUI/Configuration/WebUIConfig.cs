@@ -17,7 +17,7 @@ public static class WebUIConfig
 
         services.AddControllersWithViews();
         services.AddCustomAuthentication();
-        services.AddRegister();
+        services.AddRegister(configuration);
 
         return services;
     }
