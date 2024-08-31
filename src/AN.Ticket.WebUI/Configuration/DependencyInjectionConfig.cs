@@ -2,8 +2,10 @@
 using AN.Ticket.Application.Interfaces;
 using AN.Ticket.Application.Services;
 using AN.Ticket.Domain.Accounts;
+using AN.Ticket.Domain.Interfaces;
 using AN.Ticket.Domain.Interfaces.Base;
 using AN.Ticket.Infra.Data.Identity;
+using AN.Ticket.Infra.Data.Repositories;
 using AN.Ticket.Infra.Data.Repositories.Base;
 
 namespace AN.Ticket.WebUI.Configuration;
@@ -25,6 +27,7 @@ public static class DependencyInjectionConfig
         #endregion
 
         #region Repositories
+        services.AddScoped<IUserRepository, UserRepository>();
         #endregion
 
         #region SMTP

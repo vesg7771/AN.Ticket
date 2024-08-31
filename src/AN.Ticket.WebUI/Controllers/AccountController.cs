@@ -1,4 +1,7 @@
 ﻿using AN.Ticket.Application.Interfaces;
+using AN.Ticket.Domain.Entities;
+using AN.Ticket.Domain.Interfaces;
+using AN.Ticket.Domain.Interfaces.Base;
 using AN.Ticket.Infra.Data.Identity;
 using AN.Ticket.WebUI.ViewModels.Account;
 using Microsoft.AspNetCore.Authorization;
@@ -14,18 +17,24 @@ public class AccountController : Controller
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly IEmailSenderService _emailSenderService;
+    private readonly IUserRepository _userRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
     public AccountController(
         ILogger<AccountController> logger,
         UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager,
-        IEmailSenderService emailSenderService
+        IEmailSenderService emailSenderService,
+        IUserRepository userRepository,
+        IUnitOfWork unitOfWork
     )
     {
         _logger = logger;
         _userManager = userManager;
         _signInManager = signInManager;
         _emailSenderService = emailSenderService;
+        _userRepository = userRepository;
+        _unitOfWork = unitOfWork;
     }
 
     [HttpGet]
@@ -140,12 +149,38 @@ public class AccountController : Controller
         }
 
         var user = new ApplicationUser(model.FullName, model.Email, model.Email, false, false);
+        var userEmployee = new User(Guid.Parse(user.Id), user.FullName!, user.Email!);
         var result = await _userManager.CreateAsync(user, model.Password);
-
         if (result.Succeeded)
         {
-            await _signInManager.SignInAsync(user, model.RememberMe);
-            return RedirectToAction(nameof(HomeController.Index), "Home");
+            await _userRepository.SaveAsync(userEmployee);
+            await _unitOfWork.CommitAsync();
+
+            var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+
+            var callbackUrl = Url.Action(nameof(ConfirmEmail), "Account", new { userId = user.Id, code }, protocol: HttpContext.Request.Scheme);
+            var emailMessage = $@"
+                <html>
+                <body style='margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #ffffff;'>
+                    <table align='center' border='0' cellpadding='0' cellspacing='0' width='100%' style='max-width: 600px; background-color: #ffffff; margin: 40px auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);'>
+                        <tr>
+                            <td style='padding: 30px; text-align: center;'>
+                                <h2 style='color: #333333;'>Confirmação de E-mail</h2>
+                                <p style='color: #666666; font-size: 16px; line-height: 1.5;'>Olá,</p>
+                                <p style='color: #666666; font-size: 16px; line-height: 1.5;'>Por favor, confirme seu e-mail clicando no botão abaixo:</p>
+                                <a href='{callbackUrl}' style='display: inline-block; padding: 6px 12px; font-size: 12px; color: #ffffff; background-color: #007bff; text-decoration: none; border-radius: 5px; margin-top: 20px;'>Confirmar E-mail</a>
+                                <p style='color: #666666; font-size: 14px; line-height: 1.5; margin-top: 30px;'>Se você não solicitou esta ação, por favor, ignore este e-mail.</p>
+                                <hr style='border: none; border-top: 1px solid #eeeeee; margin: 30px 0;' />
+                                <p style='color: #999999; font-size: 12px; text-align: center;'>Este é um e-mail automático. Por favor, não responda.</p>
+                            </td>
+                        </tr>
+                    </table>
+                </body>
+                </html>";
+
+            await _emailSenderService.SendEmailAsync(user.Email, "Confirme seu e-mail", emailMessage);
+
+            return RedirectToAction(nameof(VerifyEmail));
         }
         else
         {

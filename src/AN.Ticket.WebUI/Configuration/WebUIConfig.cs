@@ -1,4 +1,5 @@
-﻿using AN.Ticket.Infra.Data.Context;
+﻿using AN.Ticket.Hangfire.Configuration;
+using AN.Ticket.Infra.Data.Context;
 using Microsoft.EntityFrameworkCore;
 
 namespace AN.Ticket.WebUI.Configuration;
@@ -16,6 +17,7 @@ public static class WebUIConfig
         );
 
         services.AddControllersWithViews();
+        services.AddHangfireConfiguration(configuration);
         services.AddCustomAuthentication();
         services.AddRegister(configuration);
 
@@ -23,7 +25,9 @@ public static class WebUIConfig
     }
 
     public static IApplicationBuilder UseWebUI(
-        this IApplicationBuilder app, IWebHostEnvironment env
+        this IApplicationBuilder app,
+        IWebHostEnvironment env,
+        IConfiguration configuration
     )
     {
         if (!env.IsDevelopment())
@@ -39,6 +43,7 @@ public static class WebUIConfig
 
         app.UseAuthentication();
         app.UseAuthorization();
+        app.UseHangfireConfiguration(configuration);
 
         return app;
     }

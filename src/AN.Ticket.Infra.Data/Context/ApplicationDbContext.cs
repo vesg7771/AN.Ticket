@@ -1,7 +1,11 @@
-﻿using AN.Ticket.Infra.Data.Identity;
+﻿using AN.Ticket.Domain.Entities;
+using AN.Ticket.Domain.Entities.Base;
+using AN.Ticket.Domain.ValueObjects;
+using AN.Ticket.Infra.Data.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using DomainEntity = AN.Ticket.Domain.Entities;
 
 namespace AN.Ticket.Infra.Data.Context;
 public class ApplicationDbContext
@@ -10,6 +14,16 @@ public class ApplicationDbContext
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)
     { }
+
+    DbSet<Contact> Contacts { get; set; }
+    DbSet<SocialNetwork> SocialNetworks { get; set; }
+    DbSet<DomainEntity.Ticket> Tickets { get; set; }
+    DbSet<SatisfactionRating> SatisfactionRatings { get; set; }
+    DbSet<Activity> Activities { get; set; }
+    DbSet<InteractionHistory> InteractionHistories { get; set; }
+    DbSet<Payment> Payments { get; set; }
+    DbSet<Team> Teams { get; set; }
+    DbSet<User> Users { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -40,5 +54,24 @@ public class ApplicationDbContext
                 }
             }
         }
+    }
+
+    public override int SaveChanges()
+    {
+        var entries = ChangeTracker.Entries()
+            .Where(e => e.Entity is EntityBase &&
+                        (e.State == EntityState.Added || e.State == EntityState.Modified));
+
+        foreach (var entityEntry in entries)
+        {
+            ((EntityBase)entityEntry.Entity).UpdatedAt = DateTime.UtcNow;
+
+            if (entityEntry.State == EntityState.Added)
+            {
+                ((EntityBase)entityEntry.Entity).CreatedAt = DateTime.UtcNow;
+            }
+        }
+
+        return base.SaveChanges();
     }
 }

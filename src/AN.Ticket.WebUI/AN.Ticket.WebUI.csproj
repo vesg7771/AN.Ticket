@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\AN.Ticket.Hangfire\AN.Ticket.Hangfire.csproj" />
     <ProjectReference Include="..\AN.Ticket.Application\AN.Ticket.Application.csproj" />
     <ProjectReference Include="..\AN.Ticket.Infra.Data\AN.Ticket.Infra.Data.csproj" />
   </ItemGroup>
