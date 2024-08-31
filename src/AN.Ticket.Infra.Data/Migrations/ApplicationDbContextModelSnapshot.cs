@@ -312,7 +312,7 @@ namespace AN.Ticket.Infra.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("AN.Ticket.Domain.ValueObjects.SocialNetwork", b =>
@@ -636,7 +636,7 @@ namespace AN.Ticket.Infra.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsOne("AN.Ticket.Domain.Entities.SatisfactionRating", "SatisfactionRating", b1 =>
+                    b.OwnsOne("AN.Ticket.Domain.Entities.Ticket.SatisfactionRating#AN.Ticket.Domain.Entities.SatisfactionRating", "SatisfactionRating", b1 =>
                         {
                             b1.Property<Guid>("TicketId")
                                 .HasColumnType("char(36)");
@@ -659,7 +659,7 @@ namespace AN.Ticket.Infra.Data.Migrations
 
                             b1.HasKey("TicketId");
 
-                            b1.ToTable("SatisfactionRatings");
+                            b1.ToTable("SatisfactionRatings", (string)null);
 
                             b1.WithOwner("Ticket")
                                 .HasForeignKey("TicketId");

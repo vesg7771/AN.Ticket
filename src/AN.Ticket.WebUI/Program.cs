@@ -8,7 +8,7 @@ builder.Services.AddWebUI(builder.Configuration);
 
 var app = builder.Build();
 
-app.UseWebUI(builder.Environment);
+app.UseWebUI(builder.Environment, builder.Configuration);
 
 app.MapControllerRoute(
     name: "default",
