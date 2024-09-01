@@ -54,13 +54,11 @@ public class Ticket : EntityBase
         SatisfactionRating = new SatisfactionRating();
     }
 
-    public void AssignUsers(User user)
+    public void AssignUsers(Guid userId)
     {
-        if (user is null) throw new ArgumentNullException(nameof(user));
-        if (user.Id == Guid.Empty) throw new ArgumentException("User ID cannot be empty.", nameof(user));
+        if (userId == Guid.Empty) throw new ArgumentException("User ID cannot be empty.", nameof(userId));
 
-        UserId = user.Id;
-        User = user;
+        UserId = userId;
     }
 
     public void AddMessages(IEnumerable<TicketMessage> messages)

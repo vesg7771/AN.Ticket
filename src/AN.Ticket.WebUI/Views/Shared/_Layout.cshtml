@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/AN.Ticket.WebUI.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    @RenderSection("Styles", required: false)
 </head>
 <body>
     <header>
@@ -70,17 +72,20 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link d-flex align-items-center" href="#" data-bs-toggle="collapse" data-bs-target="#appFeaturesMenu" aria-expanded="false" aria-controls="appFeaturesMenu">
-                        <i class="bi bi-people"></i>
-                        <span class="ms-2">Funcionalidades do App</span>
+                        <i class="bi bi-ticket"></i>
+                        <span class="ms-2">Tickets</span>
                         <i class="bi bi-chevron-down ms-auto"></i>
                     </a>
                     <div class="collapse" id="appFeaturesMenu">
                         <ul class="navbar-nav ps-3">
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Ticket" asp-action="Index"><i class="bi bi-people"></i>Chamados</a>
+                                <a class="nav-link" asp-controller="Ticket" asp-action="Index"><i class="bi bi-grid me-1"></i>Dashboard</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="" asp-action="Create"><i class="bi bi-person-plus"></i>Criar Chamados</a>
+                                <a class="nav-link" asp-controller="Ticket" asp-action="UserTickets"><i class="bi bi-kanban me-1"></i>Seus Tickets</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Ticket" asp-action="UnassignedTickets"><i class="bi bi-collection me-1"></i>Tickets não atribuidos</a>
                             </li>
                         </ul>
                     </div>

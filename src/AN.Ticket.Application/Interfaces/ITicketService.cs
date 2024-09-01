@@ -6,4 +6,7 @@ namespace AN.Ticket.Application.Interfaces;
 public interface ITicketService
     : IService<TicketDto, DomainEntity.Ticket>
 {
+    Task<bool> AssignTicketToUserAsync(Guid ticketId, Guid userId);
+    Task<IEnumerable<TicketDto>> GetTicketsByUserIdAsync(Guid userId);
+    Task<IEnumerable<TicketDto>> GetTicketsNotAssignedAsync();
 }

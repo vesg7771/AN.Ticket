@@ -1,0 +1,115 @@
+﻿@using AN.Ticket.Domain.Enums
+@model IEnumerable<AN.Ticket.Application.DTOs.TicketDto>
+
+@{
+    ViewBag.Title = "Tickets";
+    var statuses = Enum.GetValues(typeof(TicketStatus)).Cast<TicketStatus>();
+    var ticketsGroupedByStatus = Model.GroupBy(t => t.Status).ToDictionary(g => g.Key, g => g.ToList());
+}
+
+@await Component.InvokeAsync("Breadcrumb")
+
+<div class="container">
+    <div class="row">
+        @foreach (var status in statuses)
+        {
+            <div class="col-md-3 col-sm-6 mb-4">
+                <h3 class="status-header">@TranslateStatus(status) <i class="@GetStatusIcon(status)"></i></h3>
+                @if (ticketsGroupedByStatus.ContainsKey(status))
+                {
+                    foreach (var ticket in ticketsGroupedByStatus[status])
+                    {
+                        <div class="ticket-card p-3 mb-3 border rounded">
+                            <div class="row d-flex align-items-center">
+                                <h4 class="col mb-0">@ticket.Subject</h4>
+                                <div class="col-2 initial-circle d-none d-md-flex justify-content-center align-items-center rounded-circle text-white me-2">
+                                    @GetInitials(ticket.AccountName)
+                                </div>
+                            </div>
+                            <p class="mb-1">@ticket.ContactName - @ticket.AccountName</p>
+                            <p class="mb-1">
+                                Prioridade
+                                <span class="badge @GetPriorityBadgeClass(ticket.Priority) text-white">
+                                    @TranslatePriority(ticket.Priority)
+                                </span>
+                            </p>
+                            <p class="mb-1"><i class="bi bi-clock me-1"></i> @ticket.DueDate.ToShortDateString()</p>
+                            <span>@TranslateStatus(ticket.Status)</span>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="d-flex justify-content-center align-items-center flex-column">
+                        <img src="~/img/ticket-icon.png" alt="Ticket Icon" style="width: 60px; height: 60px; object-fit: cover;" />
+                        <p>Nenhum ticket nesta fila</p>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/ticket.css" />
+}
+
+@functions {
+    public string TranslateStatus(TicketStatus status)
+    {
+        return status switch
+        {
+            TicketStatus.Onhold => "Em Espera",
+            TicketStatus.Open => "Aberto",
+            TicketStatus.InProgress => "Em Progresso",
+            TicketStatus.Closed => "Fechado",
+            _ => status.ToString(),
+        };
+    }
+
+    public string TranslatePriority(TicketPriority priority)
+    {
+        return priority switch
+        {
+            TicketPriority.Low => "Baixo",
+            TicketPriority.Medium => "Médio",
+            TicketPriority.High => "Alta",
+            _ => priority.ToString(),
+        };
+    }
+
+    public string GetInitials(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return "";
+
+        var words = name.Split(' ');
+        if (words.Length == 1)
+            return words[0].Substring(0, 1).ToUpper();
+
+        return string.Concat(words[0].Substring(0, 1), words[words.Length - 1].Substring(0, 1)).ToUpper();
+    }
+
+    public string GetStatusIcon(TicketStatus status)
+    {
+        return status switch
+        {
+            TicketStatus.Onhold => "bi bi-hourglass-split text-info",
+            TicketStatus.Open => "bi bi-folder2-open text-primary",
+            TicketStatus.InProgress => "bi bi-arrow-repeat text-warning",
+            TicketStatus.Closed => "bi bi-check-circle text-success",
+            _ => "bi bi-question-circle text-secondary",
+        };
+    }
+
+    public string GetPriorityBadgeClass(TicketPriority priority)
+    {
+        return priority switch
+        {
+            TicketPriority.Low => "bg-success", 
+            TicketPriority.Medium => "bg-warning",
+            TicketPriority.High => "bg-danger", 
+            _ => "bg-secondary",  
+        };
+    }
+}

@@ -26,4 +26,20 @@ public class TicketRepository
                 x.Subject == subject
             );
     }
+
+    public async Task<IEnumerable<DomainEntity.Ticket>> GetTicketsByUserIdAsync(Guid userId)
+    {
+        return await Entities
+            .AsNoTracking()
+            .Where(x => x.UserId == userId)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<DomainEntity.Ticket>> GetTicketsNotAssignedAsync()
+    {
+        return await Entities
+            .AsNoTracking()
+            .Where(x => x.UserId == null)
+            .ToListAsync();
+    }
 }

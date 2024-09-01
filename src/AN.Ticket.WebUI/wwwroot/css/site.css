@@ -48,3 +48,8 @@ body {
     scrollbar-width: thin;
     scrollbar-color: #c1c1c1 #f1f1f1;
 }
+
+.container {
+    max-width: 1700px;
+    padding: 0 30px;
+}
