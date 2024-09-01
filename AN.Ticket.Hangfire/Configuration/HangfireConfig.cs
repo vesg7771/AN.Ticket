@@ -18,7 +18,7 @@ public static class HangfireConfig
             config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170);
             config.UseSimpleAssemblyNameTypeSerializer();
             config.UseRecommendedSerializerSettings();
-            config.UseStorage(new MySqlStorage(configuration.GetConnectionString("AtlasBd"),
+            config.UseStorage(new MySqlStorage(configuration.GetConnectionString("AtlasHanfireBd"),
                 new MySqlStorageOptions
                 {
                     TransactionIsolationLevel = (IsolationLevel)System.Data.IsolationLevel.ReadCommitted,
@@ -41,6 +41,7 @@ public static class HangfireConfig
             options.WorkerCount = workerCount;
             options.Queues = new[]
             {
+                "default",
                 Enums.TypeQueue.synchronization.ToString(),
                 Enums.TypeQueue.support_ticket.ToString(),
                 Enums.TypeQueue.ticket_response.ToString(),

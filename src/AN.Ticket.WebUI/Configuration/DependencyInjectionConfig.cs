@@ -1,6 +1,9 @@
 ﻿using AN.Ticket.Application.Helpers.EmailSender;
+using AN.Ticket.Application.Helpers.TokenProvider;
 using AN.Ticket.Application.Interfaces;
+using AN.Ticket.Application.Interfaces.Base;
 using AN.Ticket.Application.Services;
+using AN.Ticket.Application.Services.Base;
 using AN.Ticket.Domain.Accounts;
 using AN.Ticket.Domain.Interfaces;
 using AN.Ticket.Domain.Interfaces.Base;
@@ -16,6 +19,7 @@ public static class DependencyInjectionConfig
     {
         #region Base
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+        services.AddScoped(typeof(IService<,>), typeof(Service<,>));
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         #endregion
 
@@ -24,14 +28,20 @@ public static class DependencyInjectionConfig
         #endregion
 
         #region Services
+        services.AddScoped<IEmailMonitoringService, EmailMonitoringService>();
+        services.AddScoped<ITicketService, TicketService>();
         #endregion
 
         #region Repositories
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<ITicketRepository, TicketRepository>();
+        services.AddScoped<IContactRepository, ContactRepository>();
+        services.AddScoped<ITicketMessageRepository, TicketMessageRepository>();
         #endregion
 
         #region SMTP
         services.Configure<SmtpSettings>(configuration.GetSection("SmtpSettings"));
+        services.AddSingleton<CancellationTokenProvider>();
         services.AddScoped<IEmailSenderService, EmailSenderService>();
         #endregion
     }

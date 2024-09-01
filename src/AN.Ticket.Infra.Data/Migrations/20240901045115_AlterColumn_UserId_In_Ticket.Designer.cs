@@ -4,6 +4,7 @@ using AN.Ticket.Infra.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AN.Ticket.Infra.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240901045115_AlterColumn_UserId_In_Ticket")]
+    partial class AlterColumn_UserId_In_Ticket
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -28,34 +31,21 @@ namespace AN.Ticket.Infra.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
-                    b.Property<Guid?>("ContactId")
-                        .HasColumnType("char(36)");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("varchar(500)");
-
-                    b.Property<TimeSpan?>("Duration")
-                        .HasColumnType("time(6)");
-
-                    b.Property<int>("Priority")
-                        .HasColumnType("int");
 
                     b.Property<DateTime>("ScheduledDate")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<string>("Subject")
-                        .HasMaxLength(200)
-                        .HasColumnType("varchar(200)");
-
-                    b.Property<Guid?>("TicketId")
-                        .IsRequired()
+                    b.Property<Guid>("TicketId")
                         .HasColumnType("char(36)");
 
-                    b.Property<Guid?>("TicketId1")
+                    b.Property<Guid>("TicketId1")
                         .HasColumnType("char(36)");
 
                     b.Property<int>("Type")
@@ -65,8 +55,6 @@ namespace AN.Ticket.Infra.Data.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ContactId");
 
                     b.HasIndex("TicketId");
 
@@ -260,6 +248,9 @@ namespace AN.Ticket.Infra.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<string>("Description")
+                        .HasColumnType("longtext");
+
                     b.Property<DateTime>("DueDate")
                         .HasColumnType("datetime(6)");
 
@@ -297,41 +288,6 @@ namespace AN.Ticket.Infra.Data.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Tickets", (string)null);
-                });
-
-            modelBuilder.Entity("AN.Ticket.Domain.Entities.TicketMessage", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)");
-
-                    b.Property<DateTime>("SentAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<Guid>("TicketId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<Guid?>("UserId")
-                        .HasColumnType("char(36)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TicketId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("TicketMessage");
                 });
 
             modelBuilder.Entity("AN.Ticket.Domain.Entities.User", b =>
@@ -610,11 +566,6 @@ namespace AN.Ticket.Infra.Data.Migrations
 
             modelBuilder.Entity("AN.Ticket.Domain.Entities.Activity", b =>
                 {
-                    b.HasOne("AN.Ticket.Domain.Entities.Contact", "Contact")
-                        .WithMany()
-                        .HasForeignKey("ContactId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
                     b.HasOne("AN.Ticket.Domain.Entities.Ticket", null)
                         .WithMany("Activities")
                         .HasForeignKey("TicketId")
@@ -624,9 +575,8 @@ namespace AN.Ticket.Infra.Data.Migrations
                     b.HasOne("AN.Ticket.Domain.Entities.Ticket", "Ticket")
                         .WithMany()
                         .HasForeignKey("TicketId1")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.Navigation("Contact");
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Ticket");
                 });
@@ -691,6 +641,7 @@ namespace AN.Ticket.Infra.Data.Migrations
                                 .HasColumnType("char(36)");
 
                             b1.Property<string>("Comment")
+                                .IsRequired()
                                 .HasColumnType("longtext");
 
                             b1.Property<DateTime>("CreatedAt")
@@ -699,7 +650,7 @@ namespace AN.Ticket.Infra.Data.Migrations
                             b1.Property<Guid>("Id")
                                 .HasColumnType("char(36)");
 
-                            b1.Property<int?>("Rating")
+                            b1.Property<int>("Rating")
                                 .HasColumnType("int");
 
                             b1.Property<DateTime>("UpdatedAt")
@@ -716,24 +667,6 @@ namespace AN.Ticket.Infra.Data.Migrations
                         });
 
                     b.Navigation("SatisfactionRating");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("AN.Ticket.Domain.Entities.TicketMessage", b =>
-                {
-                    b.HasOne("AN.Ticket.Domain.Entities.Ticket", "Ticket")
-                        .WithMany("Messages")
-                        .HasForeignKey("TicketId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AN.Ticket.Domain.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.Navigation("Ticket");
 
                     b.Navigation("User");
                 });
@@ -825,8 +758,6 @@ namespace AN.Ticket.Infra.Data.Migrations
                     b.Navigation("Activities");
 
                     b.Navigation("InteractionHistories");
-
-                    b.Navigation("Messages");
                 });
 #pragma warning restore 612, 618
         }

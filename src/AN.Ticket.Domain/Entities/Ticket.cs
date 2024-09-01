@@ -10,17 +10,17 @@ public class Ticket : EntityBase
     public string Email { get; private set; }
     public string Phone { get; private set; }
     public string Subject { get; private set; }
-    public string Description { get; private set; }
+    public ICollection<TicketMessage>? Messages { get; private set; }
     public TicketStatus Status { get; private set; }
-    public Guid UserId { get; private set; }
-    public User User { get; private set; }
+    public Guid? UserId { get; private set; }
+    public User? User { get; private set; }
     public DateTime DueDate { get; private set; }
     public TicketPriority Priority { get; private set; }
-    public string Classification { get; private set; }
-    public string AttachmentFile { get; private set; }
-    public ICollection<Activity> Activities { get; private set; }
-    public ICollection<InteractionHistory> InteractionHistories { get; private set; }
-    public SatisfactionRating SatisfactionRating { get; private set; }
+    public string? Classification { get; private set; }
+    public string? AttachmentFile { get; private set; }
+    public ICollection<Activity>? Activities { get; private set; }
+    public ICollection<InteractionHistory>? InteractionHistories { get; private set; }
+    public SatisfactionRating? SatisfactionRating { get; private set; }
     public DateTime? FirstResponseAt { get; private set; }
     public DateTime? ClosedAt { get; private set; }
 
@@ -32,9 +32,7 @@ public class Ticket : EntityBase
         string email,
         string phone,
         string subject,
-        string description,
         TicketStatus status,
-        User user,
         DateTime dueDate,
         TicketPriority priority,
         string classification = null,
@@ -46,9 +44,7 @@ public class Ticket : EntityBase
         Email = email;
         Phone = phone;
         Subject = subject;
-        Description = description;
         Status = status;
-        User = user;
         DueDate = dueDate;
         Priority = priority;
         Classification = classification;
@@ -60,26 +56,42 @@ public class Ticket : EntityBase
 
     public void AssignUsers(User user)
     {
-        if (user == null) throw new ArgumentNullException(nameof(user));
+        if (user is null) throw new ArgumentNullException(nameof(user));
+        if (user.Id == Guid.Empty) throw new ArgumentException("User ID cannot be empty.", nameof(user));
+
+        UserId = user.Id;
         User = user;
+    }
+
+    public void AddMessages(IEnumerable<TicketMessage> messages)
+    {
+        if (messages is null) throw new ArgumentNullException(nameof(messages));
+        Messages ??= new List<TicketMessage>();
+
+        foreach (var message in messages)
+        {
+            if (message is null) throw new ArgumentNullException(nameof(message));
+            Messages.Add(message);
+        }
     }
 
     public void AddActivity(Activity activity)
     {
-        if (activity == null) throw new ArgumentNullException(nameof(activity));
+        if (activity is null) throw new ArgumentNullException(nameof(activity));
+        Activities ??= new List<Activity>();
         Activities.Add(activity);
     }
 
     public void AddInteractionHistory(InteractionHistory history)
     {
-        if (history == null) throw new ArgumentNullException(nameof(history));
+        if (history is null) throw new ArgumentNullException(nameof(history));
+        InteractionHistories ??= new List<InteractionHistory>();
         InteractionHistories.Add(history);
     }
 
     public void SetSatisfactionRating(SatisfactionRating rating)
     {
-        if (rating == null) throw new ArgumentNullException(nameof(rating));
-        SatisfactionRating = rating;
+        SatisfactionRating = rating ?? throw new ArgumentNullException(nameof(rating));
     }
 
     public void RecordFirstResponse()

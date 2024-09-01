@@ -13,7 +13,7 @@ public class ActivityMap : IEntityTypeConfiguration<Activity>
             .IsRequired();
 
         builder.Property(a => a.Description)
-            .IsRequired()
+            .IsRequired(false)
             .HasMaxLength(500);
 
         builder.Property(a => a.ScheduledDate)
@@ -22,10 +22,26 @@ public class ActivityMap : IEntityTypeConfiguration<Activity>
         builder.Property(a => a.TicketId)
             .IsRequired();
 
+        builder.Property(a => a.Subject)
+            .HasMaxLength(200);
+
+        builder.Property(a => a.Duration)
+            .IsRequired(false);
+
+        builder.Property(a => a.Priority)
+            .IsRequired();
+
+        builder.Property(a => a.ContactId)
+            .IsRequired(false);
+
         builder.HasOne(a => a.Ticket)
             .WithMany(t => t.Activities)
             .HasForeignKey(a => a.TicketId)
             .IsRequired();
+
+        builder.HasOne(a => a.Contact)
+            .WithMany()
+            .HasForeignKey(a => a.ContactId);
 
         builder.ToTable("Activities");
     }

@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\AN.Ticket.Hangfire\AN.Ticket.Hangfire.csproj" />
     <ProjectReference Include="..\AN.Ticket.Domain\AN.Ticket.Domain.csproj" />
   </ItemGroup>
 

@@ -20,17 +20,18 @@ public class TicketMap : IEntityTypeConfiguration<DomainEntity.Ticket>
             .HasMaxLength(150);
 
         builder.Property(t => t.Phone)
-            .HasMaxLength(20);
+            .HasMaxLength(20)
+            .IsRequired(false);
 
         builder.Property(t => t.Subject)
             .IsRequired()
             .HasMaxLength(500);
 
-        builder.Property(t => t.Description)
-            .IsRequired();
-
         builder.Property(t => t.Status)
             .IsRequired();
+
+        builder.Property(t => t.UserId)
+            .IsRequired(false);
 
         builder.Property(t => t.DueDate)
             .IsRequired();
@@ -39,12 +40,16 @@ public class TicketMap : IEntityTypeConfiguration<DomainEntity.Ticket>
             .IsRequired();
 
         builder.Property(t => t.Classification)
-            .HasMaxLength(100);
+            .HasMaxLength(100)
+            .IsRequired(false);
+
+        builder.Property(t => t.AttachmentFile)
+            .HasMaxLength(500)
+            .IsRequired(false);
 
         builder.HasOne(t => t.User)
             .WithMany()
-            .HasForeignKey(x => x.UserId)
-            .IsRequired();
+            .HasForeignKey(x => x.UserId);
 
         builder.HasMany(t => t.Activities)
             .WithOne()

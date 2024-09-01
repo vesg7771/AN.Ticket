@@ -5,8 +5,8 @@ namespace AN.Ticket.Domain.Entities;
 
 public class SatisfactionRating : EntityBase
 {
-    public SatisfactionRatingValue Rating { get; private set; }
-    public string Comment { get; private set; }
+    public SatisfactionRatingValue? Rating { get; private set; }
+    public string? Comment { get; private set; }
     public Guid TicketId { get; private set; }
     public Ticket Ticket { get; private set; }
 

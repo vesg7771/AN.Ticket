@@ -12,8 +12,8 @@ public class Repository<T>
 
     public Repository(ApplicationDbContext context)
     {
-        _context = context;
-        Entities = context.Set<T>();
+        _context = context ?? throw new ArgumentNullException(nameof(context));
+        Entities = _context.Set<T>();
     }
 
     public async Task<IEnumerable<T>> GetAllAsync()

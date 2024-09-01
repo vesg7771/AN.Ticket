@@ -23,15 +23,24 @@ public class Contact : EntityBase
     public Contact(
         string firstName,
         string lastName,
-        string primaryEmail
+        string primaryEmail,
+        string secondaryEmail = null,
+        string phone = null,
+        string mobile = null,
+        string department = null,
+        string title = null
     )
     {
-        if (string.IsNullOrEmpty(firstName)) throw new EntityValidationException("First name is required.");
         if (string.IsNullOrEmpty(primaryEmail)) throw new EntityValidationException("Primary email is required.");
 
         FirstName = firstName;
         LastName = lastName;
         PrimaryEmail = primaryEmail;
+        SecondaryEmail = secondaryEmail;
+        Phone = phone;
+        Mobile = mobile;
+        Department = department;
+        Title = title;
         SocialNetworks = new List<SocialNetwork>();
     }
 
@@ -43,8 +52,10 @@ public class Contact : EntityBase
 
     public void AssignUser(User user)
     {
-        if (user == null) throw new ArgumentNullException(nameof(user));
-        User = user;
+        User = user ?? throw new ArgumentNullException(nameof(user));
     }
+
+    public string GetFullName()
+        => $"{FirstName} {LastName}";
 }
 

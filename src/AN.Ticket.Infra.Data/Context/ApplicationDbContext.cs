@@ -56,11 +56,13 @@ public class ApplicationDbContext
         }
     }
 
-    public override int SaveChanges()
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        var entries = ChangeTracker.Entries()
-            .Where(e => e.Entity is EntityBase &&
-                        (e.State == EntityState.Added || e.State == EntityState.Modified));
+        var entries = ChangeTracker
+            .Entries()
+            .Where(e => e.Entity is EntityBase && (
+                    e.State == EntityState.Added
+                    || e.State == EntityState.Modified));
 
         foreach (var entityEntry in entries)
         {
@@ -72,6 +74,6 @@ public class ApplicationDbContext
             }
         }
 
-        return base.SaveChanges();
+        return await base.SaveChangesAsync(cancellationToken);
     }
 }
