@@ -45,7 +45,7 @@ public static class WebUIConfig
         app.UseAuthorization();
         app.UseHangfireConfiguration(configuration);
 
-        HangfireJobsConfig.ConfigureRecurringJobs(configuration);
+        //HangfireJobsConfig.ConfigureRecurringJobs(configuration);
 
         return app;
     }

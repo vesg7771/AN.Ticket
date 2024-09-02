@@ -22,7 +22,7 @@ public static class IdentityConfig
         services.ConfigureApplicationCookie(options =>
         {
             options.Cookie.HttpOnly = true;
-            options.ExpireTimeSpan = TimeSpan.FromHours(5);
+            options.ExpireTimeSpan = TimeSpan.FromHours(24);
             options.LoginPath = "/Account/Login";
             options.AccessDeniedPath = "/Account/AccessDenied";
             options.SlidingExpiration = true;

@@ -3,7 +3,6 @@ using Hangfire.MySql;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System.Transactions;
 
 namespace AN.Ticket.Hangfire.Configuration;
 public static class HangfireConfig
@@ -19,17 +18,7 @@ public static class HangfireConfig
             config.UseSimpleAssemblyNameTypeSerializer();
             config.UseRecommendedSerializerSettings();
             config.UseStorage(new MySqlStorage(configuration.GetConnectionString("AtlasHanfireBd"),
-                new MySqlStorageOptions
-                {
-                    TransactionIsolationLevel = (IsolationLevel)System.Data.IsolationLevel.ReadCommitted,
-                    QueuePollInterval = TimeSpan.FromSeconds(15),
-                    JobExpirationCheckInterval = TimeSpan.FromHours(1),
-                    CountersAggregateInterval = TimeSpan.FromMinutes(5),
-                    PrepareSchemaIfNecessary = true,
-                    DashboardJobListLimit = 50000,
-                    TransactionTimeout = TimeSpan.FromMinutes(1),
-                    TablesPrefix = "Hangfire"
-                }));
+                new MySqlStorageOptions()));
         });
 
         var workerCount = configuration.GetValue<int>("Hangfire:WorkerCount");

@@ -135,7 +135,7 @@ public class EmailMonitoringService : IEmailMonitoringService
 
             newTicket.AddMessages(messages);
 
-            _ticketRepository.Update(newTicket);
+            await _ticketRepository.SaveAsync(newTicket);
             await _unitOfWork.CommitAsync();
         }
         catch (Exception ex)
