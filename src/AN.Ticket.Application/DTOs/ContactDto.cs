@@ -2,8 +2,7 @@
 public class ContactDto
 {
     public Guid Id { get; set; }
-    public string FirstName { get; set; }
-    public string LastName { get; set; }
+    public string FullName { get; set; }
     public string PrimaryEmail { get; set; }
     public string SecondaryEmail { get; set; }
     public string Phone { get; set; }

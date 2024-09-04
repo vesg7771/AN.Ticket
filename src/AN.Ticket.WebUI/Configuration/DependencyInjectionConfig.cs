@@ -30,6 +30,7 @@ public static class DependencyInjectionConfig
         #region Services
         services.AddScoped<IEmailMonitoringService, EmailMonitoringService>();
         services.AddScoped<ITicketService, TicketService>();
+        services.AddScoped<IContactService, ContactService>();
         #endregion
 
         #region Repositories

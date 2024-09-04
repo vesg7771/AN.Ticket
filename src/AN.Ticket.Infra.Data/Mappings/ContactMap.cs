@@ -32,7 +32,7 @@ internal class ContactMap : IEntityTypeConfiguration<Contact>
             .HasMaxLength(100);
 
         builder.Property(c => c.Title)
-            .HasMaxLength(100);
+            .HasMaxLength(250);
 
         builder.HasOne(c => c.User)
             .WithMany()

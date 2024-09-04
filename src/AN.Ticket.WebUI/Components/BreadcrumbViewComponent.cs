@@ -18,7 +18,8 @@ public class BreadcrumbViewComponent : ViewComponent
             {
                 { "Index", "Dashboard Tickets" },
                 { "UnassignedTickets", "Tickets Não Atribuídos" },
-                { "UserTickets", "Meus Tickets" }
+                { "UserTickets", "Meus Tickets" },
+                { "CreateTicket", "Criar Ticket" }
             }
         },
     };

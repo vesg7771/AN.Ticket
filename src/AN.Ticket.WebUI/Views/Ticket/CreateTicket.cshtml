@@ -1,0 +1,122 @@
+﻿@model AN.Ticket.WebUI.ViewModels.Ticket.CreateTicketViewModel
+
+@{
+    ViewBag.Title = "Criar Ticket";
+}
+
+@await Component.InvokeAsync("Breadcrumb")
+
+<style>
+    .fixed-bottom {
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        z-index: 1030;
+        background-color: white;
+        border-top: 1px solid #dee2e6;
+    }
+</style>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <form asp-action="CreateTicket" asp-controller="Ticket" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="card mb-3">
+                    <div class="card-header">
+                        Ticket Informações
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label asp-for="Subject" class="form-label">Assunto</label>
+                            <input asp-for="Subject" class="form-control" />
+                            <span asp-validation-for="Subject" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">Descrição</label>
+                            <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="ContactName" class="form-label">Contato</label>
+                            <div class="input-group">
+                                @await Component.InvokeAsync("ContactDropdown")
+                                <input type="hidden" id="selectedContactId" name="selectedContactId" />
+                            </div>
+                            <span asp-validation-for="ContactName" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="AccountName" class="form-label">Nome da Conta</label>
+                            <input asp-for="AccountName" class="form-control" />
+                            <span asp-validation-for="AccountName" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label">Email</label>
+                            <input asp-for="Email" type="email" class="form-control" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Phone" class="form-label">Telefone</label>
+                            <input asp-for="Phone" class="form-control" />
+                            <span asp-validation-for="Phone" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="AttachmentFile" class="form-label">Arquivo de Anexo</label>
+                            <input asp-for="AttachmentFile" type="file" class="form-control" />
+                            <span asp-validation-for="AttachmentFile" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card mb-3">
+                    <div class="card-header">
+                        Informações Adicionais
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label asp-for="Priority" class="form-label">Prioridade</label>
+                            <select asp-for="Priority" class="form-select">
+                                <option value="0">Baixa</option>
+                                <option value="1">Média</option>
+                                <option value="2">Alta</option>
+                            </select>
+                            <span asp-validation-for="Priority" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="DueDate" class="form-label">Data de Vencimento</label>
+                            <input asp-for="DueDate" type="date" class="form-control" />
+                            <span asp-validation-for="DueDate" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Status" class="form-label">Status</label>
+                            <select asp-for="Status" class="form-select">
+                                <option value="0">Aberto</option>
+                                <option value="1">Em Progresso</option>
+                                <option value="2">Fechado</option>
+                            </select>
+                            <span asp-validation-for="Status" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="fixed-bottom text-end p-3">
+                    <button type="submit" class="btn btn-primary">Criar Ticket</button>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    Detalhes Relacionados
+                </div>
+                <div class="card-body">
+                    <div id="contactDetailsContainer">
+                        @await Component.InvokeAsync("ContactDetails", new { contactId = Guid.Empty })
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/contactDropdown.js"></script>
+}
