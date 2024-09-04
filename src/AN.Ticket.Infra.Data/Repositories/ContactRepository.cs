@@ -17,4 +17,7 @@ public class ContactRepository
 
     public async Task<Contact> GetByEmailAsync(string email)
         => await Entities.SingleOrDefaultAsync(c => c.PrimaryEmail == email);
+
+    public async Task<bool> ExistContactCpfAsync(string cpf)
+        => await Entities.AnyAsync(c => c.Cpf.Equals(cpf));
 }

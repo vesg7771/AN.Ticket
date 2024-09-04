@@ -1,4 +1,4 @@
-﻿using AN.Ticket.Application.DTOs;
+﻿using AN.Ticket.Application.DTOs.Ticket;
 using AN.Ticket.Application.Interfaces.Base;
 using DomainEntity = AN.Ticket.Domain.Entities;
 

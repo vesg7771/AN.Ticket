@@ -1,4 +1,6 @@
-﻿namespace AN.Ticket.Application.DTOs;
+﻿using AN.Ticket.Application.DTOs.User;
+
+namespace AN.Ticket.Application.DTOs.Ticket;
 public class TicketMessageDto
 {
     public Guid Id { get; set; }

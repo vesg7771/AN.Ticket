@@ -1,6 +1,6 @@
 ﻿using AN.Ticket.Domain.Enums;
 
-namespace AN.Ticket.Application.DTOs;
+namespace AN.Ticket.Application.DTOs.SatisfactionRating;
 public class SatisfactionRatingDto
 {
     public Guid Id { get; set; }

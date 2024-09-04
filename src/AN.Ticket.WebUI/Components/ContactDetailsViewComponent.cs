@@ -18,14 +18,14 @@ public class ContactDetailsViewComponent
     {
         if (contactId == Guid.Empty)
         {
-            return View(new ContactDetailsViewModel());
+            return View();
         }
 
         var contact = await _contactService.GetByIdAsync(contactId);
 
         if (contact == null)
         {
-            return View(new ContactDetailsViewModel());
+            return View();
         }
 
         var viewModel = new ContactDetailsViewModel

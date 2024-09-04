@@ -1,4 +1,4 @@
-﻿using AN.Ticket.Application.DTOs;
+﻿using AN.Ticket.Application.DTOs.Contact;
 using AN.Ticket.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 

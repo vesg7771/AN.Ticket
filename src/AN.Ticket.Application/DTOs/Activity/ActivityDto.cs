@@ -1,6 +1,7 @@
-﻿using AN.Ticket.Domain.Enums;
+﻿using AN.Ticket.Application.DTOs.Contact;
+using AN.Ticket.Domain.Enums;
 
-namespace AN.Ticket.Application.DTOs;
+namespace AN.Ticket.Application.DTOs.Activity;
 public class ActivityDto
 {
     public Guid Id { get; set; }

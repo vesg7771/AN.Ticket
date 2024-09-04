@@ -1,6 +1,6 @@
 ﻿@model AN.Ticket.WebUI.ViewModels.Contact.ContactDetailsViewModel
 
-@if (Model != null || Model.Id != Guid.Empty)
+@if (Model != null)
 {
     <div class="card">
         <div class="card-header">
@@ -17,7 +17,7 @@
 else
 {
     <div class="text-center">
-        <p>Nenhum Contato escolhido</p>
+        <p class="fs-3">Nenhum Contato escolhido</p>
         <p>Os detalhes sobre o Contato que você deseja inserir serão exibidos aqui.</p>
     </div>
 }

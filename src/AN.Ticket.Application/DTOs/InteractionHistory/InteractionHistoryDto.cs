@@ -1,4 +1,6 @@
-﻿namespace AN.Ticket.Application.DTOs;
+﻿using AN.Ticket.Application.DTOs.User;
+
+namespace AN.Ticket.Application.DTOs.InteractionHistory;
 public class InteractionHistoryDto
 {
     public Guid Id { get; set; }

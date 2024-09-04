@@ -10,6 +10,11 @@
         max-height: 200px;
         overflow-y: auto;
     }
+
+    .dropdown-menu input[type="text"] {
+        width: calc(100% - 1rem);
+        margin: 0.5rem auto;
+    }
 </style>
 
 <div class="input-group mb-3">
@@ -18,8 +23,8 @@
         <i class="bi bi-search" style="cursor: pointer;"></i>
     </span>
     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="searchIcon">
-        <li>
-            <input type="text" class="form-control p-1" id="contactSearch" placeholder="Pesquisar...">
+        <li class="pe-2 ps-2">
+            <input type="text" class="form-control" id="contactSearch" placeholder="Pesquisar...">
         </li>
         @foreach (var contact in Model.Contacts)
         {

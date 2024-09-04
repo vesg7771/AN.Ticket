@@ -89,21 +89,24 @@
                         <div class="mb-3">
                             <label asp-for="Status" class="form-label">Status</label>
                             <select asp-for="Status" class="form-select">
-                                <option value="0">Aberto</option>
-                                <option value="1">Em Progresso</option>
-                                <option value="2">Fechado</option>
+                                <option value="0">Em espera</option>
+                                <option value="1">Aberto</option>
+                                <option value="2">Em Progresso</option>
+                                <option value="3">Fechado</option>
                             </select>
                             <span asp-validation-for="Status" class="text-danger"></span>
                         </div>
                     </div>
                 </div>
                 <div class="fixed-bottom text-end p-3">
-                    <button type="submit" class="btn btn-primary">Criar Ticket</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-plus"></i> Criar Ticket
+                    </button>
                 </div>
             </form>
         </div>
         <div class="col-md-6">
-            <div class="card">
+            <div class="card sticky-top">
                 <div class="card-header">
                     Detalhes Relacionados
                 </div>
