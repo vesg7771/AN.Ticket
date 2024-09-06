@@ -2,6 +2,7 @@
 using AN.Ticket.Application.Helpers.TokenProvider;
 using AN.Ticket.Application.Interfaces;
 using AN.Ticket.Application.Interfaces.Base;
+using AN.Ticket.Application.Mappings;
 using AN.Ticket.Application.Services;
 using AN.Ticket.Application.Services.Base;
 using AN.Ticket.Domain.Accounts;
@@ -48,6 +49,10 @@ public static class DependencyInjectionConfig
         services.Configure<SmtpSettings>(configuration.GetSection("SmtpSettings"));
         services.AddSingleton<CancellationTokenProvider>();
         services.AddScoped<IEmailSenderService, EmailSenderService>();
+        #endregion
+
+        #region AutoMapper Profiles
+        services.AddAutoMapper(typeof(DomainToDTOMappingProfile));
         #endregion
     }
 }

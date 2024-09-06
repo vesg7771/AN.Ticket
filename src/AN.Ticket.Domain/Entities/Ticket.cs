@@ -117,5 +117,10 @@ public class Ticket : EntityBase
         if (ClosedAt == null) return null;
         return ClosedAt - CreatedAt;
     }
+
+    public void SetAttachmentFile(string attachmentFile)
+    {
+        AttachmentFile = attachmentFile;
+    }
 }
 

@@ -10,15 +10,10 @@ $(document).ready(function () {
     $('.dropdown-item').on('click', function (e) {
         e.preventDefault();
 
-        var selectedContactName = $(this).data('contact-name').trim();
         var selectedContactId = $(this).data('contact-id');
-
-        console.log('Nome do contato selecionado:', selectedContactName);
-        console.log('ID do contato selecionado:', selectedContactId);
 
         $('#contactInput').val(selectedContactName);
         $('#selectedContactId').val(selectedContactId);
-        $('#selectedContactName').val(selectedContactName);
 
         loadContactDetails(selectedContactId);
     });

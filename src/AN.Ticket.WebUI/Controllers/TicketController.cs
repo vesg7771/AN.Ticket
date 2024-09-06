@@ -1,5 +1,4 @@
 ﻿using AN.Ticket.Application.DTOs.Ticket;
-using AN.Ticket.Application.Exceptions;
 using AN.Ticket.Application.Interfaces;
 using AN.Ticket.Infra.Data.Identity;
 using AN.Ticket.WebUI.Components;
@@ -67,29 +66,26 @@ public class TicketController : Controller
     }
 
     [HttpGet]
-    public IActionResult CreateTicket()
-    {
-        return View();
-    }
+    public IActionResult CreateTicket() => View();
 
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> CreateTicket(CreateTicketDto model)
     {
-        //if (!ModelState.IsValid)
-        //{
-        //    return View(model);
-        //}
+        if (!ModelState.IsValid)
+            return View(model);
 
-        var user = await GetCurrentUserAsync();
-        if (user is null)
-            return Unauthorized();
+        model.UserId = await GetCurrentUserId();
+        var success = await _ticketService.CreateTicketAsync(model);
 
-        throw new NotFoundException("Implementar a criação de tickets");
-        //await _ticketService.CreateTicketAsync(model, Guid.Parse(user.Id));
+        if (!success)
+        {
+            return BadRequest("Não foi possível criar o ticket");
+        }
 
         return RedirectToAction(nameof(UserTickets));
     }
+
 
     [HttpGet]
     public async Task<IActionResult> GetContactDetails(Guid contactId)
@@ -100,7 +96,11 @@ public class TicketController : Controller
     }
 
     private async Task<ApplicationUser?> GetCurrentUserAsync()
+        => await _userManager.GetUserAsync(User);
+
+    private async Task<Guid> GetCurrentUserId()
     {
-        return await _userManager.GetUserAsync(User);
+        var user = await GetCurrentUserAsync();
+        return user != null ? Guid.Parse(user.Id) : Guid.Empty;
     }
 }

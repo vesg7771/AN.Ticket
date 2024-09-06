@@ -7,6 +7,7 @@ public interface ITicketService
     : IService<TicketDto, DomainEntity.Ticket>
 {
     Task<bool> AssignTicketToUserAsync(Guid ticketId, Guid userId);
+    Task<bool> CreateTicketAsync(CreateTicketDto createTicket);
     Task<IEnumerable<TicketDto>> GetTicketsByUserIdAsync(Guid userId);
     Task<IEnumerable<TicketDto>> GetTicketsNotAssignedAsync();
 }

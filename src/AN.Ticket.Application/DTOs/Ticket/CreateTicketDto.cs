@@ -6,7 +6,7 @@ public class CreateTicketDto
 {
     [Required(ErrorMessage = "O nome do contato é obrigatório.")]
     [StringLength(100, ErrorMessage = "O nome do contato deve ter no máximo 100 caracteres.")]
-    public string ContactName { get; set; }
+    public string Name { get; set; }
 
     [Required(ErrorMessage = "O nome da conta é obrigatório.")]
     [StringLength(100, ErrorMessage = "O nome da conta deve ter no máximo 100 caracteres.")]
@@ -39,6 +39,8 @@ public class CreateTicketDto
 
     [Required(ErrorMessage = "A prioridade é obrigatória.")]
     public TicketPriority Priority { get; set; }
+
+    public Guid UserId { get; set; }
 
     public string? AttachmentFile { get; set; }
 }
