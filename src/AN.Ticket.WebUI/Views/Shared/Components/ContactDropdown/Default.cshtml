@@ -29,7 +29,7 @@
         @foreach (var contact in Model.Contacts)
         {
             <li>
-                <a class="dropdown-item" href="#" data-contact-id="@contact.Id">@contact.FullName</a>
+                <a class="dropdown-item" href="#" data-contact-id="@contact.Id" data-contact-name="@contact.FullName">@contact.FullName</a>
             </li>
         }
     </ul>

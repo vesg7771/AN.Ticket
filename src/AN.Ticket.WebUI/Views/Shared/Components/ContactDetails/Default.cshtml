@@ -1,6 +1,6 @@
 ﻿@model AN.Ticket.WebUI.ViewModels.Contact.ContactDetailsViewModel
 
-@if (Model != null)
+@if (Model != null && Model.Id != Guid.Empty)
 {
     <div class="card">
         <div class="card-header">

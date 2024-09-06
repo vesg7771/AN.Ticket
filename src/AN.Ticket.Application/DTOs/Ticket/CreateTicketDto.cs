@@ -1,9 +1,8 @@
 ﻿using AN.Ticket.Domain.Enums;
 using System.ComponentModel.DataAnnotations;
 
-namespace AN.Ticket.WebUI.ViewModels.Ticket;
-
-public class CreateTicketViewModel
+namespace AN.Ticket.Application.DTOs.Ticket;
+public class CreateTicketDto
 {
     [Required(ErrorMessage = "O nome do contato é obrigatório.")]
     [StringLength(100, ErrorMessage = "O nome do contato deve ter no máximo 100 caracteres.")]

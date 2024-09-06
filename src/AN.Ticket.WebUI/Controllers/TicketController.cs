@@ -1,7 +1,8 @@
-﻿using AN.Ticket.Application.Interfaces;
+﻿using AN.Ticket.Application.DTOs.Ticket;
+using AN.Ticket.Application.Exceptions;
+using AN.Ticket.Application.Interfaces;
 using AN.Ticket.Infra.Data.Identity;
 using AN.Ticket.WebUI.Components;
-using AN.Ticket.WebUI.ViewModels.Ticket;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -72,19 +73,25 @@ public class TicketController : Controller
     }
 
     [HttpPost]
-    public IActionResult CreateTicket(CreateTicketViewModel model)
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CreateTicket(CreateTicketDto model)
     {
-        if (!ModelState.IsValid)
-        {
-            TempData["ToastMessage"] = "Por favor, corrija os erros.";
-            return View(model);
-        }
+        //if (!ModelState.IsValid)
+        //{
+        //    return View(model);
+        //}
 
+        var user = await GetCurrentUserAsync();
+        if (user is null)
+            return Unauthorized();
 
-        return RedirectToAction("Index");
+        throw new NotFoundException("Implementar a criação de tickets");
+        //await _ticketService.CreateTicketAsync(model, Guid.Parse(user.Id));
+
+        return RedirectToAction(nameof(UserTickets));
     }
 
-
+    [HttpGet]
     public async Task<IActionResult> GetContactDetails(Guid contactId)
     {
         var contactDetailsViewComponent = new ContactDetailsViewComponent(_contactService);

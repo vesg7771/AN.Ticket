@@ -1,4 +1,4 @@
-﻿@model AN.Ticket.WebUI.ViewModels.Ticket.CreateTicketViewModel
+﻿@model AN.Ticket.Application.DTOs.Ticket.CreateTicketDto
 
 @{
     ViewBag.Title = "Criar Ticket";
@@ -42,6 +42,7 @@
                             <div class="input-group">
                                 @await Component.InvokeAsync("ContactDropdown")
                                 <input type="hidden" id="selectedContactId" name="selectedContactId" />
+                                @* <input asp-for="ContactName" type="hidden" id="selectedContactName" name="selectedContactName" /> *@
                             </div>
                             <span asp-validation-for="ContactName" class="text-danger"></span>
                         </div>

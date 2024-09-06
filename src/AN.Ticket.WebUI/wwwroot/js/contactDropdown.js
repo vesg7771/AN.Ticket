@@ -10,17 +10,24 @@ $(document).ready(function () {
     $('.dropdown-item').on('click', function (e) {
         e.preventDefault();
 
-        var selectedContactName = $(this).text().trim();
+        var selectedContactName = $(this).data('contact-name').trim();
         var selectedContactId = $(this).data('contact-id');
+
+        console.log('Nome do contato selecionado:', selectedContactName);
+        console.log('ID do contato selecionado:', selectedContactId);
 
         $('#contactInput').val(selectedContactName);
         $('#selectedContactId').val(selectedContactId);
+        $('#selectedContactName').val(selectedContactName);
 
         loadContactDetails(selectedContactId);
     });
 
     $('#contactInput').on('input', function () {
-        if ($(this).val().trim() === '') {
+        var currentValue = $(this).val().trim();
+        $('#selectedContactName').val(currentValue);
+
+        if (currentValue === '') {
             $('#selectedContactId').val('');
             loadContactDetails('00000000-0000-0000-0000-000000000000');
         }

@@ -10,6 +10,7 @@ using AN.Ticket.Domain.Interfaces.Base;
 using AN.Ticket.Infra.Data.Identity;
 using AN.Ticket.Infra.Data.Repositories;
 using AN.Ticket.Infra.Data.Repositories.Base;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
 namespace AN.Ticket.WebUI.Configuration;
 
@@ -34,6 +35,7 @@ public static class DependencyInjectionConfig
         #endregion
 
         #region Repositories
+        services.AddSingleton<ITempDataDictionaryFactory, TempDataDictionaryFactory>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<ITicketRepository, TicketRepository>();
         services.AddScoped<IContactRepository, ContactRepository>();

@@ -1,5 +1,6 @@
 ﻿using AN.Ticket.Hangfire.Configuration;
 using AN.Ticket.Infra.Data.Context;
+using AN.Ticket.WebUI.Filters;
 using Microsoft.EntityFrameworkCore;
 
 namespace AN.Ticket.WebUI.Configuration;
@@ -16,7 +17,11 @@ public static class WebUIConfig
             )
         );
 
-        services.AddControllersWithViews();
+        services.AddControllersWithViews(options =>
+        {
+            options.Filters.Add<CustomExceptionFilter>();
+        });
+
         services.AddHangfireConfiguration(configuration);
         services.AddCustomAuthentication();
         services.AddRegister(configuration);
@@ -32,7 +37,7 @@ public static class WebUIConfig
     {
         if (!env.IsDevelopment())
         {
-            app.UseExceptionHandler("/Home/Error");
+            //app.UseExceptionHandler("/Home/Error");
             app.UseHsts();
         }
 
