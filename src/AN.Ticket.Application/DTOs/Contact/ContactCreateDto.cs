@@ -16,4 +16,5 @@ public class ContactCreateDto
     public List<SocialNetworkDto> SocialNetworks { get; set; }
     public Guid UserId { get; set; }
     public UserDto User { get; set; }
+    public Guid PaymentPlanId { get; set; }
 }

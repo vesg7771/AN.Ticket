@@ -41,6 +41,7 @@ public static class DependencyInjectionConfig
         services.AddScoped<IContactRepository, ContactRepository>();
         services.AddScoped<ITicketMessageRepository, TicketMessageRepository>();
         services.AddScoped<IPaymentRepository, PaymentRepository>();
+        services.AddScoped<IPaymentPlanRepository, PaymentPlanRepository>();
         #endregion
 
         #region SMTP

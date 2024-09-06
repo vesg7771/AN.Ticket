@@ -6,21 +6,26 @@ public class Payment : EntityBase
 {
     public Guid ContactId { get; private set; }
     public Contact Contact { get; private set; }
-    public decimal MonthlyFee { get; private set; }
+    public double MonthlyFee { get; private set; }
     public DateTime DueDate { get; private set; }
     public bool Paid { get; private set; }
+    public Guid PaymentPlanId { get; private set; }
+    public PaymentPlan? PaymentPlan { get; set; }
+
 
     protected Payment() { }
 
     public Payment(
         Guid contactId,
-        decimal monthlyFee,
-        DateTime dueDate
+        double monthlyFee,
+        DateTime dueDate,
+        Guid paymentPlanId
     )
     {
         if (contactId == Guid.Empty) throw new ArgumentException("ContactId cannot be empty.", nameof(contactId));
         if (monthlyFee <= 0) throw new ArgumentException("MonthlyFee must be greater than zero.", nameof(monthlyFee));
         if (dueDate == default) throw new ArgumentException("DueDate must be a valid date.", nameof(dueDate));
+        if (paymentPlanId == Guid.Empty) throw new ArgumentException("PaymentPlanId cannot be empty.", nameof(paymentPlanId));
 
         ContactId = contactId;
         MonthlyFee = monthlyFee;
@@ -39,7 +44,7 @@ public class Payment : EntityBase
         DueDate = newDueDate;
     }
 
-    public void UpdateMonthlyFee(decimal newMonthlyFee)
+    public void UpdateMonthlyFee(double newMonthlyFee)
     {
         if (newMonthlyFee <= 0) throw new ArgumentException("NewMonthlyFee must be greater than zero.", nameof(newMonthlyFee));
         MonthlyFee = newMonthlyFee;

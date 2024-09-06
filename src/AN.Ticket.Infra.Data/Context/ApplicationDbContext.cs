@@ -24,6 +24,7 @@ public class ApplicationDbContext
     DbSet<Payment> Payments { get; set; }
     DbSet<Team> Teams { get; set; }
     DbSet<User> Users { get; set; }
+    DbSet<PaymentPlan> PaymentPlans { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

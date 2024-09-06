@@ -13,8 +13,7 @@ public class PaymentMap : IEntityTypeConfiguration<Payment>
             .IsRequired();
 
         builder.Property(p => p.MonthlyFee)
-            .IsRequired()
-            .HasColumnType("decimal(18,2)");
+            .IsRequired();
 
         builder.Property(p => p.DueDate)
             .IsRequired();
@@ -25,6 +24,11 @@ public class PaymentMap : IEntityTypeConfiguration<Payment>
         builder.HasOne(p => p.Contact)
             .WithMany()
             .HasForeignKey(p => p.ContactId)
+            .IsRequired();
+
+        builder.HasOne(p => p.PaymentPlan)
+            .WithMany()
+            .HasForeignKey(p => p.PaymentPlanId)
             .IsRequired();
 
         builder.ToTable("Payments");
