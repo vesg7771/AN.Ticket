@@ -65,6 +65,9 @@ public class TicketMap : IEntityTypeConfiguration<DomainEntity.Ticket>
 
         builder.Property(t => t.ClosedAt);
 
+        builder.Property(t => t.TicketCode)
+            .IsRequired();
+
         builder.ToTable("Tickets");
     }
 }

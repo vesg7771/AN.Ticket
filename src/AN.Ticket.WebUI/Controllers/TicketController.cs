@@ -86,6 +86,19 @@ public class TicketController : Controller
         return RedirectToAction(nameof(UserTickets));
     }
 
+    [HttpGet]
+    [Route("Ticket/Details/{id:guid}")]
+    public async Task<IActionResult> Details(Guid id)
+    {
+        if (id == Guid.Empty)
+            return BadRequest("ID do ticket inválido");
+
+        var ticket = await _ticketService.GetByIdAsync(id);
+        if (ticket is null)
+            return NotFound();
+
+        return View(ticket);
+    }
 
     [HttpGet]
     public async Task<IActionResult> GetContactDetails(Guid contactId)

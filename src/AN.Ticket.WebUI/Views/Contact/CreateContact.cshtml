@@ -1,0 +1,76 @@
+﻿@model AN.Ticket.Application.DTOs.Contact.ContactCreateDto
+
+@{
+    ViewData["Title"] = "Criar cliente";
+}
+
+<div class="row">
+    <form asp-controller="Contact" asp-action="CreateContactSubmit" method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="card col-6">
+            <h3 class="card-header">
+                Informações do cliente
+            </h3>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label asp-for="FirstName" class="form-label">Primeiro Nome</label>
+                    <div class="input-group">
+                        <input asp-for="FirstName" class="form-control" />
+                        <span asp-validation-for="FirstName" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="LastName" class="form-label">Segundo Nome</label>
+                    <div class="input-group">
+                        <input asp-for="LastName" class="form-control" />
+                        <span asp-validation-for="LastName" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Cpf" class="form-label">CPF</label>
+                    <div class="input-group">
+                        <input asp-for="Cpf" class="form-control" />
+                        <span asp-validation-for="Cpf" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="PrimaryEmail" class="form-label">E-mail Principal</label>
+                    <div class="input-group">
+                        <input asp-for="PrimaryEmail" class="form-control" />
+                        <span asp-validation-for="PrimaryEmail" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="SecondaryEmail" class="form-label">E-mail Secondário</label>
+                    <div class="input-group">
+                        <input asp-for="SecondaryEmail" class="form-control" />
+                        <span asp-validation-for="SecondaryEmail" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Phone" class="form-label">Telefone</label>
+                    <div class="input-group">
+                        <input asp-for="Phone" class="form-control" />
+                        <span asp-validation-for="Phone" class="d-block text-danger"></span>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Mobile" class="form-label">Celular</label>
+                    <div class="input-group">
+                        <input asp-for="Mobile" class="form-control" />
+                        @* <span asp-validation-for="Mobile" class="d-block text-danger"></span> *@
+                        @Html.ValidationMessageFor(x => x.Mobile)
+                    </div>
+                </div>
+@*                 <div class="input-group mb-3">
+                    <label asp-for="Title" class="form-label">Tí</label>
+                    <input asp-for="Title" class="form-control" />
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div> *@
+                <div>
+                    <button type="submit" class="btn btn-primary">Primary</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>

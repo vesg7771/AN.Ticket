@@ -95,6 +95,23 @@
                     </div>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center" href="#" data-bs-toggle="collapse" data-bs-target="#appFeaturesCustomer" aria-expanded="false" aria-controls="appFeaturesCustomer">
+                        <i class="bi bi-people"></i>
+                        <span class="ms-2">Cliente</span>
+                        <i class="bi bi-chevron-down ms-auto"></i>
+                    </a>
+                    <div class="collapse" id="appFeaturesCustomer">
+                        <ul class="navbar-nav ps-3">
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Contact" asp-action="GetContact"><i class="bi bi-person-lines-fill me-1"></i>Clientes</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Contact" asp-action="CreateContact"><i class="bi bi-person-add me-1"></i>Cadastrar Cliente</a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link d-flex align-items-center" href="#" data-bs-toggle="collapse" data-bs-target="#financeMenu" aria-expanded="false" aria-controls="financeMenu">
                         <i class="bi bi-currency-dollar"></i>
                         <span class="ms-2">Relatório</span>

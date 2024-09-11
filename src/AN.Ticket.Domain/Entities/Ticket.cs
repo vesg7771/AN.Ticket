@@ -23,6 +23,7 @@ public class Ticket : EntityBase
     public SatisfactionRating? SatisfactionRating { get; private set; }
     public DateTime? FirstResponseAt { get; private set; }
     public DateTime? ClosedAt { get; private set; }
+    public int TicketCode { get; private set; }
 
     protected Ticket() { }
 

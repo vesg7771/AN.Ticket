@@ -19,23 +19,25 @@
                 {
                     foreach (var ticket in ticketsGroupedByStatus[status])
                     {
-                        <div class="ticket-card p-3 mb-3 border rounded">
-                            <div class="row d-flex align-items-center">
-                                <h4 class="col mb-0">@ticket.Subject</h4>
-                                <div class="col-2 initial-circle d-none d-md-flex justify-content-center align-items-center rounded-circle text-white me-2">
-                                    @GetInitials(ticket.AccountName)
+                        <a asp-controller="Ticket" asp-action="Details" asp-route-id="@ticket.Id" class="text-decoration-none">
+                            <div class="ticket-card p-3 mb-3 border rounded">
+                                <div class="row d-flex align-items-center">
+                                    <h4 class="col mb-0">@ticket.Subject</h4>
+                                    <div class="col-2 initial-circle d-none d-md-flex justify-content-center align-items-center rounded-circle text-white me-2">
+                                        @GetInitials(ticket.AccountName)
+                                    </div>
                                 </div>
+                                <p class="mb-1">@ticket.ContactName - @ticket.AccountName</p>
+                                <p class="mb-1">
+                                    Prioridade
+                                    <span class="badge @GetPriorityBadgeClass(ticket.Priority) text-white">
+                                        @TranslatePriority(ticket.Priority)
+                                    </span>
+                                </p>
+                                <p class="mb-1"><i class="bi bi-clock me-1"></i> @ticket.DueDate.ToShortDateString()</p>
+                                <span>@TranslateStatus(ticket.Status)</span>
                             </div>
-                            <p class="mb-1">@ticket.ContactName - @ticket.AccountName</p>
-                            <p class="mb-1">
-                                Prioridade
-                                <span class="badge @GetPriorityBadgeClass(ticket.Priority) text-white">
-                                    @TranslatePriority(ticket.Priority)
-                                </span>
-                            </p>
-                            <p class="mb-1"><i class="bi bi-clock me-1"></i> @ticket.DueDate.ToShortDateString()</p>
-                            <span>@TranslateStatus(ticket.Status)</span>
-                        </div>
+                        </a>
                     }
                 }
                 else
