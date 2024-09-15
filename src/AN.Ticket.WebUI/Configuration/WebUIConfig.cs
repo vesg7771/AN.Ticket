@@ -1,7 +1,11 @@
 ﻿using AN.Ticket.Hangfire.Configuration;
 using AN.Ticket.Infra.Data.Context;
 using AN.Ticket.WebUI.Filters;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using System.Globalization;
 
 namespace AN.Ticket.WebUI.Configuration;
 
@@ -22,9 +26,24 @@ public static class WebUIConfig
             options.Filters.Add<CustomExceptionFilter>();
         });
 
+        services.Configure<FormOptions>(options =>
+        {
+            options.MultipartBodyLengthLimit = 104857600;
+        });
+
         services.AddHangfireConfiguration(configuration);
         services.AddCustomAuthentication();
         services.AddRegister(configuration);
+
+        var supportedCultures = new[] { "pt-BR", "en-US" };
+
+        services.Configure<RequestLocalizationOptions>(options =>
+        {
+            var supportedCulturesInfo = supportedCultures.Select(c => new CultureInfo(c)).ToList();
+            options.DefaultRequestCulture = new RequestCulture("pt-BR");
+            options.SupportedCultures = supportedCulturesInfo;
+            options.SupportedUICultures = supportedCulturesInfo;
+        });
 
         return services;
     }
@@ -37,7 +56,7 @@ public static class WebUIConfig
     {
         if (!env.IsDevelopment())
         {
-            //app.UseExceptionHandler("/Home/Error");
+            app.UseExceptionHandler("/Home/Error");
             app.UseHsts();
         }
 
@@ -45,6 +64,9 @@ public static class WebUIConfig
         app.UseStaticFiles();
 
         app.UseRouting();
+
+        var localizationOptions = app.ApplicationServices.GetService<IOptions<RequestLocalizationOptions>>().Value;
+        app.UseRequestLocalization(localizationOptions);
 
         app.UseAuthentication();
         app.UseAuthorization();

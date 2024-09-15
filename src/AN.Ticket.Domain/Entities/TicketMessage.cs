@@ -14,13 +14,23 @@ public class TicketMessage
     protected TicketMessage() { }
 
     public TicketMessage(
-        //Guid userId,
         string message,
         DateTime sentAt
     )
     {
-        //UserId = userId;
         Message = message;
         SentAt = sentAt == DateTime.MinValue ? DateTime.Now : sentAt;
+    }
+
+    public void AssignTicket(Guid ticketId)
+    {
+        if (ticketId == Guid.Empty) throw new ArgumentException("Ticket ID cannot be empty.", nameof(ticketId));
+        TicketId = ticketId;
+    }
+
+    public void AssignUser(Guid userId)
+    {
+        if (userId == Guid.Empty) throw new ArgumentException("User ID cannot be empty.", nameof(userId));
+        UserId = userId;
     }
 }

@@ -19,7 +19,16 @@ public class TicketMessageMap
             .IsRequired(false);
 
         builder.Property(t => t.SentAt)
-            .IsRequired();
+            .IsRequired()
+            .HasColumnType("datetime");
+
+        builder.Property(t => t.CreatedAt)
+            .IsRequired()
+            .HasColumnType("datetime");
+
+        builder.Property(t => t.UpdatedAt)
+            .IsRequired()
+            .HasColumnType("datetime");
 
         builder.HasOne(t => t.Ticket)
             .WithMany(t => t.Messages)

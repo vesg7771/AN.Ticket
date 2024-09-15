@@ -1,4 +1,10 @@
-﻿using AN.Ticket.Application.DTOs.Ticket;
+﻿using AN.Ticket.Application.DTOs.Activity;
+using AN.Ticket.Application.DTOs.Attachment;
+using AN.Ticket.Application.DTOs.InteractionHistory;
+using AN.Ticket.Application.DTOs.SatisfactionRating;
+using AN.Ticket.Application.DTOs.Ticket;
+using AN.Ticket.Application.DTOs.User;
+using AN.Ticket.Domain.Entities;
 using AutoMapper;
 using DomainEntity = AN.Ticket.Domain.Entities;
 
@@ -8,11 +14,12 @@ public class DomainToDTOMappingProfile
 {
     public DomainToDTOMappingProfile()
     {
-        CreateMap<DomainEntity.Ticket, TicketDto>()
-            .ForMember(dest => dest.Messages, opt => opt.MapFrom(src => src.Messages))
-            .ForMember(dest => dest.Activities, opt => opt.MapFrom(src => src.Activities))
-            .ForMember(dest => dest.InteractionHistories, opt => opt.MapFrom(src => src.InteractionHistories))
-            .ForMember(dest => dest.SatisfactionRating, opt => opt.MapFrom(src => src.SatisfactionRating))
-            .ReverseMap();
+        CreateMap<DomainEntity.Ticket, TicketDto>();
+        CreateMap<TicketMessage, TicketMessageDto>();
+        CreateMap<Activity, ActivityDto>();
+        CreateMap<InteractionHistory, InteractionHistoryDto>();
+        CreateMap<SatisfactionRating, SatisfactionRatingDto>();
+        CreateMap<User, UserDto>();
+        CreateMap<Attachment, AttachmentDto>();
     }
 }

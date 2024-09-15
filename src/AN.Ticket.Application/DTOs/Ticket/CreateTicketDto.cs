@@ -1,4 +1,5 @@
 ﻿using AN.Ticket.Domain.Enums;
+using Microsoft.AspNetCore.Http;
 using System.ComponentModel.DataAnnotations;
 
 namespace AN.Ticket.Application.DTOs.Ticket;
@@ -42,7 +43,8 @@ public class CreateTicketDto
 
     public Guid UserId { get; set; }
 
-    public string? AttachmentFile { get; set; }
+    [FileExtensions(Extensions = "pdf,jpg,jpeg,png", ErrorMessage = "Tipo de arquivo não suportado.")]
+    public IFormFile? AttachmentFile { get; set; }
 }
 
 public class NotDefaultDateAttribute : ValidationAttribute

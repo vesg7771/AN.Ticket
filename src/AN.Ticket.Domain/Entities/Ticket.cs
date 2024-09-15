@@ -1,5 +1,6 @@
 ﻿using AN.Ticket.Domain.Entities.Base;
 using AN.Ticket.Domain.Enums;
+using AN.Ticket.Domain.Extensions;
 
 namespace AN.Ticket.Domain.Entities;
 
@@ -17,13 +18,14 @@ public class Ticket : EntityBase
     public DateTime DueDate { get; private set; }
     public TicketPriority Priority { get; private set; }
     public string? Classification { get; private set; }
-    public string? AttachmentFile { get; private set; }
+    public ICollection<Attachment>? Attachments { get; private set; }
     public ICollection<Activity>? Activities { get; private set; }
     public ICollection<InteractionHistory>? InteractionHistories { get; private set; }
     public SatisfactionRating? SatisfactionRating { get; private set; }
     public DateTime? FirstResponseAt { get; private set; }
     public DateTime? ClosedAt { get; private set; }
     public int TicketCode { get; private set; }
+    public string? Resolution { get; private set; }
 
     protected Ticket() { }
 
@@ -49,7 +51,6 @@ public class Ticket : EntityBase
         DueDate = dueDate;
         Priority = priority;
         Classification = classification;
-        AttachmentFile = attachmentFile;
         Activities = new List<Activity>();
         InteractionHistories = new List<InteractionHistory>();
         SatisfactionRating = new SatisfactionRating();
@@ -97,14 +98,14 @@ public class Ticket : EntityBase
     {
         if (FirstResponseAt == null)
         {
-            FirstResponseAt = DateTime.UtcNow;
+            FirstResponseAt = DateTime.UtcNow.ToLocal();
         }
     }
 
     public void CloseTicket()
     {
         Status = TicketStatus.Closed;
-        ClosedAt = DateTime.UtcNow;
+        ClosedAt = DateTime.UtcNow.ToLocal();
     }
 
     public TimeSpan? GetTimeToFirstResponse()
@@ -119,9 +120,16 @@ public class Ticket : EntityBase
         return ClosedAt - CreatedAt;
     }
 
-    public void SetAttachmentFile(string attachmentFile)
+    public void AddAttachment(Attachment attachment)
     {
-        AttachmentFile = attachmentFile;
+        if (attachment is null) throw new ArgumentNullException(nameof(attachment));
+        Attachments ??= new List<Attachment>();
+        Attachments.Add(attachment);
+    }
+
+    public void SetResolution(string resolution)
+    {
+        Resolution = resolution ?? throw new ArgumentNullException(nameof(resolution));
     }
 }
 

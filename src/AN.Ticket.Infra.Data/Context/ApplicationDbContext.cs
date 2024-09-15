@@ -1,5 +1,6 @@
 ﻿using AN.Ticket.Domain.Entities;
 using AN.Ticket.Domain.Entities.Base;
+using AN.Ticket.Domain.Extensions;
 using AN.Ticket.Domain.ValueObjects;
 using AN.Ticket.Infra.Data.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -25,6 +26,7 @@ public class ApplicationDbContext
     DbSet<Team> Teams { get; set; }
     DbSet<User> Users { get; set; }
     DbSet<PaymentPlan> PaymentPlans { get; set; }
+    public DbSet<Attachment> Attachments { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -39,19 +41,23 @@ public class ApplicationDbContext
 
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
-            foreach (var property in entityType.GetProperties())
+            if (typeof(EntityBase).IsAssignableFrom(entityType.ClrType))
             {
-                if (property.ClrType == typeof(DateTime))
+                var createdAtProperty = entityType.FindProperty(nameof(EntityBase.CreatedAt));
+                var updatedAtProperty = entityType.FindProperty(nameof(EntityBase.UpdatedAt));
+
+                if (createdAtProperty != null && createdAtProperty.ClrType == typeof(DateTime))
                 {
-                    property.SetValueConverter(new ValueConverter<DateTime, DateTime>(
-                        v => v.ToUniversalTime(),
+                    createdAtProperty.SetValueConverter(new ValueConverter<DateTime, DateTime>(
+                        v => v.Kind == DateTimeKind.Utc ? v : v.ToUniversalTime(),
                         v => DateTime.SpecifyKind(v, DateTimeKind.Utc)));
                 }
-                else if (property.ClrType == typeof(DateTime?))
+
+                if (updatedAtProperty != null && updatedAtProperty.ClrType == typeof(DateTime))
                 {
-                    property.SetValueConverter(new ValueConverter<DateTime?, DateTime?>(
-                        v => v.HasValue ? v.Value.ToUniversalTime() : (DateTime?)null,
-                        v => v.HasValue ? DateTime.SpecifyKind(v.Value, DateTimeKind.Utc) : (DateTime?)null));
+                    updatedAtProperty.SetValueConverter(new ValueConverter<DateTime, DateTime>(
+                        v => v.Kind == DateTimeKind.Utc ? v : v.ToUniversalTime(),
+                        v => DateTime.SpecifyKind(v, DateTimeKind.Utc)));
                 }
             }
         }
@@ -67,11 +73,11 @@ public class ApplicationDbContext
 
         foreach (var entityEntry in entries)
         {
-            ((EntityBase)entityEntry.Entity).UpdatedAt = DateTime.UtcNow;
+            ((EntityBase)entityEntry.Entity).UpdatedAt = DateTime.UtcNow.ToLocal();
 
             if (entityEntry.State == EntityState.Added)
             {
-                ((EntityBase)entityEntry.Entity).CreatedAt = DateTime.UtcNow;
+                ((EntityBase)entityEntry.Entity).CreatedAt = DateTime.UtcNow.ToLocal();
             }
         }
 

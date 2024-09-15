@@ -42,4 +42,17 @@ public class TicketRepository
             .Where(x => x.UserId == null)
             .ToListAsync();
     }
+
+    public async Task<DomainEntity.Ticket> GetTicketWithDetailsAsync(Guid ticketId)
+    {
+        return await Entities
+            .AsNoTracking()
+            .Include(x => x.Messages).ThenInclude(x => x.User)
+            .Include(x => x.Activities)
+            .Include(x => x.InteractionHistories).ThenInclude(x => x.User)
+            .Include(x => x.SatisfactionRating)
+            .Include(x => x.User)
+            .Include(x => x.Attachments)
+            .FirstOrDefaultAsync(x => x.Id == ticketId);
+    }
 }

@@ -1,4 +1,5 @@
-﻿using AN.Ticket.Application.Helpers.EmailSender;
+﻿using AN.Ticket.Application.DTOs.Email;
+using AN.Ticket.Application.Helpers.EmailSender;
 using AN.Ticket.Application.Interfaces;
 using MailKit.Net.Smtp;
 using Microsoft.Extensions.Options;
@@ -14,7 +15,7 @@ public class EmailSenderService : IEmailSenderService
         _smtpSettings = smtpSettings.Value;
     }
 
-    public async Task SendEmailAsync(string email, string subject, string message)
+    public async Task SendEmailAsync(string email, string subject, string message, List<EmailAttachment>? attachments = null)
     {
         var senderName = email;
         var senderAddress = _smtpSettings.Username;
@@ -26,10 +27,17 @@ public class EmailSenderService : IEmailSenderService
         emailMessage.To.Add(new MailboxAddress(senderName, recipientAddress));
         emailMessage.Subject = subject;
 
-        emailMessage.Body = new TextPart("html")
+        var bodyBuilder = new BodyBuilder { HtmlBody = message };
+
+        if (attachments != null && attachments.Any())
         {
-            Text = message
-        };
+            foreach (var attachment in attachments)
+            {
+                bodyBuilder.Attachments.Add(attachment.FileName, attachment.Content, ContentType.Parse(attachment.ContentType));
+            }
+        }
+
+        emailMessage.Body = bodyBuilder.ToMessageBody();
 
         using var client = new SmtpClient();
         await client.ConnectAsync(_smtpSettings.Host, _smtpSettings.Port, false);

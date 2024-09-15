@@ -1,5 +1,16 @@
-﻿@{
+﻿@using AN.Ticket.Domain.Enums
+@model AN.Ticket.Application.DTOs.Ticket.TicketDetailsDto
+
+@{
     ViewData["Title"] = "Detalhes do Ticket";
+    var successMessage = TempData["SuccessMessage"] as string;
+}
+
+@if (!string.IsNullOrEmpty(successMessage))
+{
+    <script>
+        onResolutionSuccess(@Model.Ticket.Id);
+    </script>
 }
 
 @await Component.InvokeAsync("Breadcrumb")
@@ -8,6 +19,36 @@
     .nav-tabs .nav-link {
         font-size: 14px;
     }
+
+    .user-message {
+        background-color: #f8f9fa;
+        border-left: 5px solid #17a2b8;
+    }
+
+    .support-message {
+        background-color: #e9f7ef;
+        border-left: 5px solid #28a745;
+    }
+
+    .message-header {
+        font-size: 14px;
+    }
+
+    .message-body {
+        font-size: 16px;
+    }
+
+    .message-time {
+        font-size: 12px;
+    }
+
+    .expandable {
+        cursor: pointer;
+    }
+
+    .icon-expand {
+        float: right;
+    }
 </style>
 
 <div class="container">
@@ -15,7 +56,14 @@
         <div class="col-md-4">
             <div class="card shadow-sm mb-3">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <span>Vencido</span>
+                    @if (Model.Ticket.DueDate < DateTime.Now)
+                    {
+                        <span>Vencido</span>
+                    }
+                    else
+                    {
+                        <span>Detalhes</span>
+                    }
                     <div class="icon-wrapper">
                         <button class="btn btn-link p-0"><i class="bi bi-pin-angle"></i></button>
                     </div>
@@ -23,15 +71,19 @@
                 <div class="card-body">
                     <div class="ticket-item mb-3 p-2 border rounded d-flex flex-column">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="fw-bold">Aqui está seu primeiro ticket.</span>
-                            <span class="badge rounded-circle bg-success text-white" style="height: 40px; width: 40px; display: flex; align-items: center; justify-content: center;">D</span>
+                            <span class="fw-bold text-wrap text-truncate" style="max-width: 350px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                @Model.Ticket.Subject
+                            </span>
+                            <span class="badge rounded-circle bg-success text-white ms-3" style="height: 40px; width: 40px; display: flex; align-items: center; justify-content: center;">
+                                @GetInitials(Model.Ticket.ContactName)
+                            </span>
                         </div>
-                        <div class="small text-muted">#100 - Lawrence - Zoho</div>
+                        <div class="small text-muted">#@Model.Ticket.TicketCode - @Model.Ticket.ContactName - @Model.Ticket.AccountName</div>
                         <div class="small text-muted">
-                            <i class="bi bi-clock-fill"></i> 03 Set 01:48 PM
+                            <i class="bi bi-clock-fill"></i> @FormatTimeWithAmPm(Model.Ticket.DueDate)
                         </div>
                         <div class="d-flex justify-content-between align-items-center mt-2">
-                            <span class="badge bg-light text-danger border border-danger">Escalated</span>
+                            <span class="badge bg-light border @GetStatusBadgeClass(Model.Ticket.Status)">@TranslateStatus(Model.Ticket.Status)</span>
                             <div class="icon-wrapper">
                                 <i class="bi bi-envelope"></i>
                                 <i class="bi bi-list-task ms-2"></i>
@@ -45,18 +97,18 @@
         <div class="col-md-8">
             <div class="d-flex justify-content-between align-items-center p-3">
                 <div>
-                    <h5><i class="bi bi-envelope"></i> Aqui está seu primeiro ticket.</h5>
+                    <h5 class="text-wrap flex-grow-1"><i class="bi bi-envelope"></i> @Model.Ticket.Subject</h5>
                     <div class="d-flex align-items-center">
-                        <span class="badge bg-light border text-black">#100</span>
-                        <span class="mx-2">Lawrence</span>
+                        <span class="badge bg-light border text-black">#@Model.Ticket.TicketCode</span>
+                        <span class="mx-2">@Model.Ticket.ContactName</span>
                         <i class="bi bi-clock"></i>
-                        <span class="mx-2">30 Ago 08:20 PM</span>
+                        <span class="mx-2">@FormatTimeWithAmPm(Model.Ticket.CreatedAt)</span>
                         <i class="bi bi-play-circle me-1"></i>
                         <span class="badge bg-light border text-black">00:00:00</span>
                     </div>
                 </div>
                 <div>
-                    <button class="btn btn-primary"><i class="bi bi-reply"></i> Responder</button>
+                    <button class="btn btn-primary" id="showResponseForm"><i class="bi bi-reply"></i> Responder</button>
                     <button class="btn btn-light"><i class="bi bi-chat"></i></button>
                     <button class="btn btn-light"><i class="bi bi-three-dots"></i></button>
                 </div>
@@ -83,88 +135,221 @@
             <div id="tabContent">
 
                 <div id="conversa-content">
-                    <div class="card-body border border-1 rounded-1">
-                        <div class="d-flex align-items-center mb-3">
-                            <span class="badge rounded-circle bg-success text-white me-2" style="height: 40px; width: 40px; display: flex; align-items: center; justify-content: center;">LA</span>
-                            <div>
-                                <strong>Lawrence</strong>
-                                <br />
-                                <small class="text-muted">30 Ago 08:20 PM (10 dias atrás)</small>
+                    <div id="responseForm" class="mb-3" style="display: none;">
+                        <form asp-action="ReplyToTicket" method="post" enctype="multipart/form-data">
+                            <input type="hidden" name="ticketId" value="@Model.Ticket.Id" />
+                            <textarea rows="4" name="responseText" class="form-control"></textarea>
+
+                            <div class="mt-3">
+                                <label for="attachments" class="form-label">Anexar Arquivos</label>
+                                <input type="file" id="attachments" name="attachments" class="form-control" onchange="handleFiles(this.files)" multiple>
+                                <div id="fileList" class="mt-2"></div>
                             </div>
-                        </div>
-                        <p>
-                            Bem-vindo à tela do novo Ticket Unificado do Zoho Desk. Aqui você tem o contexto completo do ticket. Agora que você recebeu seu primeiro ticket, notou que foi atribuído a você? Para responder a este ticket de forma eficiente, verifique as soluções sugeridas automaticamente no painel à sua esquerda.
-                        </p>
-                        <p>
-                            Ao terminar de compor sua resposta, você pode enviá-la e fechar o ticket.
-                        </p>
-                        <p>
-                            Qualquer ação que você realizar poderá ser acompanhada pelo histórico do ticket. Dessa forma, você está a um passo de fornecer ao cliente um atendimento de alta qualidade!
-                        </p>
-                        <p>
-                            Saudações,
-                            <br />
-                            Equipe Zoho Desk
-                            <br />
-                            1 888 900 9646
-                        </p>
+
+                            <div class="text-end mt-3">
+                                <button type="button" class="btn btn-light" id="hideResponseForm">Cancelar</button>
+                                <button type="submit" class="btn btn-primary">Enviar Resposta</button>
+                            </div>
+                        </form>
                     </div>
+                    @if (Model.Ticket.Messages != null && Model.Ticket.Messages.Any())
+                    {
+                        var sortedMessages = Model.Ticket.Messages.OrderBy(m => m.SentAt).ToList();
+                        var firstMessage = sortedMessages.FirstOrDefault();
+                        var remainingMessages = sortedMessages.Skip(1).ToList();
+
+                        @if (firstMessage != null)
+                        {
+                            <div class="card-body @(firstMessage.UserId == null ? "user-message" : "support-message") mb-2 border rounded-1">
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="badge rounded-circle @(firstMessage.UserId == null ? "bg-info" : "bg-success") text-white me-2" style="height: 40px; width: 40px; display: flex; align-items: center; justify-content: center;">
+                                        @GetInitials(firstMessage.UserId == null ? Model.Ticket.ContactName : firstMessage.User?.FullName)
+                                    </span>
+                                    <div>
+                                        <strong>@(firstMessage.UserId == null ? Model.Ticket.ContactName : firstMessage.User?.FullName)</strong>
+                                        <br />
+                                        <small class="text-muted">@firstMessage.SentAt?.ToString("dd MMM yyyy hh:mm tt")</small>
+                                    </div>
+                                </div>
+                                <p class="message-body">
+                                    @firstMessage.Message
+                                </p>
+                            </div>
+                        }
+
+                        @foreach (var message in remainingMessages)
+                        {
+                            <div class="card-body @(message.UserId == null ? "user-message" : "support-message") mb-2 border rounded-1 expandable">
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="badge rounded-circle @(message.UserId == null ? "bg-info" : "bg-success") text-white me-2" style="height: 40px; width: 40px; display: flex; align-items: center; justify-content: center;">
+                                        @GetInitials(message.UserId == null ? Model.Ticket.ContactName : message.User?.FullName)
+                                    </span>
+                                    <div>
+                                        <strong>@(message.UserId == null ? Model.Ticket.ContactName : message.User?.FullName)</strong>
+                                        <br />
+                                        <small class="text-muted">@message.SentAt?.ToString("dd MMM yyyy hh:mm tt")</small>
+                                    </div>
+                                    <span class="icon-expand"><i class="bi bi-caret-down"></i></span>
+                                </div>
+                                <p class="message-body">
+                                    @message.Message
+                                </p>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="card-body border border-1 rounded-1">
+                            <h4 class="text-center m-0 p-2">Nenhuma mensagem encontrada</h4>
+                        </div>
+                    }
                 </div>
 
                 <div id="resolucao-content" style="display: none;">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center mb-3">
-                            <span class="badge rounded-circle bg-success text-white me-2" style="height: 40px; width: 40px; display: flex; align-items: center; justify-content: center;">D</span>
-                            <div>
-                                <strong>Adicionar resolução</strong>
+                    @if (Model.Resolution != null && Model.Resolution.Id != null)
+                    {
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <span class="badge rounded-circle bg-success text-white me-2" style="height: 40px; width: 40px; display: flex; align-items: center; justify-content: center;">
+                                    @GetInitials(Model.Ticket.User?.FullName)
+                                </span>
+                                <div>
+                                    <strong>@Model.Ticket.User?.FullName</strong>
+                                </div>
                             </div>
+                            <textarea class="form-control mb-3" rows="4">@Model.Resolution.ResolutionDetails</textarea>
                         </div>
-                        <textarea class="form-control mb-3" rows="4" placeholder="Adicionar resolução"></textarea>
-                        <div class="form-check mb-3">
-                            <input class="form-check-input" type="checkbox" id="notificarContato">
-                            <label class="form-check-label" for="notificarContato">
-                                Notificar contato
-                            </label>
-                        </div>
-                        <div class="d-flex justify-content-end">
-                            <button class="btn btn-primary me-2">Salvar</button>
-                            <button class="btn btn-primary">Salvar E Adicionar Artigo</button>
-                            <button class="btn btn-light">Limpar</button>
-                        </div>
-                    </div>
+                    }
+                    else
+                    {
+                        <form asp-action="ResolveTicket" asp-controller="Ticket" method="post">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-3">
+                                    <span class="badge rounded-circle bg-success text-white me-2" style="height: 40px; width: 40px; display: flex; align-items: center; justify-content: center;">
+                                        @GetInitials(Model.Ticket.User?.FullName)
+                                    </span>
+                                    <div>
+                                        <strong>Adicionar resolução</strong>
+                                    </div>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <textarea asp-for="Resolution.ResolutionDetails" rows="4" placeholder="Adicionar resolução" class="form-control"></textarea>
+                                    <span asp-validation-for="Resolution.ResolutionDetails" class="text-danger"></span>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" asp-for="Resolution.NotifyContact" type="checkbox">
+                                    <label class="form-check-label" asp-for="Resolution.NotifyContact">
+                                        Notificar contato
+                                    </label>
+                                </div>
+                                <input type="hidden" asp-for="Resolution.TicketId" value="@Model.Ticket.Id" />
+                                <div class="d-flex justify-content-end">
+                                    <button type="submit" class="btn btn-primary me-2">Salvar</button>
+                                    <button class="btn btn-light">Limpar</button>
+                                </div>
+                            </div>
+                        </form>
+                    }
                 </div>
 
                 <div id="anexo-content" style="display: none;">
-                    <div class="text-center p-5">
-                        <i class="bi bi-paperclip fs-1" style="width: 70px; height: 70px;"></i>
-                        <h5>Nenhum Anexos disponível</h5>
-                        <p class="text-muted">Faça o upload dos anexos para adicionar mais contexto a este Ticket.</p>
-                        <div class="d-flex justify-content-center">
-                            <button class="btn btn-primary">Procurar Arquivos</button>
+                    @if (Model.Ticket.Attachments != null && Model.Ticket.Attachments.Any())
+                    {
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0">Anexos</h5>
+
+                            <form id="fileUploadForm" asp-action="Upload" asp-controller="Attachment" method="post" enctype="multipart/form-data">
+                                <input type="file" id="fileInput" name="file" style="display: none;" onchange="this.form.submit()" />
+                                <input type="hidden" name="ticketId" value="@Model.Ticket.Id" />
+                                <button type="button" class="btn btn-primary" onclick="document.getElementById('fileInput').click();">
+                                    <i class="bi bi-plus-lg"></i> Adicionar Arquivo
+                                </button>
+                            </form>
                         </div>
-                    </div>
+
+                        <div class="card-body p-0">
+                            <ul class="list-group list-group-flush">
+                                @foreach (var attachment in Model.Ticket.Attachments)
+                                {
+                                    <li class="list-group-item d-flex justify-content-between align-items-center p-3">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-file-earmark fs-3 me-3 text-primary"></i>
+                                            <div class="d-flex flex-column">
+                                                <a href="@Url.Action("Download", "Attachment", new { id = attachment.Id })" class="text-truncate fw-bold" style="max-width: 300px;" title="@attachment.FileName">@attachment.FileName</a>
+                                                <small class="text-muted">
+                                                    @Model.Ticket.User.FullName &bull; @attachment.CreatedAt.ToString("dd MMM HH:mm") &bull; @((attachment.Size / 1024.0).ToString("0.0")) KB
+                                                </small>
+                                            </div>
+                                        </div>
+                                        <a href="@Url.Action("Download", "Attachment", new { id = attachment.Id })" download class="btn btn-outline-secondary btn-sm">
+                                            <i class="bi bi-download"></i> Download
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center p-5">
+                            <i class="bi bi-paperclip fs-1" style="width: 70px; height: 70px;"></i>
+                            <h5>Nenhum Anexo disponível</h5>
+                            <p class="text-muted">Faça o upload dos anexos para adicionar mais contexto a este Ticket.</p>
+
+                            <form asp-action="Upload" asp-controller="Attachment" method="post" enctype="multipart/form-data">
+                                <div class="mb-3">
+                                    <input type="file" name="file" class="form-control" required />
+                                    <input type="hidden" name="ticketId" value="@Model.Ticket.Id" />
+                                </div>
+                                <button type="submit" class="btn btn-primary">Enviar Arquivo</button>
+                            </form>
+                        </div>
+                    }
                 </div>
 
                 <div id="atividade-content" style="display: none;">
-                    <div class="text-center p-5">
-                        <i class="bi bi-activity fs-1"></i>
-                        <h5>Nenhum Próximo Atividades disponível</h5>
-                        <p class="text-muted">Adicionar um Chamada telefônica, Tarefa ou Evento para serem concluídos.
-                        <div class="d-flex justify-content-center">
-                            <button class="btn btn-primary">Adicionar Atividade</button>
+                    @if (Model.Ticket.Activities != null && Model.Ticket.Activities.Any())
+                    {
+                        <div class="card-body">
+                            @foreach (var activity in Model.Ticket.Activities)
+                            {
+                                <p><strong>@activity.Subject</strong> - @activity.ScheduledDate.ToString("dd MMM yyyy hh:mm tt")</p>
+                            }
                         </div>
-                    </div>
+                    }
+                    else
+                    {
+                        <div class="text-center p-5">
+                            <i class="bi bi-activity fs-1"></i>
+                            <h5>Nenhum Próximo Atividades disponível</h5>
+                            <p class="text-muted">
+                                Adicionar um Chamada telefônica, Tarefa ou Evento para serem concluídos.
+                                <div class="d-flex justify-content-center">
+                                    <button class="btn btn-primary">Adicionar Atividade</button>
+                                </div>
+                        </div>
+                    }
                 </div>
 
                 <div id="aprovacao-content" style="display: none;">
-                    <div class="text-center p-5">
-                        <i class="bi bi-check-lg fs-1"></i>
-                        <h5>Nenhum Aprovações disponível</h5>
-                        <p class="text-muted">Enviar este Ticket para aprovação de seu gerente de suporte.
-                        <div class="d-flex justify-content-center">
-                            <button class="btn btn-primary">Enviado Para Aprovação</button>
+                    @if (Model.Approval != null)
+                    {
+                        @*                         <div class="text-center p-5">
+                    <h5>Ticket aprovado em @Model.Approval.DateApproved?.ToString("dd MMM yyyy hh:mm tt")</h5>
+                    </div> *@
+                    }
+                    else
+                    {
+                        <div class="text-center p-5">
+                            <i class="bi bi-check-lg fs-1"></i>
+                            <h5>Nenhum Aprovações disponível</h5>
+                            <p class="text-muted">
+                                Enviar este Ticket para aprovação de seu gerente de suporte.
+                                <div class="d-flex justify-content-center">
+                                    <button class="btn btn-primary">Enviado Para Aprovação</button>
+                                </div>
                         </div>
-                    </div>
+                    }
                 </div>
 
             </div>
@@ -174,4 +359,52 @@
 
 @section Scripts {
     <script src="~/js/ticket.js"></script>
+}
+
+@functions {
+    public string GetInitials(string fullName)
+    {
+        if (string.IsNullOrEmpty(fullName))
+            return string.Empty;
+
+        var names = fullName.Split(' ');
+        if (names.Length == 1)
+            return names[0].Substring(0, 1).ToUpper();
+
+        return (names[0].Substring(0, 1) + names[1].Substring(0, 1)).ToUpper();
+    }
+
+    public string TranslateStatus(TicketStatus status)
+    {
+        return status switch
+        {
+            TicketStatus.Onhold => "Em Espera",
+            TicketStatus.Open => "Aberto",
+            TicketStatus.InProgress => "Em Progresso",
+            TicketStatus.Closed => "Fechado",
+            _ => status.ToString(),
+        };
+    }
+
+    public string GetStatusBadgeClass(TicketStatus status)
+    {
+        return status switch
+        {
+            TicketStatus.Onhold => "text-info border-info",
+            TicketStatus.Open => "text-primary border-primary",
+            TicketStatus.InProgress => "text-warning border-warning",
+            TicketStatus.Closed => "text-success border-success",
+            _ => "text-secondary border-secondary",
+        };
+    }
+
+    public string FormatTimeWithAmPm(DateTime dateTime)
+    {
+        string amPm = dateTime.Hour >= 12 ? "PM" : "AM";
+
+        int hour12 = dateTime.Hour % 12;
+        if (hour12 == 0) hour12 = 12;
+
+        return dateTime.ToString($"dd MMM yyyy {hour12}:mm") + " " + amPm;
+    }
 }

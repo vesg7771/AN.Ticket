@@ -34,7 +34,8 @@ public class TicketMap : IEntityTypeConfiguration<DomainEntity.Ticket>
             .IsRequired(false);
 
         builder.Property(t => t.DueDate)
-            .IsRequired();
+            .IsRequired()
+            .HasColumnType("datetime");
 
         builder.Property(t => t.Priority)
             .IsRequired();
@@ -43,8 +44,8 @@ public class TicketMap : IEntityTypeConfiguration<DomainEntity.Ticket>
             .HasMaxLength(100)
             .IsRequired(false);
 
-        builder.Property(t => t.AttachmentFile)
-            .HasMaxLength(500)
+        builder.Property(t => t.Resolution)
+            .HasMaxLength(1000)
             .IsRequired(false);
 
         builder.HasOne(t => t.User)
@@ -58,6 +59,10 @@ public class TicketMap : IEntityTypeConfiguration<DomainEntity.Ticket>
         builder.HasMany(t => t.InteractionHistories)
             .WithOne()
             .HasForeignKey(x => x.TicketId);
+
+        builder.HasMany(t => t.Attachments)
+            .WithOne(a => a.Ticket)
+            .HasForeignKey(a => a.TicketId);
 
         builder.OwnsOne(t => t.SatisfactionRating);
 

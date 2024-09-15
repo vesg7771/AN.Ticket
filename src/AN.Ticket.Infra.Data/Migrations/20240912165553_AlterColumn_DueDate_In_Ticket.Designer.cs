@@ -4,6 +4,7 @@ using AN.Ticket.Infra.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AN.Ticket.Infra.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240912165553_AlterColumn_DueDate_In_Ticket")]
+    partial class AlterColumn_DueDate_In_Ticket
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -73,40 +76,6 @@ namespace AN.Ticket.Infra.Data.Migrations
                     b.HasIndex("TicketId1");
 
                     b.ToTable("Activities", (string)null);
-                });
-
-            modelBuilder.Entity("AN.Ticket.Domain.Entities.Attachment", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
-
-                    b.Property<byte[]>("Content")
-                        .IsRequired()
-                        .HasColumnType("longblob");
-
-                    b.Property<string>("ContentType")
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("FileName")
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<Guid>("TicketId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TicketId");
-
-                    b.ToTable("Attachments", (string)null);
                 });
 
             modelBuilder.Entity("AN.Ticket.Domain.Entities.Contact", b =>
@@ -310,6 +279,10 @@ namespace AN.Ticket.Infra.Data.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("varchar(150)");
 
+                    b.Property<string>("AttachmentFile")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
                     b.Property<string>("Classification")
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
@@ -343,10 +316,6 @@ namespace AN.Ticket.Infra.Data.Migrations
                     b.Property<int>("Priority")
                         .HasColumnType("int");
 
-                    b.Property<string>("Resolution")
-                        .HasMaxLength(1000)
-                        .HasColumnType("varchar(1000)");
-
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
@@ -378,22 +347,21 @@ namespace AN.Ticket.Infra.Data.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Message")
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("varchar(500)");
 
-                    b.Property<DateTime?>("SentAt")
-                        .IsRequired()
-                        .HasColumnType("datetime");
+                    b.Property<DateTime>("SentAt")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<Guid>("TicketId")
                         .HasColumnType("char(36)");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<Guid?>("UserId")
                         .HasColumnType("char(36)");
@@ -704,17 +672,6 @@ namespace AN.Ticket.Infra.Data.Migrations
                     b.Navigation("Ticket");
                 });
 
-            modelBuilder.Entity("AN.Ticket.Domain.Entities.Attachment", b =>
-                {
-                    b.HasOne("AN.Ticket.Domain.Entities.Ticket", "Ticket")
-                        .WithMany("Attachments")
-                        .HasForeignKey("TicketId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Ticket");
-                });
-
             modelBuilder.Entity("AN.Ticket.Domain.Entities.Contact", b =>
                 {
                     b.HasOne("AN.Ticket.Domain.Entities.User", "User")
@@ -915,8 +872,6 @@ namespace AN.Ticket.Infra.Data.Migrations
             modelBuilder.Entity("AN.Ticket.Domain.Entities.Ticket", b =>
                 {
                     b.Navigation("Activities");
-
-                    b.Navigation("Attachments");
 
                     b.Navigation("InteractionHistories");
 

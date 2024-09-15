@@ -1,7 +1,9 @@
-﻿using AN.Ticket.Application.Helpers.EmailSender;
+﻿using AN.Ticket.Application.DTOs.Email;
+using AN.Ticket.Application.Helpers.EmailSender;
 using AN.Ticket.Application.Interfaces;
 using AN.Ticket.Domain.Entities;
 using AN.Ticket.Domain.Enums;
+using AN.Ticket.Domain.Extensions;
 using AN.Ticket.Domain.Interfaces;
 using AN.Ticket.Domain.Interfaces.Base;
 using AN.Ticket.Hangfire.Enums;
@@ -23,6 +25,7 @@ public class EmailMonitoringService : IEmailMonitoringService
     private readonly IEmailSenderService _emailSenderService;
     private readonly ITicketRepository _ticketRepository;
     private readonly ITicketMessageRepository _ticketMessageRepository;
+    private readonly IAttachmentRepository _attachmentRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public EmailMonitoringService(
@@ -32,6 +35,7 @@ public class EmailMonitoringService : IEmailMonitoringService
         IEmailSenderService emailSenderService,
         ITicketRepository ticketRepository,
         ITicketMessageRepository ticketMessageRepository,
+        IAttachmentRepository attachmentRepository,
         IUnitOfWork unitOfWork
     )
     {
@@ -88,19 +92,31 @@ public class EmailMonitoringService : IEmailMonitoringService
         var fromName = email.From.Mailboxes.First().Name;
         var subject = email.Subject;
         var body = email.TextBody;
+        var priority = email.Priority;
+        var attachments = GetAttachmentsFromEmail(email);
 
-        BackgroundJob.Enqueue(() => ProcessEmailAsync(fromName, fromAddress, subject, body));
+        BackgroundJob.Enqueue(() => ProcessEmailAsync(fromName, fromAddress, subject, body, priority, attachments));
     }
 
-    public async Task ProcessEmailAsync(string fromName, string fromAddress, string subject, string body)
+    public async Task ProcessEmailAsync(
+        string fromName,
+        string fromAddress,
+        string subject,
+        string body,
+        MessagePriority priority,
+        List<EmailAttachment> attachments
+    )
     {
         try
         {
+            var contact = await _contactRepository.GetByEmailAsync(fromAddress);
             var ticket = await _ticketRepository.GetByEmailAndSubjectAsync(fromAddress, subject.Replace("Re: ", ""));
+            var newMessages = new List<TicketMessage>();
+
             if (ticket is not null)
             {
                 var existingMessages = EmailParser.ParseEmailThread(body);
-                var newMessages = new List<TicketMessage>();
+                await HandleAttachmentsAndAddMessages(ticket, attachments);
 
                 foreach (var msg in existingMessages)
                 {
@@ -118,20 +134,22 @@ public class EmailMonitoringService : IEmailMonitoringService
                 }
                 return;
             }
+            var ticketPriority = MapEmailPriorityToTicketPriority(priority);
 
             var newTicket = new DomainEntity.Ticket(
                 fromName,
-                "Rafael Lima",
+                contact is not null ? contact.GetFullName() : fromName,
                 fromAddress,
-                "75983635340",
+                contact is not null ? contact.Phone : "",
                 subject.Replace("Re: ", ""),
                 TicketStatus.Onhold,
-                DateTime.UtcNow.AddDays(3),
-                TicketPriority.Low
+                DateTime.UtcNow.ToLocal(),
+                ticketPriority
             );
 
             var messages = EmailParser.ParseEmailThread(body);
             messages.Select(msg => msg.TicketId = newTicket.Id);
+            await HandleAttachmentsAndAddMessages(newTicket, attachments);
 
             newTicket.AddMessages(messages);
 
@@ -149,5 +167,57 @@ public class EmailMonitoringService : IEmailMonitoringService
     {
         await _ticketMessageRepository.SaveListAsync(messages);
         await _unitOfWork.CommitAsync();
+    }
+
+    private async Task HandleAttachmentsAndAddMessages(DomainEntity.Ticket ticket, List<EmailAttachment> attachments)
+    {
+        foreach (var attachment in attachments)
+        {
+            var ticketAttachment = new DomainEntity.Attachment(
+                attachment.FileName,
+                attachment.Content,
+                attachment.ContentType,
+                ticket.Id
+            );
+            ticket.AddAttachment(ticketAttachment);
+
+            await _attachmentRepository.SaveAsync(ticketAttachment);
+        }
+
+        await _unitOfWork.CommitAsync();
+    }
+
+    private List<EmailAttachment> GetAttachmentsFromEmail(MimeMessage emailMessage)
+    {
+        var attachments = new List<EmailAttachment>();
+
+        foreach (var attachment in emailMessage.Attachments)
+        {
+            if (attachment is MimePart mimePart)
+            {
+                using var memoryStream = new MemoryStream();
+                mimePart.Content.DecodeTo(memoryStream);
+
+                attachments.Add(new EmailAttachment
+                (
+                    mimePart.FileName,
+                    memoryStream.ToArray(),
+                    mimePart.ContentType.MimeType
+                ));
+            }
+        }
+
+        return attachments;
+    }
+
+    private TicketPriority MapEmailPriorityToTicketPriority(MessagePriority emailPriority)
+    {
+        return emailPriority switch
+        {
+            MessagePriority.Urgent => TicketPriority.High,
+            MessagePriority.Normal => TicketPriority.Medium,
+            MessagePriority.NonUrgent => TicketPriority.Low,
+            _ => TicketPriority.Low,
+        };
     }
 }

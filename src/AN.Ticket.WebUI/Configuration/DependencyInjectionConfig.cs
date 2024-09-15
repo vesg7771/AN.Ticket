@@ -33,6 +33,7 @@ public static class DependencyInjectionConfig
         services.AddScoped<IEmailMonitoringService, EmailMonitoringService>();
         services.AddScoped<ITicketService, TicketService>();
         services.AddScoped<IContactService, ContactService>();
+        services.AddScoped<IAttachmentService, AttachmentService>();
         #endregion
 
         #region Repositories
@@ -43,6 +44,10 @@ public static class DependencyInjectionConfig
         services.AddScoped<ITicketMessageRepository, TicketMessageRepository>();
         services.AddScoped<IPaymentRepository, PaymentRepository>();
         services.AddScoped<IPaymentPlanRepository, PaymentPlanRepository>();
+        services.AddScoped<ISatisfactionRatingRepository, SatisfactionRatingRepository>();
+        services.AddScoped<IInteractionHistoryRepository, InteractionHistoryRepository>();
+        services.AddScoped<IActivityRepository, ActivityRepository>();
+        services.AddScoped<IAttachmentRepository, AttachmentRepository>();
         #endregion
 
         #region SMTP

@@ -8,4 +8,5 @@ public class TicketMessageDto
     public Guid? UserId { get; set; }
     public UserDto? User { get; set; }
     public DateTime? SentAt { get; set; }
+    public bool IsFromSupport { get; set; }
 }
