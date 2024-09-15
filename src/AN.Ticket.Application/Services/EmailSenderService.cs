@@ -71,8 +71,11 @@ public class EmailSenderService : IEmailSenderService
 
         emailMessage.Body = bodyBuilder.ToMessageBody();
 
-        emailMessage.InReplyTo = originalMessageId;
-        emailMessage.References.Add(originalMessageId);
+        if (originalMessageId is not null)
+        {
+            emailMessage.InReplyTo = originalMessageId;
+            emailMessage.References.Add(originalMessageId);
+        }
 
         using var client = new SmtpClient();
         await client.ConnectAsync(_smtpSettings.Host, _smtpSettings.Port, SecureSocketOptions.StartTls);

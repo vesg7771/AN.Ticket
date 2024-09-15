@@ -3,17 +3,103 @@
     ViewData["Title"] = "Erro";
 }
 
-<h1 class="text-danger">Erro.</h1>
-<h2 class="text-danger">Ocorreu um erro ao processar sua solicitação.</h2>
+<style>
+    .error-page {
+        min-height: 70vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+    }
 
-@if (!string.IsNullOrEmpty(Model.ErrorMessage))
-{
-    <p class="text-danger">@Model.ErrorMessage</p>
-}
+    .error-card {
+        padding: 40px;
+        border-radius: 10px;
+        border: 1px solid #e9ecef;
+        background-color: #fff;
+        max-width: 600px;
+        width: 100%;
+    }
 
-@if (Model.ShowRequestId)
-{
-    <p>
-        <strong>ID da Solicitação:</strong> <code>@Model.RequestId</code>
-    </p>
-}
+    .error-icon {
+        font-size: 4rem;
+        color: #dc3545;
+        margin-bottom: 20px;
+    }
+
+    .error-code {
+        font-size: 3rem;
+        font-weight: bold;
+        color: #dc3545;
+        margin-bottom: 10px;
+    }
+
+    .error-message {
+        font-size: 1.2rem;
+        color: #6c757d;
+        margin-bottom: 20px;
+    }
+
+    .suggestion-message {
+        font-size: 1rem;
+        color: #495057;
+        margin-bottom: 30px;
+    }
+
+    .btn-custom {
+        background-color: #007bff;
+        color: #fff;
+        padding: 10px 20px;
+        font-size: 1.1rem;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-custom:hover {
+        background-color: #0056b3;
+        color: #fff;
+    }
+
+    .error-details {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+
+    @@media (max-width: 768px) {
+        .error-code {
+            font-size: 2.5rem;
+        }
+
+        .error-message, .suggestion-message {
+            font-size: 1rem;
+        }
+
+        .error-page {
+            padding: 20px;
+        }
+    }
+</style>
+
+<div class="error-page">
+    <div class="error-card">
+        <i class="bi bi-exclamation-circle-fill error-icon"></i>
+        <div class="error-code">Erro @Model.StatusCode</div>
+        <div class="error-message">Desculpe, algo deu errado ao processar sua solicitação.</div>
+        
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="suggestion-message">@Model.ErrorMessage</div>
+        }
+
+        <a href="javascript:history.back()" class="btn btn-custom">
+            <i class="bi bi-arrow-left-circle me-2"></i> Voltar
+        </a>
+
+        @if (Model.ShowRequestId)
+        {
+            <div class="error-details mt-4">
+                <strong>ID da Solicitação:</strong> <code>@Model.RequestId</code>
+            </div>
+        }
+    </div>
+</div>

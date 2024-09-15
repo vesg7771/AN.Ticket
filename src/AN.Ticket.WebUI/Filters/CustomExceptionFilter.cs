@@ -22,18 +22,21 @@ public class CustomExceptionFilter : IExceptionFilter
     {
         var tempData = _tempDataDictionaryFactory.GetTempData(context.HttpContext);
         var errorMessage = "Ocorreu um erro ao processar a solicitação. Verifique os dados e tente novamente";
+        var statusCode = 500;
 
         if (context.Exception is EntityValidationException ex)
         {
             tempData["ErrorMessage"] = $"{ex.Message}";
             errorMessage = ex.Message;
             context.ExceptionHandled = true;
+            statusCode = 502;
         }
         else if (context.Exception is NotFoundException enfx)
         {
             tempData["ErrorMessage"] = $"{enfx.Message}";
             errorMessage = enfx.Message;
             context.ExceptionHandled = true;
+            statusCode = 404;
         }
         else
         {
@@ -45,7 +48,8 @@ public class CustomExceptionFilter : IExceptionFilter
         var errorViewModel = new ErrorViewModel
         {
             ErrorMessage = errorMessage,
-            RequestId = Activity.Current?.Id ?? context.HttpContext.TraceIdentifier
+            RequestId = Activity.Current?.Id ?? context.HttpContext.TraceIdentifier,
+            StatusCode = statusCode
         };
 
         var result = new ViewResult

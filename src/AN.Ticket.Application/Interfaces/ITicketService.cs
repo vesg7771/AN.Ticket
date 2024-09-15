@@ -14,4 +14,6 @@ public interface ITicketService
     Task<IEnumerable<TicketDto>> GetTicketsByUserIdAsync(Guid userId);
     Task<IEnumerable<TicketDto>> GetTicketsNotAssignedAsync();
     Task<bool> ReplyToTicketAsync(Guid ticketId, string messageText, Guid userId, List<IFormFile> attachments);
+    Task<bool> DeleteTicketAsync(Guid ticketId);
+    Task<bool> UpdateTicketAsync(EditTicketDto editTicketDto);
 }

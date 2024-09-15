@@ -137,5 +137,29 @@ public class Ticket : EntityBase
     {
         EmailMessageId = messageId ?? throw new ArgumentNullException(nameof(messageId));
     }
+
+    public void Update(
+        TicketStatus status,
+        TicketPriority priority,
+        DateTime dueDate,
+        string contactName,
+        string accountName,
+        string email,
+        string phone
+    )
+    {
+        Status = status;
+        Priority = priority;
+        DueDate = dueDate;
+        ContactName = contactName;
+        AccountName = accountName;
+        Email = email;
+        Phone = phone;
+    }
+
+    public void UpdateStatus(TicketStatus status)
+    {
+        Status = status;
+    }
 }
 

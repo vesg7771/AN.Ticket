@@ -4,6 +4,7 @@ using AN.Ticket.Application.Interfaces;
 using AN.Ticket.Application.Services.Base;
 using AN.Ticket.Domain.Entities;
 using AN.Ticket.Domain.EntityValidations;
+using AN.Ticket.Domain.Enums;
 using AN.Ticket.Domain.Interfaces;
 using AN.Ticket.Domain.Interfaces.Base;
 using AutoMapper;
@@ -248,7 +249,7 @@ public class TicketService
 
     public async Task<bool> ReplyToTicketAsync(Guid ticketId, string messageText, Guid userId, List<IFormFile> attachments)
     {
-        var ticket = await _ticketRepository.GetTicketWithDetailsAsync(ticketId);
+        var ticket = await _ticketRepository.GetByIdAsync(ticketId);
         if (ticket is null)
         {
             return false;
@@ -256,6 +257,13 @@ public class TicketService
 
         var ticketMessage = new TicketMessage(messageText, DateTime.UtcNow.ToLocalTime());
         ticketMessage.AssignUser(userId);
+
+        if (
+            ticket.Status != TicketStatus.Closed ||
+            ticket.Status != TicketStatus.InProgress ||
+            ticket.Status != TicketStatus.Open
+        )
+            ticket.UpdateStatus(TicketStatus.Open);
 
         ticketMessage.AssignTicket(ticketId);
         ticket.AddMessages(new List<TicketMessage> { ticketMessage });
@@ -280,6 +288,7 @@ public class TicketService
         }
 
         await _ticketMessageRepository.SaveAsync(ticketMessage);
+        _ticketRepository.Update(ticket);
         await _unitOfWork.CommitAsync();
 
         await _emailSenderService.SendEmailResponseAsync(
@@ -302,6 +311,47 @@ public class TicketService
             ticket.EmailMessageId!,
             emailAttachments
         );
+
+        return true;
+    }
+
+    public async Task<bool> DeleteTicketAsync(Guid ticketId)
+    {
+        var ticket = await _ticketRepository.GetByIdAsync(ticketId);
+        if (ticket is null)
+        {
+            return false;
+        }
+
+        _ticketRepository.Delete(ticket);
+        await _unitOfWork.CommitAsync();
+
+        return true;
+    }
+
+    public async Task<bool> UpdateTicketAsync(EditTicketDto editTicketDto)
+    {
+        var ticket = await _ticketRepository.GetByIdAsync(editTicketDto.Id);
+        if (ticket is null)
+        {
+            return false;
+        }
+
+        if (ticket.Status == TicketStatus.Closed)
+            throw new EntityValidationException("Não é possível editar um ticket fechado.");
+
+        ticket.Update(
+            editTicketDto.Status,
+            editTicketDto.Priority,
+            editTicketDto.DueDate,
+            editTicketDto.ContactName,
+            editTicketDto.AccountName,
+            editTicketDto.Email,
+            editTicketDto.Phone
+        );
+
+        _ticketRepository.Update(ticket);
+        await _unitOfWork.CommitAsync();
 
         return true;
     }

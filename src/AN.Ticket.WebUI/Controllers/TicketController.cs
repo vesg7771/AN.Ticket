@@ -171,6 +171,85 @@ public class TicketController : Controller
         return RedirectToAction(nameof(Details), new { id = ticketId });
     }
 
+    [HttpPost]
+    public async Task<IActionResult> Delete(Guid ticketId)
+    {
+        if (ticketId == Guid.Empty)
+        {
+            TempData["ErrorMessage"] = "ID do ticket inválido.";
+            return RedirectToAction(nameof(UserTickets));
+        }
+
+        var success = await _ticketService.DeleteTicketAsync(ticketId);
+        if (!success)
+        {
+            TempData["ErrorMessage"] = "Não foi possível excluir o ticket.";
+            return RedirectToAction(nameof(UserTickets));
+        }
+
+        TempData["SuccessMessage"] = "Ticket excluído com sucesso.";
+        return RedirectToAction(nameof(UserTickets));
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Edit(Guid id)
+    {
+        if (id == Guid.Empty)
+        {
+            TempData["ErrorMessage"] = "ID do ticket inválido.";
+            return RedirectToAction(nameof(UserTickets));
+        }
+
+        var ticketDetails = await _ticketService.GetTicketDetailsAsync(id);
+        if (ticketDetails == null)
+        {
+            TempData["ErrorMessage"] = "Ticket não encontrado.";
+            return RedirectToAction(nameof(UserTickets));
+        }
+
+        var editTicketDto = new EditTicketDto
+        {
+            Id = ticketDetails.Ticket.Id,
+            Subject = ticketDetails.Ticket.Subject,
+            Status = ticketDetails.Ticket.Status,
+            Priority = ticketDetails.Ticket.Priority,
+            DueDate = ticketDetails.Ticket.DueDate,
+            ContactName = ticketDetails.Ticket.ContactName,
+            AccountName = ticketDetails.Ticket.AccountName,
+            Email = ticketDetails.Ticket.Email,
+            Phone = ticketDetails.Ticket.Phone,
+
+            TicketCode = ticketDetails.Ticket.TicketCode,
+            TotalMessages = ticketDetails.Ticket.Messages?.Count() ?? 0,
+            TotalActivities = ticketDetails.Ticket.Activities?.Count() ?? 0,
+            TotalAttachments = ticketDetails.Ticket.Attachments?.Count() ?? 0,
+            SatisfactionStars = (int?)ticketDetails.Ticket.SatisfactionRating?.Rating ?? 0
+        };
+
+        return View(editTicketDto);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditTicket(EditTicketDto model)
+    {
+        if (!ModelState.IsValid)
+        {
+            TempData["ErrorMessage"] = "Erro ao editar o ticket.";
+            return View(model);
+        }
+
+        var success = await _ticketService.UpdateTicketAsync(model);
+        if (!success)
+        {
+            TempData["ErrorMessage"] = "Não foi possível editar o ticket.";
+            return RedirectToAction(nameof(Edit), new { id = model.Id });
+        }
+
+        TempData["SuccessMessage"] = "Ticket editado com sucesso!";
+        return RedirectToAction(nameof(Details), new { id = model.Id });
+    }
+
 
     [HttpGet]
     public async Task<IActionResult> GetContactDetails(Guid contactId)

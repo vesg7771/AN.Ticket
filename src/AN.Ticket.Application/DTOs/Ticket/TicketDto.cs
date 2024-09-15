@@ -30,5 +30,5 @@ public class TicketDto
     public SatisfactionRatingDto SatisfactionRating { get; set; }
     public string? Classification { get; set; }
     public ICollection<AttachmentDto> Attachments { get; set; }
-
+    public string? Resolution { get; set; }
 }
