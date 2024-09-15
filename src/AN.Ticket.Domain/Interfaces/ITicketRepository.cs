@@ -8,4 +8,6 @@ public interface ITicketRepository : IRepository<DomainEntity.Ticket>
     Task<IEnumerable<DomainEntity.Ticket>> GetTicketsByUserIdAsync(Guid userId);
     Task<IEnumerable<DomainEntity.Ticket>> GetTicketsNotAssignedAsync();
     Task<DomainEntity.Ticket> GetTicketWithDetailsAsync(Guid ticketId);
+    Task<int> GetTicketCodeByIdAsync(Guid ticketId);
+    Task<DomainEntity.Ticket> GetByTicketCodeAsync(int ticketCode);
 }

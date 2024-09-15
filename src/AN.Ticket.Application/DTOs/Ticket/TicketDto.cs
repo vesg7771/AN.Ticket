@@ -15,6 +15,7 @@ public class TicketDto
     public string Email { get; set; }
     public string Phone { get; set; }
     public string Subject { get; set; }
+    public string EmailMessageId { get; set; }
     public TicketStatus Status { get; set; }
     public TicketPriority Priority { get; set; }
     public DateTime CreatedAt { get; set; }

@@ -14,6 +14,7 @@ using MailKit.Search;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MimeKit;
+using System.Text.RegularExpressions;
 using DomainEntity = AN.Ticket.Domain.Entities;
 
 namespace AN.Ticket.Application.Services;
@@ -77,9 +78,9 @@ public class EmailMonitoringService : IEmailMonitoringService
 
             await Task.Delay(TimeSpan.FromSeconds(15), cancellationToken);
 
-            //BackgroundJob.Schedule<IEmailMonitoringService>(
-            //    service => service.StartMonitoringAsync(cancellationToken),
-            //    TimeSpan.FromSeconds(5));
+            BackgroundJob.Schedule<IEmailMonitoringService>(
+                service => service.StartMonitoringAsync(cancellationToken),
+                TimeSpan.FromSeconds(1));
 
             await client.DisconnectAsync(true, cancellationToken);
         }
@@ -97,9 +98,10 @@ public class EmailMonitoringService : IEmailMonitoringService
         var subject = email.Subject;
         var body = email.TextBody;
         var priority = email.Priority;
+        var messageId = email.MessageId;
         var attachments = GetAttachmentsFromEmail(email);
 
-        BackgroundJob.Enqueue(() => ProcessEmailAsync(fromName, fromAddress, subject, body, priority, attachments));
+        BackgroundJob.Enqueue(() => ProcessEmailAsync(fromName, fromAddress, subject, body, priority, messageId, attachments));
     }
 
     public async Task ProcessEmailAsync(
@@ -108,17 +110,38 @@ public class EmailMonitoringService : IEmailMonitoringService
         string subject,
         string body,
         MessagePriority priority,
+        string messageId,
         List<EmailAttachment> attachments
     )
     {
         try
         {
             var contact = await _contactRepository.GetByEmailAsync(fromAddress);
-            var ticket = await _ticketRepository.GetByEmailAndSubjectAsync(fromAddress, subject.Replace("Re: ", ""));
+            var ticketCode = ExtractTicketCode(body);
+            DomainEntity.Ticket ticket = null;
+
+            if (ticketCode.HasValue)
+                ticket = await _ticketRepository.GetByTicketCodeAsync(ticketCode.Value);
+            else
+                ticket = await _ticketRepository.GetByEmailAndSubjectAsync(fromAddress, subject.Replace("Re: ", ""));
+
+            var contactName = contact is not null ? contact.GetFullName() : fromName;
+
             var newMessages = new List<TicketMessage>();
 
             if (ticket is not null)
             {
+                if (ticket.Status == TicketStatus.Closed)
+                {
+
+                }
+
+                if (ticket.EmailMessageId is null)
+                {
+                    ticket.AssignMessageId(messageId);
+                    _ticketRepository.Update(ticket);
+                }
+
                 var existingMessages = EmailParser.ParseEmailThread(body);
                 //var formattedMessages = await _chatGptService.GenerateResponseAsync(body);
                 await HandleAttachmentsAndAddMessages(ticket, attachments);
@@ -165,7 +188,7 @@ public class EmailMonitoringService : IEmailMonitoringService
 
             var newTicket = new DomainEntity.Ticket(
                 fromName,
-                contact is not null ? contact.GetFullName() : fromName,
+                contactName,
                 fromAddress,
                 contact is not null ? contact.Phone : "",
                 subject.Replace("Re: ", ""),
@@ -173,6 +196,8 @@ public class EmailMonitoringService : IEmailMonitoringService
                 DateTime.UtcNow.ToLocal(),
                 ticketPriority
             );
+
+            newTicket.AssignMessageId(messageId);
 
             var messages = EmailParser.ParseEmailThread(body);
             messages.Select(msg => msg.TicketId = newTicket.Id);
@@ -253,5 +278,11 @@ public class EmailMonitoringService : IEmailMonitoringService
             MessagePriority.NonUrgent => TicketPriority.Low,
             _ => TicketPriority.Low,
         };
+    }
+
+    private int? ExtractTicketCode(string body)
+    {
+        var match = Regex.Match(body, @"#(\d+)");
+        return match.Success ? int.Parse(match.Groups[1].Value) : (int?)null;
     }
 }

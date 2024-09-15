@@ -154,7 +154,7 @@
                     </div>
                     @if (Model.Ticket.Messages != null && Model.Ticket.Messages.Any())
                     {
-                        var sortedMessages = Model.Ticket.Messages.OrderBy(m => m.SentAt).ToList();
+                        var sortedMessages = Model.Ticket.Messages.OrderByDescending(m => m.SentAt).ToList();
                         var firstMessage = sortedMessages.FirstOrDefault();
                         var remainingMessages = sortedMessages.Skip(1).ToList();
 

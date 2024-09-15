@@ -27,6 +27,9 @@ public class TicketMap : IEntityTypeConfiguration<DomainEntity.Ticket>
             .IsRequired()
             .HasMaxLength(500);
 
+        builder.Property(t => t.EmailMessageId)
+            .IsRequired(false);
+
         builder.Property(t => t.Status)
             .IsRequired();
 

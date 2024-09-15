@@ -17,9 +17,9 @@ public static class EmailParser
             var firstMessageBody = firstMatch.Groups[1].Value.Trim();
             firstMessageBody = CleanMessageBody(firstMessageBody);
 
-            if (!string.IsNullOrEmpty(firstMessageBody))
+            if (!string.IsNullOrEmpty(firstMessageBody) && !ContainsGreeting(firstMessageBody))
             {
-                messages.Add(new TicketMessage(firstMessageBody, DateTime.UtcNow));
+                messages.Add(new TicketMessage(firstMessageBody, DateTime.UtcNow.ToLocalTime()));
             }
         }
 
@@ -32,14 +32,20 @@ public static class EmailParser
             var body = match.Groups[5].Value.Trim();
             body = CleanMessageBody(body);
 
-            if (!string.IsNullOrEmpty(body))
+            if (!string.IsNullOrEmpty(body) && !ContainsGreeting(body))
             {
                 var dateTime = ExtractDateTimeFromHeader(header) ?? DateTime.UtcNow.ToLocalTime();
-                messages.Add(new TicketMessage(body, dateTime));
+                messages.Add(new TicketMessage(body, dateTime.ToLocalTime()));
             }
         }
 
         return messages;
+    }
+
+    private static bool ContainsGreeting(string message)
+    {
+        var greetingPattern = @"\bOlá\b";
+        return Regex.IsMatch(message, greetingPattern, RegexOptions.IgnoreCase);
     }
 
     private static string CleanMessageBody(string body)

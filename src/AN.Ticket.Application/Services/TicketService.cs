@@ -20,6 +20,7 @@ public class TicketService
     private readonly IActivityRepository _activityRepository;
     private readonly ISatisfactionRatingRepository _satisfactionRatingRepository;
     private readonly IEmailSenderService _emailSenderService;
+    private readonly IAttachmentRepository _attachmentRepository;
     private readonly IMapper _mapper;
     private readonly IUnitOfWork _unitOfWork;
 
@@ -30,6 +31,7 @@ public class TicketService
         IActivityRepository activityRepository,
         ISatisfactionRatingRepository satisfactionRatingRepository,
         IEmailSenderService emailSenderService,
+        IAttachmentRepository attachmentRepository,
         IMapper mapper,
         IUnitOfWork unitOfWork
     )
@@ -41,6 +43,7 @@ public class TicketService
         _activityRepository = activityRepository;
         _satisfactionRatingRepository = satisfactionRatingRepository;
         _emailSenderService = emailSenderService;
+        _attachmentRepository = attachmentRepository;
         _mapper = mapper;
         _unitOfWork = unitOfWork;
     }
@@ -79,6 +82,8 @@ public class TicketService
             );
 
             ticket.AddAttachment(attachment);
+
+            await _attachmentRepository.SaveAsync(attachment);
         }
 
         var ticketMessage = new TicketMessage(
@@ -97,6 +102,31 @@ public class TicketService
         await _ticketRepository.SaveAsync(ticket);
         await _ticketMessageRepository.SaveAsync(ticketMessage);
         await _unitOfWork.CommitAsync();
+
+        var code = await _ticketRepository.GetTicketCodeByIdAsync(ticket.Id);
+
+        await _emailSenderService.SendEmailAsync(
+            ticket.Email,
+            ticket.Subject,
+            $@"
+            <html>
+                <body>
+                    <h2 style='color: #0056b3;'>Olá {ticket.ContactName},</h2>
+                    <p>#{code}</p>
+                    <p>Obrigado por entrar em contato com o nosso suporte! Seu ticket foi <strong>criado com sucesso</strong> e nossa equipe já está trabalhando para resolvê-lo. Se você tiver mais detalhes ou informações para adicionar, basta responder este e-mail.</p>
+            
+                    <h3>Detalhes do Ticket:</h3>
+                    <ul style='list-style-type: none; padding: 0;'>
+                        <li><strong>Assunto:</strong> {ticket.Subject}</li>
+                        <li><strong>Descrição:</strong> {createTicket.Description}</li>
+                    </ul>
+            
+                    <hr style='border: 0; border-top: 1px solid #eee;' />
+            
+                    <p style='font-size: 14px; color: #777;'>Atenciosamente,<br />Equipe de Suporte</p>
+                </body>
+            </html>"
+        );
 
         return true;
     }
@@ -182,14 +212,19 @@ public class TicketService
         }
 
         ticket.SetResolution(ticketResolutionDto.ResolutionDetails);
-        ticket.RecordFirstResponse();
+        if (
+            ticket.FirstResponseAt is null &&
+            ticket.FirstResponseAt != DateTime.MinValue
+        )
+            ticket.RecordFirstResponse();
+
         ticket.CloseTicket();
 
         _ticketRepository.Update(ticket);
 
         if (ticketResolutionDto.NotifyContact)
         {
-            await _emailSenderService.SendEmailAsync(
+            await _emailSenderService.SendEmailResponseAsync(
                 ticket.Email,
                 "Ticket Resolvido",
                 $@"
@@ -201,7 +236,8 @@ public class TicketService
                         <p>Data de Fechamento: {ticket.ClosedAt?.ToString("dd/MM/yyyy HH:mm:ss")}</p>
                         <p>Obrigado por utilizar nossos serviços.</p>
                     </body>
-                </html>"
+                </html>",
+                ticket.EmailMessageId!
             );
         }
 
@@ -218,7 +254,7 @@ public class TicketService
             return false;
         }
 
-        var ticketMessage = new TicketMessage(messageText, DateTime.UtcNow.AddHours(-3));
+        var ticketMessage = new TicketMessage(messageText, DateTime.UtcNow.ToLocalTime());
         ticketMessage.AssignUser(userId);
 
         ticketMessage.AssignTicket(ticketId);
@@ -246,19 +282,24 @@ public class TicketService
         await _ticketMessageRepository.SaveAsync(ticketMessage);
         await _unitOfWork.CommitAsync();
 
-        await _emailSenderService.SendEmailAsync(
+        await _emailSenderService.SendEmailResponseAsync(
             ticket.Email,
-            $"Nova resposta ao seu ticket #{ticket.TicketCode}",
+            $"{ticket.Subject}",
             $@"
             <html>
                 <body>
-                    <h1>Resposta ao seu ticket</h1>
+                    <h1 style='color: #0056b3;'>Resposta ao seu ticket</h1>
+                    <p>Olá {ticket.ContactName},</p>
                     <p>Você recebeu uma nova resposta ao seu ticket:</p>
-                    <p><strong>Assunto:</strong> {ticket.Subject}</p>
+                    <p>#{ticket.TicketCode}</p>
                     <p><strong>Mensagem:</strong> {messageText}</p>
+                    <p>Se precisar de mais assistência, por favor, responda a este e-mail.</p>
                     <p>Obrigado por utilizar nossos serviços!</p>
+                    <hr style='border: 0; border-top: 1px solid #eee;' />
+                    <p style='font-size: 14px; color: #777;'>Atenciosamente,<br />Equipe de Suporte</p>
                 </body>
             </html>",
+            ticket.EmailMessageId!,
             emailAttachments
         );
 

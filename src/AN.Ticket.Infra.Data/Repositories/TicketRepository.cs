@@ -55,4 +55,20 @@ public class TicketRepository
             .Include(x => x.Attachments)
             .FirstOrDefaultAsync(x => x.Id == ticketId);
     }
+
+    public async Task<int> GetTicketCodeByIdAsync(Guid ticketId)
+    {
+        return await Entities
+            .AsNoTracking()
+            .Where(x => x.Id == ticketId)
+            .Select(x => x.TicketCode)
+            .SingleAsync();
+    }
+
+    public async Task<DomainEntity.Ticket> GetByTicketCodeAsync(int ticketCode)
+    {
+        return await Entities
+            .AsNoTracking()
+            .SingleAsync(x => x.TicketCode == ticketCode);
+    }
 }

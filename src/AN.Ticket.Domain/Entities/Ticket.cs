@@ -11,6 +11,7 @@ public class Ticket : EntityBase
     public string Email { get; private set; }
     public string Phone { get; private set; }
     public string Subject { get; private set; }
+    public string? EmailMessageId { get; private set; }
     public ICollection<TicketMessage>? Messages { get; private set; }
     public TicketStatus Status { get; private set; }
     public Guid? UserId { get; private set; }
@@ -130,6 +131,11 @@ public class Ticket : EntityBase
     public void SetResolution(string resolution)
     {
         Resolution = resolution ?? throw new ArgumentNullException(nameof(resolution));
+    }
+
+    public void AssignMessageId(string messageId)
+    {
+        EmailMessageId = messageId ?? throw new ArgumentNullException(nameof(messageId));
     }
 }
 
