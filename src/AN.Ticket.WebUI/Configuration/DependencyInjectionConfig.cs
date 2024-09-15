@@ -12,6 +12,7 @@ using AN.Ticket.Infra.Data.Identity;
 using AN.Ticket.Infra.Data.Repositories;
 using AN.Ticket.Infra.Data.Repositories.Base;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using OpenAI_API;
 
 namespace AN.Ticket.WebUI.Configuration;
 
@@ -30,6 +31,7 @@ public static class DependencyInjectionConfig
         #endregion
 
         #region Services
+        services.AddScoped<IChatGptService, ChatGptService>();
         services.AddScoped<IEmailMonitoringService, EmailMonitoringService>();
         services.AddScoped<ITicketService, TicketService>();
         services.AddScoped<IContactService, ContactService>();
@@ -58,6 +60,12 @@ public static class DependencyInjectionConfig
 
         #region AutoMapper Profiles
         services.AddAutoMapper(typeof(DomainToDTOMappingProfile));
+        #endregion
+
+        #region OpenAI
+        var token = configuration.GetValue<string>("OpenAI:ApiKey");
+        var authentication = new APIAuthentication(token);
+        services.AddScoped<IOpenAIAPI>(x => new OpenAIAPI(authentication));
         #endregion
     }
 }

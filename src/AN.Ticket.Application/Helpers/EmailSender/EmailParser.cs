@@ -34,7 +34,7 @@ public static class EmailParser
 
             if (!string.IsNullOrEmpty(body))
             {
-                var dateTime = ExtractDateTimeFromHeader(header) ?? DateTime.UtcNow;
+                var dateTime = ExtractDateTimeFromHeader(header) ?? DateTime.UtcNow.ToLocalTime();
                 messages.Add(new TicketMessage(body, dateTime));
             }
         }

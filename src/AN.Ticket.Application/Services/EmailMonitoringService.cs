@@ -26,6 +26,7 @@ public class EmailMonitoringService : IEmailMonitoringService
     private readonly ITicketRepository _ticketRepository;
     private readonly ITicketMessageRepository _ticketMessageRepository;
     private readonly IAttachmentRepository _attachmentRepository;
+    private readonly IChatGptService _chatGptService;
     private readonly IUnitOfWork _unitOfWork;
 
     public EmailMonitoringService(
@@ -36,6 +37,7 @@ public class EmailMonitoringService : IEmailMonitoringService
         ITicketRepository ticketRepository,
         ITicketMessageRepository ticketMessageRepository,
         IAttachmentRepository attachmentRepository,
+        IChatGptService chatGptService,
         IUnitOfWork unitOfWork
     )
     {
@@ -44,6 +46,8 @@ public class EmailMonitoringService : IEmailMonitoringService
         _emailSenderService = emailSenderService;
         _ticketRepository = ticketRepository;
         _ticketMessageRepository = ticketMessageRepository;
+        _attachmentRepository = attachmentRepository;
+        _chatGptService = chatGptService;
         _unitOfWork = unitOfWork;
         _logger = logger;
     }
@@ -116,6 +120,7 @@ public class EmailMonitoringService : IEmailMonitoringService
             if (ticket is not null)
             {
                 var existingMessages = EmailParser.ParseEmailThread(body);
+                //var formattedMessages = await _chatGptService.GenerateResponseAsync(body);
                 await HandleAttachmentsAndAddMessages(ticket, attachments);
 
                 foreach (var msg in existingMessages)
@@ -132,8 +137,30 @@ public class EmailMonitoringService : IEmailMonitoringService
                 {
                     await AddMessagesToTicket(ticket, newMessages);
                 }
+
+                //foreach (var msg in formattedMessages)
+                //{
+                //    var ticketMessage = new TicketMessage
+                //    (
+                //        msg.Mensagem,
+                //        DateTime.Parse(msg.Data)
+                //    );
+
+                //    var existingMessage = ticket.Messages?.FirstOrDefault(m => m.Message == ticketMessage.Message);
+                //    if (existingMessage is null)
+                //    {
+                //        newMessages.Add(ticketMessage);
+                //    }
+                //}
+
+                //if (newMessages.Any())
+                //{
+                //    await AddMessagesToTicket(ticket, newMessages);
+                //}
+
                 return;
             }
+
             var ticketPriority = MapEmailPriorityToTicketPriority(priority);
 
             var newTicket = new DomainEntity.Ticket(
@@ -149,9 +176,16 @@ public class EmailMonitoringService : IEmailMonitoringService
 
             var messages = EmailParser.ParseEmailThread(body);
             messages.Select(msg => msg.TicketId = newTicket.Id);
+            //var messages = await _chatGptService.GenerateResponseAsync(body);
+            //var ticketMessages = messages.Select(msg => new TicketMessage
+            //(
+            //    msg.Mensagem,
+            //    DateTime.Parse(msg.Data)
+            //)).ToList();
             await HandleAttachmentsAndAddMessages(newTicket, attachments);
 
             newTicket.AddMessages(messages);
+            //newTicket.AddMessages(ticketMessages);
 
             await _ticketRepository.SaveAsync(newTicket);
             await _unitOfWork.CommitAsync();
