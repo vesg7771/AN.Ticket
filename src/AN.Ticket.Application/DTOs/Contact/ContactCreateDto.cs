@@ -31,7 +31,7 @@ public class ContactCreateDto
 
     public string Title { get; set; }
 
-    public List<SocialNetworkDto> SocialNetworks { get; set; }
+    public List<SocialNetworkDto>? SocialNetworks { get; set; }
 
     public Guid UserId { get; set; }
 

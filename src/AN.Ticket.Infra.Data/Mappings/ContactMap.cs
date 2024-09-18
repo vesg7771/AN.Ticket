@@ -33,10 +33,12 @@ internal class ContactMap : IEntityTypeConfiguration<Contact>
             .HasMaxLength(20);
 
         builder.Property(c => c.Department)
-            .HasMaxLength(100);
+            .HasMaxLength(100)
+            .IsRequired(false);
 
         builder.Property(c => c.Title)
-            .HasMaxLength(250);
+            .HasMaxLength(250)
+            .IsRequired(false);
 
         builder.HasOne(c => c.User)
             .WithMany()
