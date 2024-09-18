@@ -40,7 +40,9 @@ public class ContactController : Controller
         var user = await GetCurrentUserAsync();
         model.UserId = Guid.Parse(user!.Id);
 
-        await _contactService.CreateContactAsync(model);
+        var success = await _contactService.CreateContactAsync(model);
+        if (success)
+            TempData["SuccessMessage"] = "Cliente criado com sucesso!";
 
         return Redirect(nameof(GetContact));
     }

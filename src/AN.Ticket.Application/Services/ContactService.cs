@@ -33,7 +33,7 @@ public class ContactService
 
     }
 
-    public async Task CreateContactAsync(
+    public async Task<bool> CreateContactAsync(
         ContactCreateDto contactCreateDto
     )
     {
@@ -90,5 +90,7 @@ public class ContactService
             await _paymentRepository.SaveAsync(payment);
 
         await _unitOfWork.CommitAsync();
+
+        return true;
     }
 }

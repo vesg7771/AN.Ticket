@@ -6,5 +6,5 @@ namespace AN.Ticket.Application.Interfaces;
 public interface IContactService
     : IService<ContactDto, Contact>
 {
-    Task CreateContactAsync(ContactCreateDto contactCreateDto);
+    Task<bool> CreateContactAsync(ContactCreateDto contactCreateDto);
 }

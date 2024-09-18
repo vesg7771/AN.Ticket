@@ -9,6 +9,7 @@ public class BreadcrumbViewComponent : ViewComponent
     {
         { "Home", "Início" },
         { "Ticket", "Tickets" },
+        { "Contact", "Contatos" }
     };
 
     private readonly Dictionary<string, Dictionary<string, string>> _actionFriendlyNames = new Dictionary<string, Dictionary<string, string>>
@@ -22,6 +23,13 @@ public class BreadcrumbViewComponent : ViewComponent
                 { "CreateTicket", "Criar Ticket" }
             }
         },
+        {
+            "Contact", new Dictionary<string, string>
+            {
+                { "GetContact", "Contatos" },
+                { "CreateContact", "Criar Contato" }
+            }
+        }
     };
 
     public IViewComponentResult Invoke()
