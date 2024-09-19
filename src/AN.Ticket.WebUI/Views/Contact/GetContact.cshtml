@@ -1,51 +1,47 @@
 ﻿@model List<AN.Ticket.Application.DTOs.Contact.ContactDto>
-
 @{
     ViewData["Title"] = "Clientes";
 }
 
 <h2>Clientes</h2>
 
-<table class="table">
+<table class="table table-striped display" id="table-contactDto">
     <thead>
-        <tr>
-            <th>
-                Nome
-            </th>
-            <th>
-                Email
-            </th>
-            <th>
-                Telefone
-            </th>
-            <th>
-                Endereço
-            </th>
-            <th></th>
+        <tr class="table-primary">
+            <th scope="col">Nome</th>
+            <th scope="col">Email</th>
+            <th scope="col">Telefone</th>
+            <th scope="col">Departamento</th>
+            <th scope="col">#</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>
-                    @item.FullName
-                </td>
-                <td>
-                    @item.PrimaryEmail
-                </td>
-                <td>
-                    @item.Phone
-                </td>
-                <td>
-                    @item.Department
-                </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-                </td>
-            </tr>
+        @if(Model!=null&&Model.Any()){
+            @foreach (var item in Model)
+            {
+                <tr class="table-secondary">
+                    <td>
+                        @item.FullName
+                    </td>
+                    <td>
+                        @item.PrimaryEmail
+                    </td>
+                    <td>
+                        @item.Phone
+                    </td>
+                    <td>
+                        @item.Department
+                    </td>
+                    <td>
+                         <div class="btn-group" role="group">
+                            <a class="btn btn-primary rounded me-2" asp-action="Edit" asp-route-id="@item.Id" role="button">Editar</a>
+                            <a class="btn btn-info rounded me-2" asp-action="Details" asp-route-id="@item.Id" role="button">Detalhes</a>
+                            <a class="btn btn-danger rounded" asp-action="Delete" asp-route-id="@item.Id" role="button">Deletar</a>
+                         </div>
+                    </td>
+                </tr>
+            }
         }
     </tbody>
 </table>
+

@@ -51,7 +51,7 @@ public class ContactController : Controller
     public async Task<IActionResult> GetContact()
     {
         var contacts = await _contactService.GetAllAsync();
-
+       
         var contactDTOs = new List<ContactDto>();
         foreach (var contact in contacts)
         {
