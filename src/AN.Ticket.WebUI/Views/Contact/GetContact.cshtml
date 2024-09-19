@@ -34,9 +34,9 @@
                     </td>
                     <td>
                          <div class="btn-group" role="group">
-                            <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                            <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                            <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                            <a class="btn btn-primary rounded me-2" asp-action="Edit" asp-route-id="@item.Id" role="button">Editar</a>
+                            <a class="btn btn-info rounded me-2" asp-action="Details" asp-route-id="@item.Id" role="button">Detalhes</a>
+                            <a class="btn btn-danger rounded" asp-action="Delete" asp-route-id="@item.Id" role="button">Deletar</a>
                          </div>
                     </td>
                 </tr>
