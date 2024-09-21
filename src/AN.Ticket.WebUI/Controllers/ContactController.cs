@@ -41,9 +41,13 @@ public class ContactController : Controller
         model.UserId = Guid.Parse(user!.Id);
 
         var success = await _contactService.CreateContactAsync(model);
-        if (success)
-            TempData["SuccessMessage"] = "Cliente criado com sucesso!";
+        if (!success)
+        {
+            TempData["ErrorMessage"] = "Ocorreu um erro ao criar o contato. Verifique os dados e tente novamente";
+            View(model);
+        }
 
+        TempData["SuccessMessage"] = "Cliente criado com sucesso!";
         return Redirect(nameof(GetContact));
     }
 
@@ -51,7 +55,7 @@ public class ContactController : Controller
     public async Task<IActionResult> GetContact()
     {
         var contacts = await _contactService.GetAllAsync();
-       
+
         var contactDTOs = new List<ContactDto>();
         foreach (var contact in contacts)
         {

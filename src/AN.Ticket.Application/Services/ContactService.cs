@@ -45,14 +45,14 @@ public class ContactService
             throw new EntityValidationException("Contato já existe com esse cpf.");
 
         var contact = new Contact(
-            contactCreateDto.FirstName,
-            contactCreateDto.LastName,
-            contactCreateDto.PrimaryEmail,
-            contactCreateDto.SecondaryEmail,
-            contactCreateDto.Phone,
-            contactCreateDto.Mobile,
-            contactCreateDto.Department,
-            contactCreateDto.Title
+            contactCreateDto.FirstName!,
+            contactCreateDto.LastName!,
+            contactCreateDto.PrimaryEmail!,
+            contactCreateDto.SecondaryEmail!,
+            contactCreateDto.Phone!,
+            contactCreateDto.Mobile!,
+            contactCreateDto.Department!,
+            contactCreateDto.Title!
         );
 
         contact.ChangedCpf(contactCreateDto.Cpf);
