@@ -1,0 +1,27 @@
+﻿@model AN.Ticket.WebUI.ViewModels.Activity.ActivityActionViewModel
+
+<a asp-controller="Activity" asp-action="Edit" asp-route-id="@Model.Id" asp-route-isTicketEdit="@Model.IsEditTicket" class="btn btn-outline-secondary btn-sm me-2 rounded-circle" title="Editar">
+    <i class="bi bi-pencil"></i>
+</a>
+
+<button type="button" class="btn btn-outline-danger btn-sm rounded-circle" data-bs-toggle="modal" data-bs-target="#deleteModal-@Model.Id" title="Excluir">
+    <i class="bi bi-trash"></i>
+</button>
+
+<div class="modal fade" id="deleteModal-@Model.Id" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirmação de Exclusão</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Tem certeza que deseja excluir esta atividade?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <a asp-controller="Activity" asp-action="Delete" asp-route-id="@Model.Id" asp-route-isTicketEdit="@Model.IsEditTicket" class="btn btn-danger">Excluir</a>
+            </div>
+        </div>
+    </div>
+</div>

@@ -6,4 +6,7 @@ namespace AN.Ticket.Application.Interfaces;
 public interface IActivityService
     : IService<ActivityDto, Activity>
 {
+    Task<ActivityDto> CreateActivityAsync(ActivityDto model);
+    Task DeleteActivityAsync(Guid id);
+    Task UpdateActivityAsync(ActivityDto model);
 }

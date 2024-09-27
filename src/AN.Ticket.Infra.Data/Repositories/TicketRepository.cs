@@ -1,4 +1,5 @@
-﻿using AN.Ticket.Domain.Interfaces;
+﻿using AN.Ticket.Domain.Enums;
+using AN.Ticket.Domain.Interfaces;
 using AN.Ticket.Infra.Data.Context;
 using AN.Ticket.Infra.Data.Repositories.Base;
 using Microsoft.EntityFrameworkCore;
@@ -70,5 +71,13 @@ public class TicketRepository
         return await Entities
             .AsNoTracking()
             .SingleAsync(x => x.TicketCode == ticketCode);
+    }
+
+    public async Task<bool> IsTicketClosedAsync(Guid ticketId)
+    {
+        return await Entities
+            .AsNoTracking()
+            .Where(x => x.Id == ticketId && x.Status == TicketStatus.Closed)
+            .AnyAsync();
     }
 }

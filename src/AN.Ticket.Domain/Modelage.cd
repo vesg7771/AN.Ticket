@@ -1,0 +1,96 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="NameAndType">
+  <Class Name="AN.Ticket.Domain.Entities.Base.EntityBase">
+    <Position X="46.75" Y="7.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAACAAEgCAAAAAAAAAAAIAAAAAAAAAAAiA=</HashCode>
+      <FileName>Entities\Base\EntityBase.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="AN.Ticket.Domain.Entities.Activity">
+    <Position X="37.75" Y="14.25" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAACAiAAQGCoAAAAAAAAEQABEAAQAAAAAAAAA=</HashCode>
+      <FileName>Entities\Activity.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AN.Ticket.Domain.Entities.Attachment">
+    <Position X="38.5" Y="11" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAgAAgAACAAAAAAAAAAAAABAAAAAQAABAAAA=</HashCode>
+      <FileName>Entities\Attachment.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AN.Ticket.Domain.Entities.Contact">
+    <Position X="40.75" Y="15" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAABAEAAAAAkAEACAAAAAAgAEAgAAACIABCAIACAAAg=</HashCode>
+      <FileName>Entities\Contact.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AN.Ticket.Domain.Entities.InteractionHistory">
+    <Position X="35.25" Y="11" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAABAACAgAAgAAACAAAAAAAAAAAAABAAAAAAAAAAAAA=</HashCode>
+      <FileName>Entities\InteractionHistory.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AN.Ticket.Domain.Entities.Payment">
+    <Position X="41.25" Y="11" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>CAAAAQAAAAAgACAACBAAAAAAAAAAEAEAAAAQABAAAAA=</HashCode>
+      <FileName>Entities\Payment.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AN.Ticket.Domain.Entities.PaymentPlan">
+    <Position X="44.25" Y="11" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAgCAAAAAAAAAAAAAAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>Entities\PaymentPlan.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AN.Ticket.Domain.Entities.SatisfactionRating">
+    <Position X="50.75" Y="14.75" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAEAAAAAAECAAAAAAAAAAAAABEAAAAAAAAAAAA=</HashCode>
+      <FileName>Entities\SatisfactionRating.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AN.Ticket.Domain.Entities.Team">
+    <Position X="47.5" Y="11" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAQAAQAgAAAAAAAEAAAAAAA=</HashCode>
+      <FileName>Entities\Team.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AN.Ticket.Domain.Entities.Ticket">
+    <Position X="54.25" Y="11" Width="3.75" />
+    <TypeIdentifier>
+      <HashCode>ACUBAAAEACCBACEEEJQwFAwAAAJgIAAIAIQAIYEAAIA=</HashCode>
+      <FileName>Entities\Ticket.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AN.Ticket.Domain.Entities.TicketMessage">
+    <Position X="50.5" Y="11" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAABAAAAAAAAAAACAAAAAAgAAACAABAAABAAIAgAAAA=</HashCode>
+      <FileName>Entities\TicketMessage.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AN.Ticket.Domain.Entities.User">
+    <Position X="45" Y="17" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAACAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Entities\User.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AN.Ticket.Domain.ValueObjects.SocialNetwork">
+    <Position X="47.5" Y="13.75" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAACAAAAAQAAAAAAAEACAAAAAAAAAA=</HashCode>
+      <FileName>ValueObjects\SocialNetwork.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

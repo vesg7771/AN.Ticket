@@ -1,5 +1,6 @@
 ﻿using AN.Ticket.Application.DTOs.Ticket;
 using AN.Ticket.Application.Interfaces;
+using AN.Ticket.Domain.EntityValidations;
 using AN.Ticket.Infra.Data.Identity;
 using AN.Ticket.WebUI.Components;
 using Microsoft.AspNetCore.Authorization;
@@ -54,20 +55,28 @@ public class TicketController : Controller
             return RedirectToAction(nameof(UserTickets));
         }
 
-        var user = await GetCurrentUserAsync();
-        if (user is null)
-            return Unauthorized();
-
-        var success = await _ticketService.AssignTicketToUserAsync(ticketId, Guid.Parse(user.Id));
-
-        if (!success)
+        try
         {
-            TempData["ErrorMessage"] = "Não foi possível atribuir o ticket.";
+            var user = await GetCurrentUserAsync();
+            if (user is null)
+                return Unauthorized();
+
+            var success = await _ticketService.AssignTicketToUserAsync(ticketId, Guid.Parse(user.Id));
+
+            if (!success)
+            {
+                TempData["ErrorMessage"] = "Não foi possível atribuir o ticket.";
+                return RedirectToAction(nameof(UserTickets));
+            }
+
+            TempData["SuccessMessage"] = "Ticket atribuído com sucesso!";
             return RedirectToAction(nameof(UserTickets));
         }
-
-        TempData["SuccessMessage"] = "Ticket atribuído com sucesso!";
-        return RedirectToAction(nameof(UserTickets));
+        catch (EntityValidationException ex)
+        {
+            TempData["ErrorMessage"] = ex.Message;
+            return RedirectToAction(nameof(UserTickets));
+        }
     }
 
     [HttpGet]
@@ -80,17 +89,25 @@ public class TicketController : Controller
         if (!ModelState.IsValid)
             return View(model);
 
-        model.UserId = await GetCurrentUserId();
-        var success = await _ticketService.CreateTicketAsync(model);
-
-        if (!success)
+        try
         {
-            TempData["ErrorMessage"] = "Não foi possível criar o ticket.";
+            model.UserId = await GetCurrentUserId();
+            var success = await _ticketService.CreateTicketAsync(model);
+
+            if (!success)
+            {
+                TempData["ErrorMessage"] = "Não foi possível criar o ticket.";
+                return View(model);
+            }
+
+            TempData["SuccessMessage"] = "Ticket criado com sucesso!";
+            return RedirectToAction(nameof(UserTickets));
+        }
+        catch (EntityValidationException ex)
+        {
+            TempData["ErrorMessage"] = ex.Message;
             return View(model);
         }
-
-        TempData["SuccessMessage"] = "Ticket criado com sucesso!";
-        return RedirectToAction(nameof(UserTickets));
     }
 
     [HttpGet]
@@ -131,16 +148,24 @@ public class TicketController : Controller
             return View("Details", ticketDetails);
         }
 
-        var success = await _ticketService.ResolveTicketAsync(resolution);
-
-        if (!success)
+        try
         {
-            TempData["ErrorMessage"] = "Não foi possível resolver o ticket. Por favor, tente novamente mais tarde.";
+            var success = await _ticketService.ResolveTicketAsync(resolution);
+
+            if (!success)
+            {
+                TempData["ErrorMessage"] = "Não foi possível resolver o ticket. Por favor, tente novamente mais tarde.";
+                return RedirectToAction(nameof(Details), new { id = resolution.TicketId });
+            }
+
+            TempData["SuccessMessage"] = "Ticket resolvido com sucesso!";
+            return RedirectToAction(nameof(UserTickets));
+        }
+        catch (EntityValidationException ex)
+        {
+            TempData["ErrorMessage"] = ex.Message;
             return RedirectToAction(nameof(Details), new { id = resolution.TicketId });
         }
-
-        TempData["SuccessMessage"] = "Ticket resolvido com sucesso!";
-        return RedirectToAction(nameof(UserTickets));
     }
 
     [HttpPost]
@@ -159,19 +184,28 @@ public class TicketController : Controller
             return RedirectToAction(nameof(Details), new { id = ticketId });
         }
 
-        var success = await _ticketService.ReplyToTicketAsync(ticketId, responseText, Guid.Parse(user.Id), attachments);
-
-        if (!success)
+        try
         {
-            TempData["ErrorMessage"] = "Não foi possível enviar a resposta. Por favor, tente novamente.";
+            var success = await _ticketService.ReplyToTicketAsync(ticketId, responseText, Guid.Parse(user.Id), attachments);
+
+            if (!success)
+            {
+                TempData["ErrorMessage"] = "Não foi possível enviar a resposta. Por favor, tente novamente.";
+                return RedirectToAction(nameof(Details), new { id = ticketId });
+            }
+
+            TempData["SuccessMessage"] = "Resposta enviada com sucesso!";
             return RedirectToAction(nameof(Details), new { id = ticketId });
         }
-
-        TempData["SuccessMessage"] = "Resposta enviada com sucesso!";
-        return RedirectToAction(nameof(Details), new { id = ticketId });
+        catch (EntityValidationException ex)
+        {
+            TempData["ErrorMessage"] = ex.Message;
+            return RedirectToAction(nameof(Details), new { id = ticketId });
+        }
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(Guid ticketId)
     {
         if (ticketId == Guid.Empty)
@@ -180,15 +214,23 @@ public class TicketController : Controller
             return RedirectToAction(nameof(UserTickets));
         }
 
-        var success = await _ticketService.DeleteTicketAsync(ticketId);
-        if (!success)
+        try
         {
-            TempData["ErrorMessage"] = "Não foi possível excluir o ticket.";
+            var success = await _ticketService.DeleteTicketAsync(ticketId);
+            if (!success)
+            {
+                TempData["ErrorMessage"] = "Não foi possível excluir o ticket.";
+                return RedirectToAction(nameof(UserTickets));
+            }
+
+            TempData["SuccessMessage"] = "Ticket excluído com sucesso.";
             return RedirectToAction(nameof(UserTickets));
         }
-
-        TempData["SuccessMessage"] = "Ticket excluído com sucesso.";
-        return RedirectToAction(nameof(UserTickets));
+        catch (EntityValidationException ex)
+        {
+            TempData["ErrorMessage"] = ex.Message;
+            return RedirectToAction(nameof(UserTickets));
+        }
     }
 
     [HttpGet]
@@ -239,15 +281,23 @@ public class TicketController : Controller
             return View(model);
         }
 
-        var success = await _ticketService.UpdateTicketAsync(model);
-        if (!success)
+        try
         {
-            TempData["ErrorMessage"] = "Não foi possível editar o ticket.";
+            var success = await _ticketService.UpdateTicketAsync(model);
+            if (!success)
+            {
+                TempData["ErrorMessage"] = "Não foi possível editar o ticket.";
+                return RedirectToAction(nameof(Edit), new { id = model.Id });
+            }
+
+            TempData["SuccessMessage"] = "Ticket editado com sucesso!";
+            return RedirectToAction(nameof(Details), new { id = model.Id });
+        }
+        catch (EntityValidationException ex)
+        {
+            TempData["ErrorMessage"] = ex.Message;
             return RedirectToAction(nameof(Edit), new { id = model.Id });
         }
-
-        TempData["SuccessMessage"] = "Ticket editado com sucesso!";
-        return RedirectToAction(nameof(Details), new { id = model.Id });
     }
 
 

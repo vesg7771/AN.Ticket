@@ -25,11 +25,10 @@ public class Activity : EntityBase
         Guid ticketId,
         string? subject = null,
         TimeSpan duration = default,
-        ActivityPriority priority = ActivityPriority.Normal,
+        ActivityPriority priority = ActivityPriority.Low,
         Guid? contactId = null
     )
     {
-        if (string.IsNullOrEmpty(description)) throw new ArgumentNullException(nameof(description), "Description cannot be null or empty.");
         if (scheduledDate == default) throw new ArgumentException("ScheduledDate must be a valid date.", nameof(scheduledDate));
         if (ticketId == Guid.Empty) throw new ArgumentException("TicketId cannot be empty.", nameof(ticketId));
 
@@ -45,7 +44,6 @@ public class Activity : EntityBase
 
     public void UpdateDescription(string newDescription)
     {
-        if (string.IsNullOrEmpty(newDescription)) throw new ArgumentNullException(nameof(newDescription), "New description cannot be null or empty.");
         Description = newDescription;
     }
 
@@ -78,6 +76,25 @@ public class Activity : EntityBase
     public void UpdateContact(Guid? newContactId)
     {
         ContactId = newContactId;
+    }
+
+    public void UpdateActivity(
+        string? newSubject,
+        ActivityType newType,
+        string? newDescription,
+        DateTime newScheduledDate,
+        TimeSpan? newDuration,
+        ActivityPriority newPriority,
+        Guid? newContactId
+    )
+    {
+        UpdateSubject(newSubject);
+        UpdateType(newType);
+        UpdateDescription(newDescription ?? Description);
+        UpdateScheduledDate(newScheduledDate);
+        UpdateDuration(newDuration ?? Duration.GetValueOrDefault());
+        UpdatePriority(newPriority);
+        UpdateContact(newContactId ?? ContactId);
     }
 }
 

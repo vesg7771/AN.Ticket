@@ -1,0 +1,110 @@
+﻿@model AN.Ticket.Application.DTOs.Activity.ActivityDto
+
+@{
+    bool isEdit = Model.Id != Guid.Empty;
+    ViewBag.Title = isEdit ? "Editar Atividade" : "Criar Atividade";
+}
+
+@await Component.InvokeAsync("Breadcrumb")
+
+<style>
+    .fixed-bottom {
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        z-index: 1030;
+        background-color: white;
+        border-top: 1px solid #dee2e6;
+    }
+</style>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <form asp-action="@(isEdit ? "Edit" : "Create")" asp-controller="Activity" method="post">
+                @if (isEdit)
+                {
+                    <input type="hidden" asp-for="Id" />
+                }
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="card mb-3">
+                    <div class="card-header">
+                        Informações da Atividade
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label asp-for="Subject" class="form-label">Assunto</label>
+                            <input asp-for="Subject" class="form-control" />
+                            <span asp-validation-for="Subject" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">Descrição</label>
+                            <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Type" class="form-label">Tipo de Atividade</label>
+                            <select asp-for="Type" class="form-select">
+                                <option value="0">Evento</option>
+                                <option value="1">Tarefa</option>
+                            </select>
+                            <span asp-validation-for="Type" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="ScheduledDate" class="form-label">Data Agendada</label>
+                            <input asp-for="ScheduledDate" type="date" class="form-control" />
+                            <span asp-validation-for="ScheduledDate" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Duration" class="form-label">Duração</label>
+                            <input asp-for="Duration" type="time" class="form-control" />
+                            <span asp-validation-for="Duration" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Priority" class="form-label">Prioridade</label>
+                            <select asp-for="Priority" class="form-select">
+                                <option value="0">Baixa</option>
+                                <option value="1">Média</option>
+                                <option value="2">Alta</option>
+                            </select>
+                            <span asp-validation-for="Priority" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="TicketId" class="form-label">Ticket</label>
+                            <select asp-for="TicketId" class="form-select" id="ticketDropdown">
+                                <option value="">Nenhum Ticket Associado</option>
+                                @foreach (var ticket in ViewBag.Tickets)
+                                {
+                                    <option value="@ticket.Id" data-ticket-id="@ticket.Id">@ticket.Subject</option>
+                                }
+                            </select>
+                            <span asp-validation-for="TicketId" class="text-danger"></span>
+                        </div>
+                        <input type="hidden" asp-for=IsEditTicket value="@ViewBag.isTicketEdit" />
+                    </div>
+                </div>
+                <div class="fixed-bottom text-end p-3">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi @(isEdit ? "bi-pencil" : "bi-plus")"></i> @(isEdit ? "Atualizar Atividade" : "Criar Atividade")
+                    </button>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-6">
+            <div class="card sticky-top">
+                <div class="card-header">
+                    Detalhes Relacionados
+                </div>
+                <div class="card-body">
+                    <div id="ticketDetailsContainer">
+                        @await Component.InvokeAsync("TicketDetails", new { ticketId = Model.TicketId != Guid.Empty ? Model.TicketId : Guid.Empty })
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/activity.js"></script>
+}

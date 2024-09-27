@@ -1,4 +1,5 @@
 ﻿@using AN.Ticket.Domain.Enums
+@using AN.Ticket.WebUI.ViewModels.Activity
 @model AN.Ticket.Application.DTOs.Ticket.TicketDetailsDto
 
 @{
@@ -217,7 +218,7 @@
                                     <strong>@Model.Ticket.User?.FullName</strong>
                                 </div>
                             </div>
-                                <textarea class="form-control mb-3" rows="4" readonly>@Model.Ticket.Resolution</textarea>
+                            <textarea class="form-control mb-3" rows="4" readonly>@Model.Ticket.Resolution</textarea>
                         </div>
                     }
                     else
@@ -310,11 +311,51 @@
                 <div id="atividade-content" style="display: none;">
                     @if (Model.Ticket.Activities != null && Model.Ticket.Activities.Any())
                     {
-                        <div class="card-body">
-                            @foreach (var activity in Model.Ticket.Activities)
-                            {
-                                <p><strong>@activity.Subject</strong> - @activity.ScheduledDate.ToString("dd MMM yyyy hh:mm tt")</p>
-                            }
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0">Atividades</h5>
+
+                            <a asp-controller="Activity" asp-action="Create" asp-route-ticketId="@Model.Ticket.Id" class="btn btn-primary">
+                                <i class="bi bi-plus-lg"></i> Adicionar Atividade
+                            </a>
+                        </div>
+
+                        <div class="card-body p-0 border">
+                            <ul class="list-group list-group-flush">
+                                @foreach (var activity in Model.Ticket.Activities.OrderByDescending(a => a.Priority))
+                                {
+                                    <li class="list-group-item d-flex justify-content-between align-items-center p-3">
+                                        <div class="d-flex flex-column">
+                                            <div>
+                                                <span class="fw-bold text-truncate" style="max-width: 300px;" title="@activity.Subject">
+                                                    @activity.Subject
+                                                </span>
+                                                <a class="btn btn-link text-decoration-none" data-bs-toggle="collapse" data-bs-target="#activity-@activity.Id" aria-expanded="false" aria-controls="activity-@activity.Id">
+                                                    <i class="bi bi-chevron-down"></i>
+                                                </a>
+                                            </div>
+
+                                            <small class="text-muted">
+                                                Data Agendada: @activity.ScheduledDate.ToString("dd/MM/yyyy") &bull; Duração: @activity.Duration.ToString(@"hh\:mm") &bull; Prioridade: @TranslatePriority(activity.Priority)
+                                            </small>
+
+                                            <div class="collapse mt-2" id="activity-@activity.Id">
+                                                @if (!string.IsNullOrEmpty(activity.Description))
+                                                {
+                                                    <p class="mb-0">@activity.Description</p>
+                                                }
+                                                else
+                                                {
+                                                    <p class="mb-0 text-muted"><em>Sem descrição para esta atividade.</em></p>
+                                                }
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex">
+                                            @await Html.PartialAsync("_ActivityActions", new ActivityActionViewModel { Id = activity.Id ?? Guid.Empty, IsEditTicket = true })
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
                         </div>
                     }
                     else
@@ -323,9 +364,9 @@
                             <i class="bi bi-activity fs-1"></i>
                             <h5>Nenhum Próximo Atividades disponível</h5>
                             <p class="text-muted">
-                                Adicionar um Chamada telefônica, Tarefa ou Evento para serem concluídos.
+                                Adicionar uma Tarefa ou Evento para serem concluídos.
                                 <div class="d-flex justify-content-center">
-                                    <button class="btn btn-primary">Adicionar Atividade</button>
+                                    <a asp-controller="Activity" asp-action="Create" asp-route-ticketId="@Model.Ticket.Id" class="btn btn-primary">Adicionar Atividade</a>
                                 </div>
                         </div>
                     }
@@ -406,5 +447,16 @@
         if (hour12 == 0) hour12 = 12;
 
         return dateTime.ToString($"dd MMM yyyy {hour12}:mm") + " " + amPm;
+    }
+
+    public string TranslatePriority(ActivityPriority priority)
+    {
+        return priority switch
+        {
+            ActivityPriority.Low => "Baixo",
+            ActivityPriority.Medium => "Médio",
+            ActivityPriority.High => "Alta",
+            _ => priority.ToString(),
+        };
     }
 }
