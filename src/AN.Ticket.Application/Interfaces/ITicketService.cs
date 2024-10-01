@@ -16,4 +16,5 @@ public interface ITicketService
     Task<bool> ReplyToTicketAsync(Guid ticketId, string messageText, Guid userId, List<IFormFile> attachments);
     Task<bool> DeleteTicketAsync(Guid ticketId);
     Task<bool> UpdateTicketAsync(EditTicketDto editTicketDto);
+    Task<List<TicketDto>> GetTicketWithDetailsByUserAsync(Guid userId);
 }

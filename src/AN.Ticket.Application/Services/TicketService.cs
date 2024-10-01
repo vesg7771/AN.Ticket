@@ -151,6 +151,17 @@ public class TicketService
         }).ToList();
     }
 
+    public async Task<List<TicketDto>> GetTicketWithDetailsByUserAsync(Guid userId)
+    {
+        var ticket = await _ticketRepository.GetTicketWithDetailsByUserAsync(userId);
+        if (ticket == null)
+        {
+            return null;
+        }
+
+        return _mapper.Map<List<TicketDto>>(ticket);
+    }
+
     public async Task<IEnumerable<TicketDto>> GetTicketsNotAssignedAsync()
     {
         var tickets = await _ticketRepository.GetTicketsNotAssignedAsync();

@@ -1,8 +1,186 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@using AN.Ticket.Domain.Enums
+@model AN.Ticket.Application.DTOs.Home.HomeDto
+
+@{
+    ViewData["Title"] = "Dashboard";
+
+    var currentDate = DateTime.Now;
+    var startOfWeek = currentDate.AddDays(-(int)currentDate.DayOfWeek + (int)DayOfWeek.Monday);
+    var daysOfWeek = Enumerable.Range(0, 7).Select(i => startOfWeek.AddDays(i).ToString("dddd")).ToList();
+
+    var ticketsByDay = Model.TicketsByDay.Select(t => t.Count).ToList();
+    var ticketsByDayJson = System.Text.Json.JsonSerializer.Serialize(ticketsByDay);
+    var daysOfWeekJson = System.Text.Json.JsonSerializer.Serialize(daysOfWeek);
+    var selectedDateValue = ViewBag.SelectedDate != null ? ((DateTime)ViewBag.SelectedDate).ToString("yyyy-MM-dd") : DateTime.Now.ToString("yyyy-MM-dd");
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-3">
+            <h1>Painel de Tickets</h1>
+            <p>Aqui está o que está acontecendo</p>
+            <div class="mb-4">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-kanban-fill me-3 text-primary" style="font-size: 2rem;"></i>
+                    <div>
+                        <h4 class="mb-0">@Model.QtyOfTicketsOnhold Tickets</h4>
+                        <small class="text-muted">Aguardando processamento</small>
+                    </div>
+                </div>
+            </div>
+            <div class="mb-4">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-people-fill me-3 text-success" style="font-size: 2rem;"></i>
+                    <div>
+                        <h4 class="mb-0">@Model.QtyOfContactsAssociation Clientes</h4>
+                        <small class="text-muted">Atendidos</small>
+                    </div>
+                </div>
+            </div>
+            <div class="mb-4">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-receipt me-3 text-warning" style="font-size: 2rem;"></i>
+                    <div>
+                        <h4 class="mb-0">@Model.QtyOfAvaliations Avaliações</h4>
+                        <small class="text-muted">Recebidas</small>
+                    </div>
+                </div>
+            </div>
+            <div class="mb-4">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-arrow-counterclockwise me-3 text-danger" style="font-size: 2rem;"></i>
+                    <div>
+                        <h4 class="mb-0">@Model.QtyOfTicketsClosed Tickets</h4>
+                        <small class="text-muted">Fechado com sucesso</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3>Tickets</h3>
+                <input type="date" id="selectedDate" class="form-control"
+                       value="@selectedDateValue"
+                       style="width: 200px;"
+                       onchange="filterByDate()" />
+            </div>
+
+            <div class="mb-4">
+                <h5>Os Tickets em andamento</h5>
+                <label class="form-switch">
+                    <input type="checkbox" id="showInProgress" class="form-check-input"
+                    @(ViewBag.ShowInProgress ? "checked" : "") onchange="filterByDate()" />
+                    <span class="form-check-label">Progresso</span>
+                </label>
+                <canvas id="progressChart"></canvas>
+            </div>
+
+            <div class="border p-3 bg-light rounded rounded-1">
+                <span class="badge @(Model.HasOverdueTickets ? "bg-danger" : "bg-success") text">ANÁLISE ATUAL</span>
+                <h5 class="mt-3">
+                    @(Model.HasOverdueTickets ? "Atenção! Há tickets vencidos e não fechados." : "Excelente progresso nos tickets!")
+                </h5>
+                <p>
+                    @(Model.HasOverdueTickets ?
+                        "Há tickets que já passaram da data de vencimento e ainda não foram fechados. Verifique com urgência!" :
+                        "Com base nos dados atuais, a equipe está fazendo um progresso impressionante no processamento dos tickets. Continue com esse ótimo trabalho!")
+                </p>
+                <a href="#" class="text-decoration-none">Clique aqui para ver detalhes de cada ticket.</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="border p-4">
+                <h3>Atividade</h3>
+                <p>Atividades recentes em todos os tickets</p>
+
+                <ul class="list-unstyled">
+                    @foreach (var ticket in Model.Tickets)
+                    {
+                        foreach (var activity in ticket.Activities)
+                        {
+                            <li class="mb-4">
+                                <div class="d-flex align-items-start">
+                                    <div class="me-3">
+                                        @if (activity.Type == AN.Ticket.Domain.Enums.ActivityType.Event)
+                                        {
+                                            <i class="bi bi-circle-fill text-primary" style="font-size: 1.5rem;"></i>
+                                        }
+                                        else if (activity.Type == AN.Ticket.Domain.Enums.ActivityType.Task)
+                                        {
+                                            <i class="bi bi-circle-fill text-info" style="font-size: 1.5rem;"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-circle-fill text-warning" style="font-size: 1.5rem;"></i>
+                                        }
+                                    </div>
+                                    <div>
+                                        <small class="text-muted">@activity.ScheduledDate.ToString("dd MMM, yyyy | hh:mm tt")</small>
+                                        <h5 class="mb-1">@activity.Subject</h5>
+                                        <p class="text-muted mb-0">Por <strong>@(activity.Contact?.FullName ?? "Desconhecido")</strong></p>
+                                        <p class="mb-0">@activity.Description</p>
+                                    </div>
+                                </div>
+                            </li>
+                        }
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
 </div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('progressChart').getContext('2d');
+        const ticketsByDay = @Html.Raw(ticketsByDayJson);
+        const daysOfWeek = @Html.Raw(daysOfWeekJson);
+        const chartLabel = showInProgress ? 'Tickets em andamento nesta semana' : 'Todos os tickets desta semana';
+        const progressChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: daysOfWeek,
+                datasets: [{
+                    label: chartLabel,
+                    data: ticketsByDay,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: {
+                scales: {
+                    x: {
+                        beginAtZero: true
+                    },
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return `${context.dataset.label}: ${context.raw} tickets`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        function filterByDate() {
+            const selectedDate = document.getElementById('selectedDate').value;
+            const showInProgress = document.getElementById('showInProgress').checked;
+
+            window.location.href = `/Home/Index?selectedDate=${selectedDate}&showInProgress=${showInProgress}`;
+        }
+    </script>
+}

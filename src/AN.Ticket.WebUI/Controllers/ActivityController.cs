@@ -56,7 +56,7 @@ public class ActivityController : Controller
         };
 
         var tickets = await _ticketService.GetAllAsync();
-        ViewBag.Tickets = tickets.Where(x => x.Status != TicketStatus.Closed);
+        ViewBag.Tickets = tickets.Where(x => x.Status != TicketStatus.Closed && x.Id == ticketId);
 
         return View(model);
     }
