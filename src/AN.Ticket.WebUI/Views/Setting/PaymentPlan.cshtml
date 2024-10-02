@@ -1,14 +1,16 @@
+@using AN.Ticket.Application.DTOs.PaymantPlan
 @model List<AN.Ticket.Application.DTOs.PaymantPlan.PaymantPlanDto>
 @{
     ViewData["Title"] = "Planos";
 }
+@await Html.PartialAsync("../Modals/_AddPaymentPlan", new PaymantPlanDto())
 
 <div class="container mt-5">
     <div class="card text-center" style="max-width: 80%; margin: auto;">
         <div class="card-header position-relative">
-    <div href="#" class="btn btn-primary btn-sm rounded position-absolute start-0" style="margin-left: 15px;">
+    <a data-bs-toggle="modal" data-bs-target="#planoPagamentoModal" class="btn btn-primary btn-sm rounded position-absolute start-0" style="margin-left: 15px;">
         Criar Plano
-    </div>
+    </a>
     <h3 class="mb-0 text-center">Lista de Planos</h3>
 </div>
 
