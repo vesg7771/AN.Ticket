@@ -1,0 +1,14 @@
+@model List<AN.Ticket.Application.DTOs.PaymantPlan.PaymantPlanDto>
+@{
+    ViewData["Title"] = "Planos";
+}
+<h1>Lista</h1>
+<ul>
+    @if (Model != null && Model.Any())
+        @foreach (var item in Model)
+        {
+            <li>@item.Description : @item.Value</li>
+        }
+    }
+
+</ul>

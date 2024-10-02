@@ -32,10 +32,17 @@ namespace AN.Ticket.Application.Services
             throw new NotImplementedException();
         }
 
-        public async Task<IEnumerable<PaymantPlanDto>> GetAllAsync()
+        public new async Task<IEnumerable<PaymantPlanDto>> GetAllAsync()
         {
             var listPaymantsPlan= await _paymantPlanRepositorie.GetAllAsync();
-            return (IEnumerable<PaymantPlanDto>)listPaymantsPlan;
+            
+            return listPaymantsPlan
+            .Select(plan => new PaymantPlanDto
+            {
+                Id = plan.Id,
+                Description = plan.Description,
+                Value = plan.Value
+            }).ToList();
         }
 
         public Task<PaymantPlanDto> GetGidAsync(Guid guid)

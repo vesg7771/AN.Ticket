@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using AN.Ticket.Application.DTOs.PaymantPlan;
+using AN.Ticket.Application.Interfaces;
+using AN.Ticket.Application.Services;
 using AN.Ticket.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -12,12 +15,15 @@ namespace AN.Ticket.WebUI.Controllers
     public class SettingController : Controller
     {
         private readonly ILogger<SettingController> _logger;
+        private readonly IPaymantPlanService _paymentPlanService;
 
 
         public SettingController(
-            ILogger<SettingController> logger
+            ILogger<SettingController> logger,
+            IPaymantPlanService paymentPlanService
         )
         {
+            _paymentPlanService = paymentPlanService;
             _logger = logger;
         }
 
@@ -25,21 +31,33 @@ namespace AN.Ticket.WebUI.Controllers
         {
             return View();
         }
-
-        public IActionResult IndexPaymantPlan()
+        [HttpGet]
+        public async Task<IActionResult> PaymentPlan()
         {
-            
-            List<PaymentPlan> listPayments = new List<PaymentPlan>(){
-                new PaymentPlan("ddd", 20),
-                new PaymentPlan("ddd", 40),
-                new PaymentPlan("dd", 50),
-            };
-            return View(listPayments);
+            try
+            {
+                var paymentPlans = await _paymentPlanService.GetAllAsync(); // Supondo que retorne List<PaymentPlan>
+
+                var paymentsPlanDTOs = paymentPlans.Select(plan => new PaymantPlanDto
+                {
+                    Id = plan.Id,
+                    Description = plan.Description,
+                    Value = plan.Value
+                }).ToList();
+
+                return View(paymentsPlanDTOs);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao acessar o método: {ex.Message}");
+                return StatusCode(500, $"Erro interno do servidor. {ex.Message}");
+            }
         }
-        public IActionResult CreatePaymentPlan(PaymentPlan paymentPlan){
+        public IActionResult CreatePaymentPlan(PaymentPlan paymentPlan)
+        {
             //TODO:Implementar cadastro
-            Console.WriteLine("Descrição:"+paymentPlan.Description);
-            Console.WriteLine("Valor:"+paymentPlan.Value);
+            Console.WriteLine("Descrição:" + paymentPlan.Description);
+            Console.WriteLine("Valor:" + paymentPlan.Value);
             return RedirectToAction("GetPaymentsPlans");
         }
 
