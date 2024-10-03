@@ -11,31 +11,58 @@ using AN.Ticket.Domain.Interfaces.Base;
 
 namespace AN.Ticket.Application.Services
 {
-    public class PaymantPlanService : Service<PaymantPlanDto, PaymentPlan>,IPaymantPlanService
+    public class PaymantPlanService : Service<PaymantPlanDto, PaymentPlan>, IPaymantPlanService
     {
         private readonly IPaymentPlanRepository _paymantPlanRepositorie;
+        private readonly IUnitOfWork _unitOfWork;
         public PaymantPlanService(
             IRepository<PaymentPlan> repository,
-            IPaymentPlanRepository paymantPlanRepositorie
+            IPaymentPlanRepository paymantPlanRepositorie,
+            IUnitOfWork unitOfWork
         )
-        :base(repository)
+        : base(repository)
         {
-            _paymantPlanRepositorie=paymantPlanRepositorie;
+            _paymantPlanRepositorie = paymantPlanRepositorie;
+            _unitOfWork = unitOfWork;
         }
-        public Task<bool> CreateAsync(PaymantPlanDto paymentPlan)
+        public async Task<bool> CreateAsync(PaymantPlanDto paymentPlanDto)
         {
-            throw new NotImplementedException();
+            try
+            {
+                PaymentPlan paymentPlan = new PaymentPlan(
+                description: paymentPlanDto.Description,
+                value: paymentPlanDto.Value
+            );
+                await _paymantPlanRepositorie.SaveAsync(paymentPlan);
+                await _unitOfWork.CommitAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+               throw;
+            }
+
         }
 
-        public Task<bool> DeleteAsync(Guid guid)
+        public async Task<bool> DeleteAsync(Guid guid)
         {
-            throw new NotImplementedException();
+            try
+            {
+                PaymentPlan paymantPlan = await _paymantPlanRepositorie.GetByIdAsync(guid);
+                _paymantPlanRepositorie.Delete(paymantPlan);
+                await _unitOfWork.CommitAsync();
+                 return true;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public new async Task<IEnumerable<PaymantPlanDto>> GetAllAsync()
         {
-            var listPaymantsPlan= await _paymantPlanRepositorie.GetAllAsync();
-            
+            var listPaymantsPlan = await _paymantPlanRepositorie.GetAllAsync();
+
             return listPaymantsPlan
             .Select(plan => new PaymantPlanDto
             {

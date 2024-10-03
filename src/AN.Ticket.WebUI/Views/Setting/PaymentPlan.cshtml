@@ -35,7 +35,7 @@
                                 <a href="@(Url.Action("Edit", "Setting", new { id = item.Id }))" class="btn btn-primary btn-sm rounded me-2">
                                     <i class="bi bi-pencil" style="font-size: 18px;"></i> <!-- Ícone de Editar -->
                                 </a>
-                                <a href="@(Url.Action("Delete", "Setting", new { id = item.Id }))" class="btn btn-danger btn-sm rounded me-2">
+                                <a asp-route-id="@item.Id" asp-controller="Setting" asp-action="DeletePaymentPlan" class="btn btn-danger btn-sm rounded me-2">
                                     <i class="bi bi-trash" style="font-size: 18px;"></i> <!-- Ícone de Remover -->
                                 </a>
                             </div>

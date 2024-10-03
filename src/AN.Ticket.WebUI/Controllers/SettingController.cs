@@ -8,6 +8,7 @@ using AN.Ticket.Application.Interfaces;
 using AN.Ticket.Application.Services;
 using AN.Ticket.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Logging;
 
 namespace AN.Ticket.WebUI.Controllers
@@ -26,7 +27,6 @@ namespace AN.Ticket.WebUI.Controllers
             _paymentPlanService = paymentPlanService;
             _logger = logger;
         }
-
         public IActionResult Index()
         {
             return View();
@@ -53,12 +53,54 @@ namespace AN.Ticket.WebUI.Controllers
                 return StatusCode(500, $"Erro interno do servidor. {ex.Message}");
             }
         }
-        public IActionResult CreatePaymentPlan(PaymentPlan paymentPlan)
+
+        [HttpPost]
+        public async Task<IActionResult> CreatePaymentPlan(PaymantPlanDto paymentPlanDto)
         {
-            //TODO:Implementar cadastro
-            Console.WriteLine("Descrição:" + paymentPlan.Description);
-            Console.WriteLine("Valor:" + paymentPlan.Value);
-            return RedirectToAction("GetPaymentsPlans");
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    await _paymentPlanService.CreateAsync(paymentPlanDto);
+                    TempData["SuccessMessage"] = "Plano de pagamento criado com sucesso!";
+                }
+                catch (System.Exception error)
+                {
+                    TempData["ErrorMessage"] = $"Ocorreu um erro ao criar o plano de pagamento: {error.Message}"; 
+                }
+
+            }else{
+                TempData["ErrorMessage"] = $"Ocorreu um erro ao tentar criar o plano de pagamento: Dados inválidos";
+            }
+           
+            return RedirectToAction("PaymentPlan");
+
+        }
+
+        //[HttpDelete]
+        public async Task<IActionResult> DeletePaymentPlan(Guid id)
+        {
+            PaymentPlan paymantPlan = await _paymentPlanService.GetByIdAsync(id);
+
+            if (paymantPlan != null)
+            {
+                try
+                {
+                    bool suces = await _paymentPlanService.DeleteAsync(paymantPlan.Id);
+                    TempData["SuccessMessage"] = "Plano de pagamento deletado com sucesso!";
+                }
+                catch (System.Exception error)
+                {
+                    TempData["ErrorMessage"] = $"Ocorreu um erro ao deletar o plano de pagamento: {error.Message}";
+                }
+            }
+            else
+            {
+                TempData["ErrorMessage"] = $"Ocorreu um erro: Plano de pagamento não encontrado";
+            }
+
+            return RedirectToAction("PaymentPlan");
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
