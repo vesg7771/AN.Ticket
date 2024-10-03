@@ -10,7 +10,7 @@ namespace AN.Ticket.Application.Interfaces
 {
     public interface IPaymantPlanService: IService<PaymantPlanDto, PaymentPlan>
     {
-        Task<IEnumerable<PaymantPlanDto>> GetAllAsync();
+        new Task<IEnumerable<PaymantPlanDto>> GetAllAsync();
         Task<PaymantPlanDto>GetGidAsync(Guid guid);
         Task<bool> CreateAsync(PaymantPlanDto paymentPlan);
         Task<bool> DeleteAsync(Guid guid);

@@ -53,7 +53,19 @@ namespace AN.Ticket.WebUI.Controllers
                 return StatusCode(500, $"Erro interno do servidor. {ex.Message}");
             }
         }
-
+        [HttpPost]
+         public async Task<IActionResult> EditPaymentPlan(PaymantPlanDto paymentPlanDto){
+            try
+            {
+               await _paymentPlanService.UpdateAsync(paymentPlanDto);
+            }
+            catch (System.Exception)
+            {
+                
+                throw;
+            }
+            return RedirectToAction("PaymentPlan");
+         }
         [HttpPost]
         public async Task<IActionResult> CreatePaymentPlan(PaymantPlanDto paymentPlanDto)
         {
