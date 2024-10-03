@@ -1,29 +1,4 @@
 @model AN.Ticket.Application.DTOs.PaymantPlan.PaymantPlanDto
-@* <div class="modal fade" id="editPlanoPagamentoModal" tabindex="-1" aria-labelledby="editPlanoPagamentoModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editPlanoPagamentoModalLabel">Editar Plano de Pagamento</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form method="post" action="/Setting/EditPaymentPlan">
-                    <input type="hidden" name="Id" value="@Model.Id" />
-                    <div class="mb-3">
-                        <label for="description" class="form-label">Descrição</label>
-                        <input type="text" class="form-control" id="description" name="Description" value="@Model.Description" />
-                    </div>
-                    <div class="mb-3">
-                        <label for="value" class="form-label">Valor</label>
-                        <input type="text" class="form-control" id="value" name="Value" value="@Model.Value" />
-                    </div>
-                    <button type="submit" class="btn btn-primary">Salvar</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div> *@
-<!-- Modal -->
 <div class="modal fade" id="editPlanoPagamentoModal" tabindex="-1" aria-labelledby="editPlanoPagamentoModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -32,64 +7,26 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-
                 <!-- Formulário para atualização de plano de pagamento -->
                 <form id="formPlanoPagamento" asp-controller="Setting" asp-action="EditPaymentPlan" method="post">
                     @Html.AntiForgeryToken() <!-- Adicione isso para proteção contra CSRF -->
                     
-                    <input type="hidden" asp-for="Id" name="Id"  />
+                    <input type="hidden" asp-for="Id" name="Id" />
 
                     <div class="mb-3">
-                        <label asp-for="Value" class="form-label">Valor</label>
+                        <label asp-for="Value" class="form-label" style="text-align: left; display: block; font-weight: bold;">Valor</label>
                         <input asp-for="Value" type="number" class="form-control" id="valor" placeholder="Insira o valor do plano" required />
                     </div>
                     <div class="mb-3">
-                        <label asp-for="Description" class="form-label">Descrição</label>
-                        <input asp-for="Description"   type="text" class="form-control" id="descricao" placeholder="Insira a descrição do plano" required />
+                        <label asp-for="Description" class="form-label" style="text-align: left; display: block; font-weight: bold;">Descrição</label>
+                        <input asp-for="Description" type="text" class="form-control" id="descricao" placeholder="Insira a descrição do plano" required />
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Voltar</button>
                         <button type="submit" class="btn btn-primary">Atualizar</button>
                     </div>
                 </form>
-
             </div>
         </div>
     </div>
 </div>
-
- 
-@* <!-- Modal -->
-<div class="modal fade" id="editPlanoPagamentoModal" tabindex="-1" aria-labelledby="editPlanoPagamentoModalLabel"
-  aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="editPlanoPagamentoModalLabel">Atualizar Plano de Pagamento</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-
-        <!-- Formulário para cadastro de plano de pagamento -->
-        <form id="formPlanoPagamento" asp-controller="Setting" asp-action="EditPaymentPlan" method="post">
-          <input type="hidden" name="Id" asp-value="@Model.Id" />
-          <div class="mb-3">
-            <label asp-for="Value" class="form-label">Valor</label>
-            <input asp-value="@Model.Value" asp-for="Value" type="text" class="form-control" id="valor"
-              placeholder="Insira o valor do plano" required>
-          </div>
-          <div class="mb-3">
-            <label asp-for="Description" class="form-label">Descrição</label>
-            <input asp-value="@Model.Description" type="text" asp-for="Description" class="form-control" id="descricao"
-              y placeholder="Insira a descrição do plano" required>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Voltar</button>
-            <button type="submit" class="btn btn-primary" form="formPlanoPagamento">Atualizar</button>
-          </div>
-        </form>
-
-      </div>
-    </div>
-  </div>
-</div> *@

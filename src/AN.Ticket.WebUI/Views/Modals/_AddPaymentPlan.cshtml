@@ -13,16 +13,15 @@
         <!-- Formulário para cadastro de plano de pagamento -->
         <form id="formPlanoPagamento" asp-controller="Setting" asp-action="CreatePaymentPlan" method="post">
           <div class="mb-3">
-            <label asp-for="Value" class="form-label">Valor</label>
+            <label asp-for="Value" class="form-label" style="font-weight: bold;">Valor</label>
             <input asp-for="Value" type="text" class="form-control" id="valor" placeholder="Insira o valor do plano" required>
           </div>
           <div class="mb-3">
-            <label asp-for="Description" class="form-label">Descrição</label>
-            <input type="text" asp-for="Description" class="form-control" id="descricao"y placeholder="Insira a descrição do plano" required>
-            @* <textarea asp-for="Description" class="form-control" id="descricao" rows="3" placeholder="Insira a descrição do plano" required></textarea> *@
+            <label asp-for="Description" class="form-label" style="font-weight: bold;">Descrição</label>
+            @* <input type="text" asp-for="Description" class="form-control" id="descricao"y placeholder="Insira a descrição do plano" required> *@
+            <textarea asp-for="Description" class="form-control" id="descricao" rows="3" placeholder="Insira a descrição do plano" required></textarea>
           </div>
         </form>
-
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Voltar</button>

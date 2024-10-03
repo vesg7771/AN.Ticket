@@ -31,6 +31,7 @@ namespace AN.Ticket.WebUI.Controllers
         {
             return View();
         }
+
         [HttpGet]
         public async Task<IActionResult> PaymentPlan()
         {
@@ -53,6 +54,7 @@ namespace AN.Ticket.WebUI.Controllers
                 return StatusCode(500, $"Erro interno do servidor. {ex.Message}");
             }
         }
+
         [HttpPost]
          public async Task<IActionResult> EditPaymentPlan(PaymantPlanDto paymentPlanDto){
 
@@ -73,6 +75,7 @@ namespace AN.Ticket.WebUI.Controllers
             }
             return RedirectToAction("PaymentPlan");
          }
+
         [HttpPost]
         public async Task<IActionResult> CreatePaymentPlan(PaymantPlanDto paymentPlanDto)
         {
@@ -102,7 +105,7 @@ namespace AN.Ticket.WebUI.Controllers
         {
             PaymentPlan paymantPlan = await _paymentPlanService.GetByIdAsync(id);
 
-            if (paymantPlan != null)
+            if (paymantPlan.Id != Guid.Empty)
             {
                 try
                 {

@@ -80,9 +80,10 @@ namespace AN.Ticket.Application.Services
         public async Task<bool> UpdateAsync(PaymantPlanDto paymentPlanDto)
         {
             PaymentPlan paymentPlan = await _paymantPlanRepositorie.GetByIdAsync(paymentPlanDto.Id);
-             _paymantPlanRepositorie.Update(paymentPlan);
+            paymentPlan.UpdateDescription(paymentPlanDto.Description);
+            paymentPlan.UpdateValue(paymentPlanDto.Value);
+            _paymantPlanRepositorie.Update(paymentPlan);
             await _unitOfWork.CommitAsync();
-
             return true;
         }
     }
