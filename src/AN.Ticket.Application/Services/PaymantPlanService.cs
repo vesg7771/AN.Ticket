@@ -30,16 +30,16 @@ namespace AN.Ticket.Application.Services
             try
             {
                 PaymentPlan paymentPlan = new PaymentPlan(
-                description: paymentPlanDto.Description,
-                value: paymentPlanDto.Value
-            );
+                    description: paymentPlanDto.Description,
+                    value: paymentPlanDto.Value
+                );
                 await _paymantPlanRepositorie.SaveAsync(paymentPlan);
                 await _unitOfWork.CommitAsync();
                 return true;
             }
             catch (Exception)
             {
-               throw;
+                throw;
             }
 
         }
@@ -51,7 +51,7 @@ namespace AN.Ticket.Application.Services
                 PaymentPlan paymantPlan = await _paymantPlanRepositorie.GetByIdAsync(guid);
                 _paymantPlanRepositorie.Delete(paymantPlan);
                 await _unitOfWork.CommitAsync();
-                 return true;
+                return true;
             }
             catch (Exception)
             {
@@ -77,9 +77,13 @@ namespace AN.Ticket.Application.Services
             throw new NotImplementedException();
         }
 
-        public Task<bool> UpdateAsync(PaymantPlanDto paymentPlan)
+        public async Task<bool> UpdateAsync(PaymantPlanDto paymentPlanDto)
         {
-            throw new NotImplementedException();
+            PaymentPlan paymentPlan = await _paymantPlanRepositorie.GetByIdAsync(paymentPlanDto.Id);
+             _paymantPlanRepositorie.Update(paymentPlan);
+            await _unitOfWork.CommitAsync();
+
+            return true;
         }
     }
 }

@@ -55,14 +55,21 @@ namespace AN.Ticket.WebUI.Controllers
         }
         [HttpPost]
          public async Task<IActionResult> EditPaymentPlan(PaymantPlanDto paymentPlanDto){
-            try
+
+             if (ModelState.IsValid)
             {
-               await _paymentPlanService.UpdateAsync(paymentPlanDto);
-            }
-            catch (System.Exception)
-            {
-                
-                throw;
+                try
+                {
+                    await _paymentPlanService.UpdateAsync(paymentPlanDto);
+                    TempData["SuccessMessage"] = "Plano de pagamento criado com sucesso!";
+                }
+                catch (System.Exception error)
+                {
+                    TempData["ErrorMessage"] = $"Ocorreu um erro ao editar o plano de pagamento: {error.Message}"; 
+                }
+
+            }else{
+                TempData["ErrorMessage"] = $"Ocorreu um erro ao tentar editar o plano de pagamento: Dados inválidos";
             }
             return RedirectToAction("PaymentPlan");
          }
