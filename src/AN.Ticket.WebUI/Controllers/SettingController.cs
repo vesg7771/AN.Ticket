@@ -50,7 +50,6 @@ namespace AN.Ticket.WebUI.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Erro ao acessar o método: {ex.Message}");
                 return StatusCode(500, $"Erro interno do servidor. {ex.Message}");
             }
         }
@@ -100,7 +99,6 @@ namespace AN.Ticket.WebUI.Controllers
 
         }
 
-        //[HttpDelete]
         public async Task<IActionResult> DeletePaymentPlan(Guid id)
         {
             PaymentPlan paymantPlan = await _paymentPlanService.GetByIdAsync(id);

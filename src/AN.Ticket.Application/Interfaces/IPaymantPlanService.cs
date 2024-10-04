@@ -11,7 +11,6 @@ namespace AN.Ticket.Application.Interfaces
     public interface IPaymantPlanService: IService<PaymantPlanDto, PaymentPlan>
     {
         new Task<IEnumerable<PaymantPlanDto>> GetAllAsync();
-        Task<PaymantPlanDto>GetGidAsync(Guid guid);
         Task<bool> CreateAsync(PaymantPlanDto paymentPlan);
         Task<bool> DeleteAsync(Guid guid);
         Task<bool> UpdateAsync(PaymantPlanDto paymentPlan);

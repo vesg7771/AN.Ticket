@@ -72,12 +72,7 @@ namespace AN.Ticket.Application.Services
             }).ToList();
         }
 
-        public Task<PaymantPlanDto> GetGidAsync(Guid guid)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<bool> UpdateAsync(PaymantPlanDto paymentPlanDto)
+            public async Task<bool> UpdateAsync(PaymantPlanDto paymentPlanDto)
         {
             PaymentPlan paymentPlan = await _paymantPlanRepositorie.GetByIdAsync(paymentPlanDto.Id);
             paymentPlan.UpdateDescription(paymentPlanDto.Description);
