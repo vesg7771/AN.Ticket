@@ -1,17 +1,22 @@
 ﻿@using AN.Ticket.Domain.Enums
+@using Newtonsoft.Json
 @model AN.Ticket.Application.DTOs.Home.HomeDto
 
 @{
     ViewData["Title"] = "Dashboard";
 
-    var currentDate = DateTime.Now;
-    var startOfWeek = currentDate.AddDays(-(int)currentDate.DayOfWeek + (int)DayOfWeek.Monday);
-    var daysOfWeek = Enumerable.Range(0, 7).Select(i => startOfWeek.AddDays(i).ToString("dddd")).ToList();
+    var selectedStartDateValue = ViewBag.SelectedStartDate != null
+        ? ((DateTime)ViewBag.SelectedStartDate).ToString("yyyy-MM-dd")
+        : ((DateTime)ViewBag.FilterStartDate).ToString("yyyy-MM-dd");
 
-    var ticketsByDay = Model.TicketsByDay.Select(t => t.Count).ToList();
-    var ticketsByDayJson = System.Text.Json.JsonSerializer.Serialize(ticketsByDay);
-    var daysOfWeekJson = System.Text.Json.JsonSerializer.Serialize(daysOfWeek);
-    var selectedDateValue = ViewBag.SelectedDate != null ? ((DateTime)ViewBag.SelectedDate).ToString("yyyy-MM-dd") : DateTime.Now.ToString("yyyy-MM-dd");
+    var selectedEndDateValue = ViewBag.SelectedEndDate != null
+        ? ((DateTime)ViewBag.SelectedEndDate).ToString("yyyy-MM-dd")
+        : ((DateTime)ViewBag.FilterEndDate).ToString("yyyy-MM-dd");
+
+    var daysRange = Model.TicketsByDay.Select(t => t.Date.ToString("dd MMM")).ToList();
+    var daysOfWeekJson = JsonConvert.SerializeObject(daysRange);
+    var ticketsByDayJson = JsonConvert.SerializeObject(Model.TicketsByDay);
+    var showInProgress = ViewBag.ShowInProgress ?? false;
 }
 
 <div class="container mt-5">
@@ -60,14 +65,18 @@
         <div class="col-md-9">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h3>Tickets</h3>
-                <input type="date" id="selectedDate" class="form-control"
-                       value="@selectedDateValue"
-                       style="width: 200px;"
-                       onchange="filterByDate()" />
+                <div class="d-flex flex-column gap-2">
+                    <label for="dateRange" class="form-label m-0">Filtrar por Intervalo de Datas:</label>
+                    <div id="dateRange" class="d-flex gap-2">
+                        <input type="date" id="startDate" class="form-control" value="@selectedStartDateValue" />
+                        <input type="date" id="endDate" class="form-control" value="@selectedEndDateValue" />
+                        <button class="btn btn-primary" onclick="filterByDate()">Filtrar</button>
+                    </div>
+                </div>
             </div>
 
             <div class="mb-4">
-                <h5>Os Tickets em andamento</h5>
+                <h5 id="ticketsTitle">@((bool)showInProgress ? "Os Tickets em andamento" : "Todos os tickets")</h5>
                 <label class="form-switch">
                     <input type="checkbox" id="showInProgress" class="form-check-input"
                     @(ViewBag.ShowInProgress ? "checked" : "") onchange="filterByDate()" />
@@ -78,57 +87,98 @@
 
             <div class="border p-3 bg-light rounded rounded-1">
                 <span class="badge @(Model.HasOverdueTickets ? "bg-danger" : "bg-success") text">ANÁLISE ATUAL</span>
-                <h5 class="mt-3">
-                    @(Model.HasOverdueTickets ? "Atenção! Há tickets vencidos e não fechados." : "Excelente progresso nos tickets!")
-                </h5>
-                <p>
-                    @(Model.HasOverdueTickets ?
-                        "Há tickets que já passaram da data de vencimento e ainda não foram fechados. Verifique com urgência!" :
-                        "Com base nos dados atuais, a equipe está fazendo um progresso impressionante no processamento dos tickets. Continue com esse ótimo trabalho!")
-                </p>
-                <a href="#" class="text-decoration-none">Clique aqui para ver detalhes de cada ticket.</a>
+
+                <h5 class="mt-3">@Model.GetAnalysis()</h5>
+
+                <div class="mt-4">
+                    <h6 class="fw-bold">Sugestões de Melhoria:</h6>
+                    @if (Model.GetSuggestions().Any())
+                    {
+                        @foreach (var suggestion in Model.GetSuggestions())
+                        {
+                            <div class="alert alert-info d-flex align-items-center mb-2" role="alert">
+                                <i class="bi bi-lightbulb me-2" style="font-size: 1.2rem;"></i>
+                                <span>@suggestion</span>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted fst-italic">Nenhuma sugestão disponível no momento. Tudo parece estar indo bem!</p>
+                    }
+                </div>
+
+                <a asp-controller="Ticket" asp-action="UserTickets" class="text-decoration-none">Clique aqui para ver detalhes de cada ticket.</a>
             </div>
         </div>
     </div>
 
     <div class="row mt-5">
         <div class="col-12">
-            <div class="border p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
                 <h3>Atividade</h3>
+                <div class="d-flex gap-2 align-items-center">
+                    <label for="priorityFilter" class="form-label mb-0">Filtrar por Prioridade:</label>
+                    <select id="priorityFilter" class="form-select" onchange="filterActivities()">
+                        <option value="All">Todas</option>
+                        <option value="High">Alta</option>
+                        <option value="Medium">Média</option>
+                        <option value="Low">Baixa</option>
+                    </select>
+
+                    <label for="typeFilter" class="form-label mb-0 ms-3" style="min-width: 72px">Filtrar por Tipo:</label>
+                    <select id="typeFilter" class="form-select" onchange="filterActivities()">
+                        <option value="All">Todos</option>
+                        <option value="Event">Evento</option>
+                        <option value="Task">Tarefa</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="border p-4 bg-white">
                 <p>Atividades recentes em todos os tickets</p>
 
-                <ul class="list-unstyled">
-                    @foreach (var ticket in Model.Tickets)
-                    {
-                        foreach (var activity in ticket.Activities)
+                @if (Model.Tickets.Any(t => t.Activities != null && t.Activities.Any()))
+                {
+                    <ul id="activityList" class="list-unstyled">
+                        @foreach (var ticket in Model.Tickets)
                         {
-                            <li class="mb-4">
-                                <div class="d-flex align-items-start">
-                                    <div class="me-3">
-                                        @if (activity.Type == AN.Ticket.Domain.Enums.ActivityType.Event)
-                                        {
-                                            <i class="bi bi-circle-fill text-primary" style="font-size: 1.5rem;"></i>
-                                        }
-                                        else if (activity.Type == AN.Ticket.Domain.Enums.ActivityType.Task)
-                                        {
-                                            <i class="bi bi-circle-fill text-info" style="font-size: 1.5rem;"></i>
-                                        }
-                                        else
-                                        {
-                                            <i class="bi bi-circle-fill text-warning" style="font-size: 1.5rem;"></i>
-                                        }
+                            foreach (var activity in ticket.Activities.OrderByDescending(a => a.Priority))
+                            {
+                                <li class="mb-4 activity-item" data-priority="@activity.Priority.ToString().ToLower()" data-type="@activity.Type.ToString().ToLower()">
+                                    <div class="d-flex align-items-start">
+                                        <div class="me-3">
+                                            @if (activity.Type == AN.Ticket.Domain.Enums.ActivityType.Event)
+                                            {
+                                                <i class="bi bi-circle-fill text-primary" style="font-size: 1.5rem;"></i>
+                                            }
+                                            else if (activity.Type == AN.Ticket.Domain.Enums.ActivityType.Task)
+                                            {
+                                                <i class="bi bi-circle-fill text-info" style="font-size: 1.5rem;"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="bi bi-circle-fill text-warning" style="font-size: 1.5rem;"></i>
+                                            }
+                                        </div>
+                                        <div>
+                                            <small class="text-muted">@activity.ScheduledDate.ToString("dd MMM, yyyy | hh:mm tt")</small>
+                                            <h5 class="mb-1">@activity.Subject</h5>
+                                            <p class="text-muted mb-0"><strong>@GetPriorityTranslation(activity.Priority)</strong></p>
+                                            <p class="text-muted mb-0">Por <strong>@(activity.Contact?.FullName ?? "Desconhecido")</strong></p>
+                                            <p class="mb-0">@activity.Description</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <small class="text-muted">@activity.ScheduledDate.ToString("dd MMM, yyyy | hh:mm tt")</small>
-                                        <h5 class="mb-1">@activity.Subject</h5>
-                                        <p class="text-muted mb-0">Por <strong>@(activity.Contact?.FullName ?? "Desconhecido")</strong></p>
-                                        <p class="mb-0">@activity.Description</p>
-                                    </div>
-                                </div>
-                            </li>
+                                </li>
+                            }
                         }
-                    }
-                </ul>
+                    </ul>
+
+                }
+                else
+                {
+                    <p class="text-muted fst-italic">Nenhuma atividade encontrada.</p>
+                }
             </div>
         </div>
     </div>
@@ -137,31 +187,80 @@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        const ctx = document.getElementById('progressChart').getContext('2d');
-        const ticketsByDay = @Html.Raw(ticketsByDayJson);
         const daysOfWeek = @Html.Raw(daysOfWeekJson);
-        const chartLabel = showInProgress ? 'Tickets em andamento nesta semana' : 'Todos os tickets desta semana';
+        const ticketsByDay = @Html.Raw(ticketsByDayJson);
+
+        const ticketsOpenByDay = [];
+        const ticketsOnholdByDay = [];
+        const ticketsInProgressByDay = [];
+        const ticketsClosedByDay = [];
+
+        ticketsByDay.forEach(function (ticket) {
+            ticketsOpenByDay.push(ticket.OpenCount);
+            ticketsOnholdByDay.push(ticket.OnholdCount);
+            ticketsInProgressByDay.push(ticket.InProgressCount);
+            ticketsClosedByDay.push(ticket.ClosedCount);
+        });
+
+        const ctx = document.getElementById('progressChart').getContext('2d');
         const progressChart = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: daysOfWeek,
-                datasets: [{
-                    label: chartLabel,
-                    data: ticketsByDay,
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderWidth: 2,
-                    tension: 0.3,
-                    fill: true
-                }]
+                datasets: [
+                    {
+                        label: 'Tickets Abertos',
+                        data: ticketsOpenByDay,
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true
+                    },
+                    {
+                        label: 'Tickets em Espera',
+                        data: ticketsOnholdByDay,
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true
+                    },
+                    {
+                        label: 'Tickets em Progresso',
+                        data: ticketsInProgressByDay,
+                        borderColor: 'rgba(255, 206, 86, 1)',
+                        backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true
+                    },
+                    {
+                        label: 'Tickets Fechados',
+                        data: ticketsClosedByDay,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true
+                    }
+                ]
             },
             options: {
+                responsive: true,
                 scales: {
                     x: {
-                        beginAtZero: true
+                        title: {
+                            display: true,
+                            text: 'Dias da Semana'
+                        }
                     },
                     y: {
-                        beginAtZero: true
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Número de Tickets'
+                        }
                     }
                 },
                 plugins: {
@@ -171,16 +270,78 @@
                                 return `${context.dataset.label}: ${context.raw} tickets`;
                             }
                         }
+                    },
+                    legend: {
+                        display: true,
+                        position: 'top'
                     }
                 }
             }
         });
 
         function filterByDate() {
-            const selectedDate = document.getElementById('selectedDate').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
             const showInProgress = document.getElementById('showInProgress').checked;
 
-            window.location.href = `/Home/Index?selectedDate=${selectedDate}&showInProgress=${showInProgress}`;
+            window.location.href = `/Home/Index?startDate=${startDate}&endDate=${endDate}&showInProgress=${showInProgress}`;
+        }
+
+        function toggleInProgress() {
+            const showInProgress = document.getElementById('showInProgress').checked;
+            const ticketsTitle = document.getElementById('ticketsTitle');
+
+            ticketsTitle.textContent = showInProgress ? "Os Tickets em andamento" : "Todos os tickets";
+        }
+
+        function filterActivities() {
+            const selectedPriority = document.getElementById("priorityFilter").value.toLowerCase();
+            const selectedType = document.getElementById("typeFilter").value.toLowerCase();
+            const activities = document.querySelectorAll(".activity-item");
+            let visibleActivitiesCount = 0;
+
+            activities.forEach(activity => {
+                const activityPriority = activity.getAttribute("data-priority").toLowerCase();
+                const activityType = activity.getAttribute("data-type").toLowerCase();
+
+                const matchesPriority = selectedPriority === "all" || activityPriority === selectedPriority;
+                const matchesType = selectedType === "all" || activityType === selectedType;
+
+                if (matchesPriority && matchesType) {
+                    activity.style.display = "block";
+                    visibleActivitiesCount++;
+                } else {
+                    activity.style.display = "none";
+                }
+            });
+
+            const noActivitiesMessage = document.getElementById("noActivitiesMessage");
+            if (visibleActivitiesCount === 0) {
+                if (!noActivitiesMessage) {
+                    const messageElement = document.createElement("p");
+                    messageElement.id = "noActivitiesMessage";
+                    messageElement.className = "text-muted fst-italic";
+                    messageElement.textContent = "Nenhuma atividade encontrada.";
+                    document.getElementById("activityList").appendChild(messageElement);
+                }
+            } else {
+                if (noActivitiesMessage) {
+                    noActivitiesMessage.remove();
+                }
+            }
         }
     </script>
+}
+
+@functions {
+    private string GetPriorityTranslation(ActivityPriority priority)
+    {
+        return priority switch
+        {
+            ActivityPriority.High => "Alta",
+            ActivityPriority.Medium => "Média",
+            ActivityPriority.Low => "Baixa",
+            _ => "Desconhecida"
+        };
+    }
 }

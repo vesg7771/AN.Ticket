@@ -12,35 +12,43 @@ public class HomeService : IHomeService
         _ticketService = ticketService;
     }
 
-    public async Task<HomeDto> GetHomeData(Guid userId, DateTime startOfWeek, DateTime endOfWeek, bool showInProgress)
+    public async Task<HomeDto> GetHomeData(Guid userId, DateTime startDate, DateTime endDate, bool showInProgress)
     {
         var tickets = await _ticketService.GetTicketWithDetailsByUserAsync(userId);
 
         if (tickets is not null)
         {
-            var filteredTickets = tickets.Where(t => t.CreatedAt >= startOfWeek && t.CreatedAt <= endOfWeek);
+            var filteredTickets = tickets.Where(t => t.CreatedAt.Date >= startDate && t.CreatedAt.Date <= endDate);
 
             if (showInProgress)
             {
                 filteredTickets = filteredTickets.Where(t => t.Status == TicketStatus.InProgress);
             }
 
-            var ticketsByDay = Enumerable.Range(0, 7)
-                .Select(i => new TicketsByDayDto
+            var daysRange = Enumerable.Range(0, (endDate - startDate).Days + 1)
+                .Select(i => startDate.AddDays(i)).ToList();
+
+            var ticketsByDay = daysRange
+                .Select(date => new TicketsByDayDto
                 {
-                    Date = startOfWeek.AddDays(i),
-                    Count = filteredTickets.Count(t => t.CreatedAt.Date == startOfWeek.AddDays(i).Date)
+                    Date = date,
+                    OpenCount = filteredTickets.Count(t => t.Status == TicketStatus.Open && t.CreatedAt.Date == date.Date),
+                    OnholdCount = filteredTickets.Count(t => t.Status == TicketStatus.Onhold && t.CreatedAt.Date == date.Date),
+                    InProgressCount = filteredTickets.Count(t => t.Status == TicketStatus.InProgress && t.CreatedAt.Date == date.Date),
+                    ClosedCount = filteredTickets.Count(t => t.Status == TicketStatus.Closed && t.CreatedAt.Date == date.Date)
                 })
                 .ToList();
 
             var homeData = new HomeDto
             {
                 QtyOfTicketsOnhold = filteredTickets.Count(t => t.Status == TicketStatus.Onhold),
+                QtyOfTicketsOpen = filteredTickets.Count(t => t.Status == TicketStatus.Open),
+                QtyOfTicketsInProgress = filteredTickets.Count(t => t.Status == TicketStatus.InProgress),
+                QtyOfTicketsClosed = filteredTickets.Count(t => t.Status == TicketStatus.Closed),
                 QtyOfContactsAssociation = filteredTickets.Select(t => t.ContactName).Distinct().Count(),
                 QtyOfAvaliations = filteredTickets.Count(t => t.SatisfactionRating != null),
-                QtyOfTicketsClosed = filteredTickets.Count(t => t.Status == TicketStatus.Closed),
                 Tickets = filteredTickets.ToList(),
-                TicketsByDay = ticketsByDay.Cast<dynamic>().ToList()
+                TicketsByDay = ticketsByDay
             };
 
             return homeData;
@@ -49,9 +57,13 @@ public class HomeService : IHomeService
         return new HomeDto();
     }
 
+
     public class TicketsByDayDto
     {
         public DateTime Date { get; set; }
-        public int Count { get; set; }
+        public int OpenCount { get; set; }
+        public int OnholdCount { get; set; }
+        public int InProgressCount { get; set; }
+        public int ClosedCount { get; set; }
     }
 }

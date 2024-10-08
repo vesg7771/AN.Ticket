@@ -26,19 +26,18 @@ public class HomeController : Controller
         _homeService = homeService;
     }
 
-    public async Task<IActionResult> Index(DateTime? selectedDate, bool showInProgress = true)
+    public async Task<IActionResult> Index(DateTime? startDate, DateTime? endDate, bool showInProgress = false)
     {
         var userId = await GetCurrentUserId();
 
-        DateTime filterDate = selectedDate ?? DateTime.Now;
+        DateTime filterStartDate = startDate ?? DateTime.Now;
+        DateTime filterEndDate = endDate ?? filterStartDate.AddDays(7);
 
-        var startOfWeek = filterDate.AddDays(-(int)filterDate.DayOfWeek + (int)DayOfWeek.Monday);
-        var endOfWeek = startOfWeek.AddDays(6);
-
-        ViewBag.SelectedDate = filterDate;
+        ViewBag.SelectedStartDate = filterStartDate;
+        ViewBag.SelectedEndDate = filterEndDate;
         ViewBag.ShowInProgress = showInProgress;
 
-        var homeData = await _homeService.GetHomeData(userId, startOfWeek, endOfWeek, showInProgress);
+        var homeData = await _homeService.GetHomeData(userId, filterStartDate, filterEndDate, showInProgress);
 
         return View(homeData);
     }
