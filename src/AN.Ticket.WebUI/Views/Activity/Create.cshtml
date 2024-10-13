@@ -70,13 +70,30 @@
                             <span asp-validation-for="Priority" class="text-danger"></span>
                         </div>
                         <div class="mb-3">
+                            <label asp-for="Status" class="form-label">Status</label>
+                            <select asp-for="Status" class="form-select">
+                                <option value="0">Aberto</option>
+                                <option value="1">Fechado</option>
+                            </select>
+                            <span asp-validation-for="Status" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
                             <label asp-for="TicketId" class="form-label">Ticket</label>
                             <select asp-for="TicketId" class="form-select" id="ticketDropdown">
                                 <option value="">Nenhum Ticket Associado</option>
+
                                 @foreach (var ticket in ViewBag.Tickets)
                                 {
-                                    <option value="@ticket.Id" data-ticket-id="@ticket.Id">@ticket.Subject</option>
+                                    if (ticket.Id == Model.TicketId)
+                                    {
+                                        <option value="@ticket.Id" selected>@ticket.Subject</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@ticket.Id">@ticket.Subject</option>
+                                    }
                                 }
+
                             </select>
                             <span asp-validation-for="TicketId" class="text-danger"></span>
                         </div>

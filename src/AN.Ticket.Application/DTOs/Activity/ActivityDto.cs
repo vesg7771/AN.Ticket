@@ -35,6 +35,10 @@ public class ActivityDto
     [Required(ErrorMessage = "O campo Prioridade é obrigatório.")]
     public ActivityPriority Priority { get; set; }
 
+    [Display(Name = "Status")]
+    [Required(ErrorMessage = "O campo Status é obrigatório.")]
+    public ActivityStatus Status { get; set; }
+
     public Guid? ContactId { get; set; }
 
     [Display(Name = "Contato")]
