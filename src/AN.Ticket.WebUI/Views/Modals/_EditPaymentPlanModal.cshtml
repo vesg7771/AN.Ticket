@@ -1,0 +1,32 @@
+@model AN.Ticket.Application.DTOs.PaymantPlan.PaymantPlanDto
+<div class="modal fade" id="editPlanoPagamentoModal" tabindex="-1" aria-labelledby="editPlanoPagamentoModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editPlanoPagamentoModalLabel">Atualizar Plano de Pagamento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Formulário para atualização de plano de pagamento -->
+                <form id="formPlanoPagamento" asp-controller="Setting" asp-action="EditPaymentPlan" method="post">
+                    @Html.AntiForgeryToken() <!-- Adicione isso para proteção contra CSRF -->
+                    
+                    <input type="hidden" asp-for="Id" name="Id" />
+
+                    <div class="mb-3">
+                        <label asp-for="Value" class="form-label" style="text-align: left; display: block; font-weight: bold;">Valor</label>
+                        <input asp-for="Value" type="number" class="form-control" id="valor" placeholder="Insira o valor do plano" required />
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label" style="text-align: left; display: block; font-weight: bold;">Descrição</label>
+                        <input asp-for="Description" type="text" class="form-control" id="descricao" placeholder="Insira a descrição do plano" required />
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Voltar</button>
+                        <button type="submit" class="btn btn-primary">Atualizar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
