@@ -42,7 +42,8 @@ public class ActivityService
             model.TicketId,
             model.Subject,
             model.Duration,
-            model.Priority
+            model.Priority,
+            ActivityStatus.Open
         );
 
         ticket.UpdateStatus(TicketStatus.InProgress);
@@ -79,6 +80,7 @@ public class ActivityService
              model.ContactId
          );
 
+        activity.UpdateStatus(model.Status);
 
         _activityRepository.Update(activity);
         await _unitOfWork.CommitAsync();

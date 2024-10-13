@@ -38,6 +38,7 @@ public static class DependencyInjectionConfig
         services.AddScoped<IAttachmentService, AttachmentService>();
         services.AddScoped<IActivityService, ActivityService>();
         services.AddScoped<IPaymantPlanService,PaymantPlanService>(); 
+        services.AddScoped<IHomeService, HomeService>();
         #endregion
 
         #region Repositories

@@ -11,6 +11,7 @@ public class Activity : EntityBase
     public DateTime ScheduledDate { get; private set; }
     public TimeSpan? Duration { get; private set; }
     public ActivityPriority Priority { get; private set; }
+    public ActivityStatus Status { get; private set; }
     public Guid? ContactId { get; private set; }
     public Contact? Contact { get; private set; }
     public Guid? TicketId { get; private set; }
@@ -26,6 +27,7 @@ public class Activity : EntityBase
         string? subject = null,
         TimeSpan duration = default,
         ActivityPriority priority = ActivityPriority.Low,
+        ActivityStatus status = ActivityStatus.Open,
         Guid? contactId = null
     )
     {
@@ -39,6 +41,7 @@ public class Activity : EntityBase
         Subject = subject;
         Duration = duration;
         Priority = priority;
+        Status = status;
         ContactId = contactId;
     }
 
@@ -96,5 +99,11 @@ public class Activity : EntityBase
         UpdatePriority(newPriority);
         UpdateContact(newContactId ?? ContactId);
     }
+
+    public void UpdateStatus(ActivityStatus newStatus)
+        => Status = newStatus;
+
+    public void CloseActivity()
+        => Status = ActivityStatus.Closed;
 }
 

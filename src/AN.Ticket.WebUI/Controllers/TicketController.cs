@@ -1,8 +1,10 @@
 ﻿using AN.Ticket.Application.DTOs.Ticket;
 using AN.Ticket.Application.Interfaces;
+using AN.Ticket.Application.Services;
 using AN.Ticket.Domain.EntityValidations;
 using AN.Ticket.Infra.Data.Identity;
 using AN.Ticket.WebUI.Components;
+using AN.Ticket.WebUI.ViewModels.Ticket;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -25,6 +27,42 @@ public class TicketController : Controller
         _ticketService = ticketService;
         _contactService = contactService;
         _userManager = userManager;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Index(
+        TicketFilterDto filters,
+        int ticketPageNumber = 1,
+        int ticketPageSize = 5,
+        int activityPageNumber = 1,
+        int activityPageSize = 5
+    )
+    {
+        var user = await GetCurrentUserAsync();
+        if (user == null) return Unauthorized();
+
+        var userId = await GetCurrentUserId();
+
+        var dashboardData = await _ticketService.GetSupportDashboardAsync(
+            userId,
+            filters,
+            ticketPageNumber,
+            ticketPageSize,
+            activityPageNumber,
+            activityPageSize
+        );
+
+        var viewModel = new SupportDashboardViewModel
+        {
+            DashboardData = dashboardData,
+            Filters = filters,
+            TicketPageNumber = ticketPageNumber,
+            TicketPageSize = ticketPageSize,
+            ActivityPageNumber = activityPageNumber,
+            ActivityPageSize = activityPageSize
+        };
+
+        return View(viewModel);
     }
 
     [HttpGet]

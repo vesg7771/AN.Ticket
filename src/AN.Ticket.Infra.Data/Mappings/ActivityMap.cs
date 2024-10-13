@@ -31,6 +31,9 @@ public class ActivityMap : IEntityTypeConfiguration<Activity>
         builder.Property(a => a.Priority)
             .IsRequired();
 
+        builder.Property(a => a.Status)
+            .IsRequired();
+
         builder.Property(a => a.ContactId)
             .IsRequired(false);
 

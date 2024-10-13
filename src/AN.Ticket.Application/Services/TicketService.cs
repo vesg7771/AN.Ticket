@@ -1,5 +1,8 @@
-﻿using AN.Ticket.Application.DTOs.Email;
+﻿using AN.Ticket.Application.DTOs.Activity;
+using AN.Ticket.Application.DTOs.Email;
+using AN.Ticket.Application.DTOs.SatisfactionRating;
 using AN.Ticket.Application.DTOs.Ticket;
+using AN.Ticket.Application.Helpers.Pagination;
 using AN.Ticket.Application.Interfaces;
 using AN.Ticket.Application.Services.Base;
 using AN.Ticket.Domain.Entities;
@@ -9,6 +12,7 @@ using AN.Ticket.Domain.Interfaces;
 using AN.Ticket.Domain.Interfaces.Base;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
+using System.Globalization;
 using DomainEntity = AN.Ticket.Domain.Entities;
 
 namespace AN.Ticket.Application.Services;
@@ -149,6 +153,17 @@ public class TicketService
             ClosedAt = t.ClosedAt,
             FirstResponseAt = t.FirstResponseAt
         }).ToList();
+    }
+
+    public async Task<List<TicketDto>> GetTicketWithDetailsByUserAsync(Guid userId)
+    {
+        var ticket = await _ticketRepository.GetTicketWithDetailsByUserAsync(userId);
+        if (ticket == null)
+        {
+            return null;
+        }
+
+        return _mapper.Map<List<TicketDto>>(ticket);
     }
 
     public async Task<IEnumerable<TicketDto>> GetTicketsNotAssignedAsync()
@@ -354,5 +369,214 @@ public class TicketService
         await _unitOfWork.CommitAsync();
 
         return true;
+    }
+
+    public async Task<SupportDashboardDto> GetSupportDashboardAsync(
+        Guid userId,
+        TicketFilterDto filters,
+        int pageNumber,
+        int pageSize,
+        int activityPageNumber,
+        int activityPageSize
+    )
+    {
+        var tickets = await _ticketRepository.GetTicketWithDetailsByUserAsync(userId);
+        var activities = tickets.SelectMany(t => t.Activities);
+
+        int openActivities = activities.Count(a => a.Status == ActivityStatus.Open);
+        int closedActivities = activities.Count(a => a.Status == ActivityStatus.Closed);
+
+        int totalPaddingTickets = tickets.Count(t =>
+            (t.Status == TicketStatus.Onhold || t.Status == TicketStatus.Open || t.Status == TicketStatus.InProgress) &&
+            t.Messages.OrderByDescending(m => m.SentAt).FirstOrDefault()?.UserId == userId
+        );
+
+        var today = DateTime.UtcNow.Date;
+        var currentPeriodStartDate = today.AddDays(-29);
+        var previousPeriodStartDate = currentPeriodStartDate.AddDays(-30);
+        var previousPeriodEndDate = currentPeriodStartDate.AddDays(-1);
+
+        var previousPeriodTickets = tickets.Where(t => t.CreatedAt.Date >= previousPeriodStartDate && t.CreatedAt.Date <= previousPeriodEndDate).ToList();
+        var currentPeriodTickets = tickets.Where(t => t.CreatedAt.Date >= currentPeriodStartDate && t.CreatedAt.Date <= today).ToList();
+
+        int currentPendingTickets = currentPeriodTickets.Count(t =>
+            (t.Status == TicketStatus.Onhold || t.Status == TicketStatus.Open || t.Status == TicketStatus.InProgress) &&
+            t.Messages.OrderByDescending(m => m.SentAt).FirstOrDefault()?.UserId == userId
+        );
+
+        int previousPendingTickets = previousPeriodTickets.Count(t =>
+            (t.Status == TicketStatus.Onhold || t.Status == TicketStatus.Open || t.Status == TicketStatus.InProgress) &&
+            t.Messages.OrderByDescending(m => m.SentAt).FirstOrDefault()?.UserId == userId
+        );
+
+        var monthlyTickets = Enumerable.Range(1, 12).Select(month =>
+        {
+            var ticketsInMonth = tickets.Where(t => t.CreatedAt.Month == month);
+
+            var responseTimes = ticketsInMonth
+                .Select(t => t.GetTimeToFirstResponse())
+                .Where(r => r.HasValue)
+                .Select(r => r.Value.TotalHours);
+
+            double averageResponseTime = responseTimes.Any() ? responseTimes.Average() : 0;
+
+            return new MonthlyTicketDataDto
+            {
+                Month = CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(month).Substring(0, 3),
+                AverageResponseTimeHours = averageResponseTime
+            };
+        }).ToList();
+
+        for (int i = 1; i < monthlyTickets.Count; i++)
+        {
+            var current = monthlyTickets[i].AverageResponseTimeHours;
+            var previous = monthlyTickets[i - 1].AverageResponseTimeHours;
+
+            if (previous == 0)
+            {
+                monthlyTickets[i].PercentageChange = current > 0 ? 100 : 0;
+            }
+            else
+            {
+                double change = ((current - previous) / previous) * 100;
+                monthlyTickets[i].PercentageChange = change;
+            }
+        }
+
+        if (monthlyTickets.Any())
+        {
+            monthlyTickets[0].PercentageChange = null;
+        }
+
+        var recentTickets = await GetRecentTicketsAsync(
+            userId, filters, pageNumber, pageSize
+        );
+
+        var pagedActivities = activities
+            .Where(a => a.Status == ActivityStatus.Open)
+            .OrderByDescending(a => a.CreatedAt)
+            .ThenBy(a => a.ScheduledDate)
+            .Skip((activityPageNumber - 1) * activityPageSize)
+            .Take(activityPageSize)
+            .Select(a => new ActivitySummaryDto
+            {
+                Id = a.Id,
+                Subject = a.Subject,
+                Description = a.Description,
+                ScheduledDate = a.ScheduledDate,
+                Status = a.Status
+            })
+            .ToList();
+
+        var totalRecentRatings = tickets.Select(t => t.SatisfactionRating).Count(r => r != null);
+
+        var recentRatings = tickets
+            .Where(t => t.SatisfactionRating != null)
+            .OrderByDescending(t => t.SatisfactionRating.CreatedAt)
+            .Take(2)
+            .Select(t => new SatisfactionRatingSummaryDto
+            {
+                Rating = t.SatisfactionRating.Rating ?? SatisfactionRatingValue.VeryDissatisfied,
+                Comment = t.SatisfactionRating.Comment ?? "",
+                TicketId = t.SatisfactionRating.TicketId,
+                TicketSubject = t.Subject,
+                CreatedAt = t.SatisfactionRating.CreatedAt
+            }).ToList();
+
+        var totalActivities = activities.Count(a => a.Status == ActivityStatus.Open);
+
+        var pagedActivityResult = new PagedResult<ActivitySummaryDto>
+        {
+            Items = pagedActivities,
+            TotalItems = totalActivities,
+            PageNumber = activityPageNumber,
+            PageSize = activityPageSize
+        };
+
+        return new SupportDashboardDto
+        {
+            TotalPendingTickets = totalPaddingTickets,
+            CurrentPendingTickets = currentPendingTickets,
+            PreviousPendingTickets = previousPendingTickets,
+            OpenActivities = openActivities,
+            ClosedActivities = closedActivities,
+            TotalRecentRatings = totalRecentRatings,
+            RecentTickets = recentTickets,
+            MonthlyTickets = monthlyTickets,
+            PagedActivities = pagedActivityResult,
+            RecentRatings = recentRatings
+        };
+    }
+
+    public async Task<PagedResult<TicketSummaryDto>> GetRecentTicketsAsync(
+        Guid userId, TicketFilterDto filters, int pageNumber, int pageSize
+    )
+    {
+        var tickets = await _ticketRepository.GetTicketWithDetailsByUserAsync(userId);
+
+        var filteredTickets = tickets.AsQueryable();
+
+        if (filters.Status.HasValue)
+            filteredTickets = filteredTickets.Where(t => t.Status == filters.Status.Value);
+
+        if (filters.Priority.HasValue)
+            filteredTickets = filteredTickets.Where(t => t.Priority == filters.Priority.Value);
+
+        if (filters.DateFrom.HasValue)
+            filteredTickets = filteredTickets.Where(t => t.DueDate.Date >= filters.DateFrom.Value.Date);
+
+        if (filters.DateTo.HasValue)
+            filteredTickets = filteredTickets.Where(t => t.DueDate.Date <= filters.DateTo.Value.Date);
+
+        var query = filteredTickets
+            .Where(t => t.Messages != null && t.Messages.Any())
+            .ToList()
+            .Where(t =>
+            {
+                var lastMessage = t.Messages.OrderByDescending(m => m.SentAt).FirstOrDefault();
+                return lastMessage != null && (lastMessage.UserId == Guid.Empty || lastMessage.UserId == null);
+            })
+            .OrderByDescending(t => t.Priority)
+            .ThenBy(t => t.DueDate);
+
+        var totalItems = query.Count();
+        var recentTickets = query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .Select(t => new TicketSummaryDto
+            {
+                Id = t.Id,
+                Subject = t.Subject,
+                ContactName = t.ContactName,
+                Priority = t.Priority,
+                DueDate = t.DueDate,
+                Status = t.Status
+            })
+            .ToList();
+
+        return new PagedResult<TicketSummaryDto>
+        {
+            Items = recentTickets,
+            TotalItems = totalItems,
+            PageNumber = pageNumber,
+            PageSize = pageSize
+        };
+    }
+
+    private decimal CalculateChangePercentage(int current, int previous)
+    {
+        if (previous == 0)
+        {
+            return current > 0 ? 100 : 0;
+        }
+
+        var percentageChange = ((current - previous) / (decimal)previous) * 100;
+
+        if (percentageChange > 500)
+        {
+            return 500;
+        }
+
+        return percentageChange;
     }
 }

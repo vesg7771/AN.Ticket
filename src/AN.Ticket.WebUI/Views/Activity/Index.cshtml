@@ -35,7 +35,7 @@
                             <td>@activity.Duration.ToString(@"hh\:mm")</td>
                             <td>@TranslatePriority(activity.Priority)</td>
                             <td>
-                                @await Html.PartialAsync("_ActivityActions", new ActivityActionViewModel { Id = activity.Id ?? Guid.Empty, IsEditTicket = false })
+                                @await Html.PartialAsync("_ActivityActions", new ActivityActionViewModel { Id = activity.Id ?? Guid.Empty, IsEditTicket = true })
                             </td>
                         </tr>
                     }

@@ -1,0 +1,613 @@
+﻿@model AN.Ticket.WebUI.ViewModels.Ticket.SupportDashboardViewModel
+@using AN.Ticket.Domain.Enums
+@using Newtonsoft.Json
+
+@{
+    ViewData["Title"] = "Dashboard";
+
+    var priorityTranslations = new Dictionary<TicketPriority, string>
+    {
+        { TicketPriority.Low, "Baixa" },
+        { TicketPriority.Medium, "Média" },
+        { TicketPriority.High, "Alta" }
+    };
+
+    var statusTranslations = new Dictionary<TicketStatus, string>
+    {
+        { TicketStatus.Onhold, "Em Espera" },
+        { TicketStatus.Open, "Aberto" },
+        { TicketStatus.InProgress, "Em Progresso" },
+        { TicketStatus.Closed, "Fechado" }
+    };
+}
+
+<style>
+    .custom-background {
+        background-color: #0d1b2a;
+        padding: 20px;
+        border-radius: 10px;
+        color: white;
+    }
+
+    .custom-card-title {
+        color: #7dd1a7;
+        font-weight: bold;
+    }
+
+    .progress-bar-custom {
+        background-color: #007bff;
+    }
+
+    .progress-bar-success {
+        background-color: #28a745;
+    }
+
+    .half-doughnut-container {
+        position: relative;
+        width: 100%;
+        height: 250px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .half-doughnut-chart {
+        position: relative;
+        width: 100%;
+        height: 100%;
+    }
+
+    .activity-info {
+        text-align: center;
+    }
+
+        .activity-info h4 {
+            margin: 0;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .activity-info p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        .activity-info .success-text {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+    .on-track-badge {
+        background-color: #d1f7e3;
+        color: #28a745;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-weight: bold;
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 0.9rem;
+    }
+
+    .rating-stars {
+        font-size: 2.5rem;
+        color: #ffc107;
+    }
+
+    .rating-bar {
+        height: 10px;
+        background-color: #f0f0f0;
+        margin-bottom: 0.5rem;
+        position: relative;
+    }
+
+    .rating-bar div {
+        height: 100%;
+        background-color: #ffc107;
+    }
+</style>
+
+<div class="mt-4 custom-background">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2 class="fw-bold custom-card-title">Tickets Pendentes de Resposta</h2>
+        </div>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="fw-bold" style="color: white;">@Model.DashboardData.TotalPendingTickets</h4>
+                    <small class="text-muted">Tickets Pendentes</small>
+                </div>
+                @if (Model.DashboardData.MonthlyTickets.Any())
+                {
+                    var latestMonth = Model.DashboardData.MonthlyTickets.LastOrDefault();
+                    if (latestMonth != null && latestMonth.PercentageChange.HasValue)
+                    {
+                        bool isPositive = latestMonth.PercentageChange.Value < 0;
+                        string colorClass = isPositive ? "text-success" : "text-danger";
+                        string sign = isPositive ? "+" : "";
+                        string formattedPercentage = $"{sign}{Math.Abs(latestMonth.PercentageChange.Value):F2}%";
+
+                        <span class="@colorClass fw-bold">
+                            @formattedPercentage
+                        </span>
+                    }
+                }
+            </div>
+            <canvas id="ticketsMonthlyChart" style="height: 300px; width: 100%;"></canvas>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <form method="get" asp-action="Index" class="row g-3">
+                <div class="col-md-2">
+                    <label for="Status" class="form-label">Status</label>
+                    <select id="Status" name="Status" class="form-select">
+                        <option value="">Todos</option>
+                        @foreach (TicketStatus status in Enum.GetValues(typeof(TicketStatus)))
+                        {
+                            <option value="@status" selected="@(Model.Filters.Status == status ? "selected" : null)">
+                                @statusTranslations[status]
+                            </option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="Priority" class="form-label">Prioridade</label>
+                    <select id="Priority" name="Priority" class="form-select">
+                        <option value="">Todas</option>
+                        @foreach (TicketPriority priority in Enum.GetValues(typeof(TicketPriority)))
+                        {
+                            <option value="@priority" selected="@(Model.Filters.Priority == priority ? "selected" : null)">
+                                @priorityTranslations[priority]
+                            </option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="DateFrom" class="form-label">Data de Vencimento (De)</label>
+                    <input type="date" id="DateFrom" name="DateFrom" class="form-control" value="@(Model.Filters.DateFrom?.ToString("yyyy-MM-dd"))">
+                </div>
+                <div class="col-md-2">
+                    <label for="DateTo" class="form-label">Data de Vencimento (Até)</label>
+                    <input type="date" id="DateTo" name="DateTo" class="form-control" value="@(Model.Filters.DateTo?.ToString("yyyy-MM-dd"))">
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
+                    <a href="/Ticket/Index" class="btn btn-outline-light w-100">Limpar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row mb-2">
+        <div class="col-md-12">
+            <table class="table table-borderless align-middle" style="color: white;">
+                <thead>
+                    <tr>
+                        <th scope="col">Assunto</th>
+                        <th scope="col">Prioridade</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Data de Vencimento</th>
+                        <th scope="col">Conclusão</th>
+                        <th scope="col">Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var ticket in Model.DashboardData.RecentTickets.Items)
+                    {
+                        <tr>
+                            <td>
+                                <i class="bi bi-ticket-detailed-fill me-2"></i> @ticket.Subject
+                            </td>
+                            <td>
+                                @Html.Raw(GetPriorityBadge(ticket.Priority))
+                            </td>
+                            <td>
+                                @Html.Raw(GetStatusBadge(ticket.Status))
+                            </td>
+                            <td>
+                                @ticket.DueDate.ToString("dd/MM/yyyy")
+                            </td>
+                            <td>
+                                <div class="progress" style="height: 6px;">
+                                    <div class="progress-bar @(GetProgressBarClass(ticket.Status))"
+                                         role="progressbar"
+                                         style="width: @(GetCompletionPercentage(ticket.Status))%;"
+                                         aria-valuenow="@GetCompletionPercentage(ticket.Status)"
+                                         aria-valuemin="0"
+                                         aria-valuemax="100"
+                                         data-bs-toggle="tooltip"
+                                         data-bs-placement="top"
+                                         title="@GetTooltipText(ticket.Status)">
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <a href="/Ticket/Details/@ticket.Id" class="btn btn-sm btn-primary">Responder</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        @if (Model.DashboardData.RecentTickets.TotalPages > 1)
+        {
+            <nav aria-label="Ticket page navigation">
+                <ul class="pagination justify-content-center">
+                    @if (Model.DashboardData.RecentTickets.PageNumber > 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="@Url.Action("Index", new { ticketPageNumber = Model.DashboardData.RecentTickets.PageNumber - 1, activityPageNumber = Model.ActivityPageNumber })" aria-label="Anterior">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    }
+                    @for (int i = 1; i <= Model.DashboardData.RecentTickets.TotalPages; i++)
+                    {
+                        <li class="page-item @(i == Model.DashboardData.RecentTickets.PageNumber ? "active" : "")">
+                            <a class="page-link" href="@Url.Action("Index", new { ticketPageNumber = i, activityPageNumber = Model.ActivityPageNumber })">@i</a>
+                        </li>
+                    }
+                    @if (Model.DashboardData.RecentTickets.PageNumber < Model.DashboardData.RecentTickets.TotalPages)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="@Url.Action("Index", new { ticketPageNumber = Model.DashboardData.RecentTickets.PageNumber + 1, activityPageNumber = Model.ActivityPageNumber })" aria-label="Próximo">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        }
+    </div>
+    <div class="row">
+        <hr class="mb-3" />
+        <div class="col-md-12 text-center">
+            <a href="/Ticket/UserTickets" class="text-decoration-none fw-bold" style="color: #007bff;">Ver todos os tickets <i class="bi bi-chevron-right"></i></a>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-6">
+        <div class="card p-3">
+            <h5 class="card-title">Atividades</h5>
+            <div class="half-doughnut-container">
+                <div class="on-track-badge">
+                    <i class="bi bi-check-circle"></i> Abertas/Fechadas
+                </div>
+                <canvas id="activityDoughnutChart" class="half-doughnut-chart"></canvas>
+            </div>
+            <div class="activity-info">
+                <h4>@Model.DashboardData.OpenActivities abertas</h4>
+                <p>@Model.DashboardData.ClosedActivities fechadas</p>
+                <p class="success-text">Monitoramento de atividades</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card p-3">
+            <h5 class="card-title">Atividades Recentes</h5>
+
+            @if (!Model.DashboardData.PagedActivities.Items.Any())
+            {
+                <div class="alert alert-info" role="alert">
+                    Nenhuma atividade encontrada.
+                </div>
+            }
+            else
+            {
+                <ul class="list-group list-group-flush">
+                    @foreach (var activity in Model.DashboardData.PagedActivities.Items)
+                    {
+                        <li class="list-group-item d-flex align-items-center">
+                            <div class="col-md-6">
+                                <strong>@activity.Subject</strong>
+                                <p class="text-muted mb-0">@activity.Description</p>
+                            </div>
+                            <div class="col-md-2 text-center">
+                                <span class="badge bg-warning text-dark">Aberto</span>
+                            </div>
+                            <div class="col-md-2 text-center">
+                                <span>@activity.ScheduledDate.ToString("dd/MM/yyyy")</span>
+                            </div>
+                            <div class="col-md-2 text-end">
+                                @await Html.PartialAsync("~/Views/Shared/Partials/Activity/_ActivityActionsDropdown.cshtml", activity.Id)
+                            </div>
+                        </li>
+                    }
+                </ul>
+            }
+
+            @if (Model.DashboardData.PagedActivities.TotalPages > 1)
+            {
+                <nav aria-label="Activity pagination">
+                    <ul class="pagination justify-content-center mt-3">
+                        @if (Model.ActivityPageNumber > 1)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="@Url.Action("Index", new { ticketPageNumber = Model.TicketPageNumber, activityPageNumber = Model.ActivityPageNumber - 1 })" aria-label="Anterior">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                        }
+                        @for (int i = 1; i <= Model.DashboardData.PagedActivities.TotalPages; i++)
+                        {
+                            <li class="page-item @(i == Model.ActivityPageNumber ? "active" : "")">
+                                <a class="page-link" href="@Url.Action("Index", new { ticketPageNumber = Model.TicketPageNumber, activityPageNumber = i })">@i</a>
+                            </li>
+                        }
+                        @if (Model.ActivityPageNumber < Model.DashboardData.PagedActivities.TotalPages)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="@Url.Action("Index", new { ticketPageNumber = Model.TicketPageNumber, activityPageNumber = Model.ActivityPageNumber + 1 })" aria-label="Próximo">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="card mt-5 shadow-sm">
+    <div class="card-body">
+        <h5 class="card-title">Avaliações recentes</h5>
+        <div class="row">
+            <div class="col-md-4 text-center">
+                <div class="d-flex justify-content-center align-items-center">
+                    <h1 class="display-4 fw-bold">@Model.DashboardData.RecentRatings.Average(r => (double)r.Rating).ToString("0.00")</h1>
+                    <div class="ms-2">
+                        <span class="rating-stars">
+                            @for (int i = 0; i < 5; i++)
+                            {
+                                if (i < @Model.DashboardData.RecentRatings.Average(r => (double)r.Rating))
+                                {
+                                    <i class="bi bi-star-fill"></i>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-star"></i>
+                                }
+                            }
+                        </span>
+                    </div>
+                </div>
+                <p class="text-muted">— de @Model.DashboardData.TotalRecentRatings avaliações <span class="badge bg-light text-muted">+1 esta semana</span></p>
+
+                <div class="rating-bar" data-bs-toggle="tooltip" data-bs-placement="top" title="Muito Satisfeito: @(Model.DashboardData.RecentRatings.Count(r => r.Rating == SatisfactionRatingValue.VerySatisfied)) avaliações">
+                    <div style="width: @(Model.DashboardData.RecentRatings.Count(r => r.Rating == SatisfactionRatingValue.VerySatisfied) / (double)Model.DashboardData.RecentRatings.Count() * 100)%;"></div>
+                </div>
+                <div class="rating-bar" data-bs-toggle="tooltip" data-bs-placement="top" title="Satisfeito: @(Model.DashboardData.RecentRatings.Count(r => r.Rating == SatisfactionRatingValue.Satisfied)) avaliações">
+                    <div style="width: @(Model.DashboardData.RecentRatings.Count(r => r.Rating == SatisfactionRatingValue.Satisfied) / (double)Model.DashboardData.RecentRatings.Count() * 100)%;"></div>
+                </div>
+                <div class="rating-bar" data-bs-toggle="tooltip" data-bs-placement="top" title="Neutro: @(Model.DashboardData.RecentRatings.Count(r => r.Rating == SatisfactionRatingValue.Neutral)) avaliações">
+                    <div style="width: @(Model.DashboardData.RecentRatings.Count(r => r.Rating == SatisfactionRatingValue.Neutral) / (double)Model.DashboardData.RecentRatings.Count() * 100)%;"></div>
+                </div>
+                <div class="rating-bar" data-bs-toggle="tooltip" data-bs-placement="top" title="Insatisfeito: @(Model.DashboardData.RecentRatings.Count(r => r.Rating == SatisfactionRatingValue.Dissatisfied)) avaliações">
+                    <div style="width: @(Model.DashboardData.RecentRatings.Count(r => r.Rating == SatisfactionRatingValue.Dissatisfied) / (double)Model.DashboardData.RecentRatings.Count() * 100)%;"></div>
+                </div>
+                <div class="rating-bar" data-bs-toggle="tooltip" data-bs-placement="top" title="Muito Insatisfeito: @(Model.DashboardData.RecentRatings.Count(r => r.Rating == SatisfactionRatingValue.VeryDissatisfied)) avaliações">
+                    <div style="width: @(Model.DashboardData.RecentRatings.Count(r => r.Rating == SatisfactionRatingValue.VeryDissatisfied) / (double)Model.DashboardData.RecentRatings.Count() * 100)%;"></div>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <ul class="list-unstyled">
+                    @foreach (var rating in Model.DashboardData.RecentRatings)
+                    {
+                        <li class="d-flex mb-3">
+                            <img src="/img/user-default.webp" alt="Avatar do Usuário" class="rounded-circle me-3" width="50" height="50" style="object-fit:cover";>
+                            <div>
+                                <h6 class="mb-1">@rating.TicketSubject <span class="text-muted">@rating.CreatedAt.ToString("dd/MM/yyyy")</span></h6>
+                                <p class="text-muted">@rating.Comment</p>
+                            </div>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    public string GetPriorityBadge(TicketPriority priority)
+    {
+        switch (priority)
+        {
+            case TicketPriority.High:
+                return "<span class=\"badge bg-danger\">Alta</span>";
+            case TicketPriority.Medium:
+                return "<span class=\"badge bg-warning text-dark\">Média</span>";
+            case TicketPriority.Low:
+                return "<span class=\"badge bg-success\">Baixa</span>";
+            default:
+                return "<span class=\"badge bg-secondary\">N/A</span>";
+        }
+    }
+
+    public string GetStatusBadge(TicketStatus status)
+    {
+        switch (status)
+        {
+            case TicketStatus.Onhold:
+                return "<span class=\"badge bg-secondary\">Em Espera</span>";
+            case TicketStatus.Open:
+                return "<span class=\"badge bg-primary\">Aberto</span>";
+            case TicketStatus.InProgress:
+                return "<span class=\"badge bg-info text-dark\">Em Progresso</span>";
+            case TicketStatus.Closed:
+                return "<span class=\"badge bg-success\">Fechado</span>";
+            default:
+                return "<span class=\"badge bg-secondary\">N/A</span>";
+        }
+    }
+
+    public string GetProgressBarClass(TicketStatus status)
+    {
+        switch (status)
+        {
+            case TicketStatus.Onhold:
+                return "bg-secondary";
+            case TicketStatus.Open:
+                return "bg-primary";
+            case TicketStatus.InProgress:
+                return "bg-info";
+            case TicketStatus.Closed:
+                return "bg-success";
+            default:
+                return "bg-secondary";
+        }
+    }
+
+    public int GetCompletionPercentage(TicketStatus status)
+    {
+        switch (status)
+        {
+            case TicketStatus.Onhold:
+                return 0;
+            case TicketStatus.Open:
+                return 25;
+            case TicketStatus.InProgress:
+                return 75;
+            case TicketStatus.Closed:
+                return 100;
+            default:
+                return 0;
+        }
+    }
+
+    public string GetTooltipText(TicketStatus status)
+    {
+        switch (status)
+        {
+            case TicketStatus.Onhold:
+                return "Ticket em espera, aguardando resposta.";
+            case TicketStatus.Open:
+                return "Ticket aberto, aguardando interação.";
+            case TicketStatus.InProgress:
+                return "Ticket em progresso, trabalhando na resolução.";
+            case TicketStatus.Closed:
+                return "Ticket fechado.";
+            default:
+                return "Status desconhecido.";
+        }
+    }
+}
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctxActivity = document.getElementById('activityDoughnutChart').getContext('2d');
+        const activityDoughnutChart = new Chart(ctxActivity, {
+            type: 'doughnut',
+            data: {
+                labels: ['Abertas', 'Fechadas'],
+                datasets: [{
+                    data: [@Model.DashboardData.OpenActivities, @Model.DashboardData.ClosedActivities],
+                    backgroundColor: ['#007bff', '#28a745'],
+                    hoverOffset: 4,
+                    cutout: '75%',
+                    rotation: -90,
+                    circumference: 180
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+
+        const monthlyTicketsData = @Html.Raw(JsonConvert.SerializeObject(Model.DashboardData.MonthlyTickets));
+
+        const labelsMonthly = monthlyTicketsData.map(x => x.Month);
+        const averageResponseTimeMonthly = monthlyTicketsData.map(x => x.AverageResponseTimeHours);
+
+        const ctxMonthly = document.getElementById('ticketsMonthlyChart').getContext('2d');
+        const ticketsMonthlyChart = new Chart(ctxMonthly, {
+            type: 'line',
+            data: {
+                labels: labelsMonthly,
+                datasets: [{
+                    label: 'Média de Resposta (Horas)',
+                    data: averageResponseTimeMonthly,
+                    borderColor: '#ffc107',
+                    backgroundColor: 'rgba(255, 193, 7, 0.2)',
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 5,
+                    pointBackgroundColor: '#ffc107',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#ffffff'
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                        titleColor: '#ffffff',
+                        bodyColor: '#ffffff',
+                        callbacks: {
+                            label: function (context) {
+                                return `${context.dataset.label}: ${context.parsed.y.toFixed(2)} horas`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        display: true,
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#ffffff'
+                        }
+                    },
+                    y: {
+                        display: true,
+                        grid: {
+                            color: '#2a3b4c'
+                        },
+                        ticks: {
+                            color: '#ffffff',
+                            beginAtZero: true,
+                            precision: 0
+                        },
+                        title: {
+                            display: true,
+                            text: 'Horas',
+                            color: '#ffffff'
+                        }
+                    }
+                }
+            }
+        });
+
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    </script>
+}
