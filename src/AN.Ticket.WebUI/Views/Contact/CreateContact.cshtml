@@ -1,7 +1,7 @@
-﻿@model AN.Ticket.Application.DTOs.Contact.ContactCreateDto
+﻿@model AN.Ticket.WebUI.ViewModels.Contact.ContactCreateViewModel
 
 @{
-    ViewData["Title"] = "Criar cliente";
+    ViewData["Title"] = Model.IsEditedContact ? "Editar cliente" : "Criar cliente";
 }
 
 <style>
@@ -20,62 +20,112 @@
 <div class="container">
     <div class="row">
         <div class="col-md-6">
-            <form asp-controller="Contact" asp-action="CreateContact" method="post">
+            <form asp-controller="Contact" asp-action="@(Model.IsEditedContact ? "EditContact" : "CreateContact")" method="post">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <input type="hidden" asp-for="Contact.Id" />
+
                 <div class="card">
                     <div class="card-header">
                         Informações do cliente
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
-                            <label asp-for="FirstName" class="form-label">Primeiro Nome</label>
-                            <input asp-for="FirstName" class="form-control" />
-                            <span asp-validation-for="FirstName" class="text-danger"></span>
+                            <label asp-for="Contact.FirstName" class="form-label">Primeiro Nome</label>
+                            <input asp-for="Contact.FirstName" class="form-control" />
+                            <span asp-validation-for="Contact.FirstName" class="text-danger"></span>
                         </div>
+                        <div class="mb-3">
+                            <label asp-for="Contact.LastName" class="form-label">Segundo Nome</label>
+                            <input asp-for="Contact.LastName" class="form-control" />
+                            <span asp-validation-for="Contact.LastName" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Contact.Cpf" class="form-label">CPF</label>
+                            <input asp-for="Contact.Cpf" class="form-control" />
+                            <span asp-validation-for="Contact.Cpf" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Contact.PrimaryEmail" class="form-label">E-mail Principal</label>
+                            <input asp-for="Contact.PrimaryEmail" class="form-control" />
+                            <span asp-validation-for="Contact.PrimaryEmail" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Contact.SecondaryEmail" class="form-label">E-mail Secundário</label>
+                            <input asp-for="Contact.SecondaryEmail" class="form-control" />
+                            <span asp-validation-for="Contact.SecondaryEmail" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Contact.Phone" class="form-label">Telefone</label>
+                            <input asp-for="Contact.Phone" class="form-control" />
+                            <span asp-validation-for="Contact.Phone" class="d-block text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Contact.Mobile" class="form-label">Celular</label>
+                            <input asp-for="Contact.Mobile" class="form-control" />
+                            <span asp-validation-for="Contact.Mobile" class="d-block text-danger"></span>
+                        </div>
+                        <input type="hidden" asp-for="Contact.PaymentPlanId" id="paymentPlanIdInput" />
 
-                        <div class="mb-3">
-                            <label asp-for="LastName" class="form-label">Segundo Nome</label>
-                            <input asp-for="LastName" class="form-control" />
-                            <span asp-validation-for="LastName" class="text-danger"></span>
-                        </div>
-                        <div class="mb-3">
-                            <label asp-for="Cpf" class="form-label">CPF</label>
-                            <input asp-for="Cpf" class="form-control" />
-                            <span asp-validation-for="Cpf" class="text-danger"></span>
-                        </div>
-                        <div class="mb-3">
-                            <label asp-for="PrimaryEmail" class="form-label">E-mail Principal</label>
-                            <input asp-for="PrimaryEmail" class="form-control" />
-                            <span asp-validation-for="PrimaryEmail" class="text-danger"></span>
-                        </div>
-                        <div class="mb-3">
-                            <label asp-for="SecondaryEmail" class="form-label">E-mail Secondário</label>
-                            <input asp-for="SecondaryEmail" class="form-control" />
-                            <span asp-validation-for="SecondaryEmail" class="text-danger"></span>
-                        </div>
-                        <div class="mb-3">
-                            <label asp-for="Phone" class="form-label">Telefone</label>
-                            <input asp-for="Phone" class="form-control" />
-                            <span asp-validation-for="Phone" class="d-block text-danger"></span>
-                        </div>
-                        <div class="mb-3">
-                            <label asp-for="Mobile" class="form-label">Celular</label>
-                            <input asp-for="Mobile" class="form-control" />
-                            <span asp-validation-for="Mobile" class="d-block text-danger"></span>
-                        </div>
-                        @*                 <div class="input-group mb-3">
-                        <label asp-for="Title" class="form-label">Tí</label>
-                        <input asp-for="Title" class="form-control" />
-                        <span asp-validation-for="Title" class="text-danger"></span>
-                        </div> *@
                         <div class="fixed-bottom text-end p-3">
                             <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-plus"></i> Criar Cliente
+                                <i class="bi @(Model.IsEditedContact ? "bi bi-save" : "bi-plus")"></i> @(Model.IsEditedContact ? "Editar Cliente" : "Criar Cliente")
                             </button>
                         </div>
                     </div>
                 </div>
             </form>
         </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    Selecione um Plano de Pagamento
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        @if (Model.PaymentPlans != null)
+                        {
+                            @foreach (var plan in Model.PaymentPlans)
+                            {
+                                <div class="col-12">
+                                    <div class="card mb-3">
+                                        <div class="card-body d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h5 class="card-title">@plan.Description</h5>
+                                                <p class="card-text">@string.Format("{0:C}", plan.Value)</p>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="PaymentPlanId" value="@plan.Id" id="plan-@plan.Id" @(Model.Contact.PaymentPlanId == plan.Id ? "checked" : "")>
+                                                <label class="form-check-label" for="plan-@plan.Id">
+                                                    Selecionar
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            var selectedPlanId = '@Model.Contact.PaymentPlanId';
+            if (selectedPlanId) {
+                $('#paymentPlanIdInput').val(selectedPlanId);
+                $('input[name="PaymentPlanId"][value="' + selectedPlanId + '"]').prop('checked', true);
+            }
+
+            $('input[name="PaymentPlanId"]').change(function () {
+                var selectedPlanId = $(this).val();
+                $('#paymentPlanIdInput').val(selectedPlanId);
+            });
+        });
+    </script>
+}

@@ -4,6 +4,8 @@ using System.ComponentModel.DataAnnotations;
 namespace AN.Ticket.Application.DTOs.Contact;
 public class ContactCreateDto
 {
+    public Guid Id { get; set; }
+
     [Required(ErrorMessage = "Esse campo é obrigatório.")]
     [StringLength(50, ErrorMessage = "O nome deve ter no máximo 50 caracteres.")]
     public string? FirstName { get; set; }

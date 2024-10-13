@@ -7,4 +7,6 @@ public interface IContactRepository
 {
     Task<Contact> GetByEmailAsync(string email);
     Task<bool> ExistContactCpfAsync(string cpf);
+    Task<List<Contact>> GetByUserAsync(Guid userId);
+    Task<List<Contact>> GetByIdsAsync(List<Guid> ids);
 }

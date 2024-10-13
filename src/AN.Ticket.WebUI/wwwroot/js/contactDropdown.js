@@ -11,6 +11,7 @@ $(document).ready(function () {
         e.preventDefault();
 
         var selectedContactId = $(this).data('contact-id');
+        var selectedContactName = $(this).data('contact-name');
 
         $('#contactInput').val(selectedContactName);
         $('#selectedContactId').val(selectedContactId);

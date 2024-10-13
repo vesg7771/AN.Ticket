@@ -1,4 +1,4 @@
-﻿@model List<AN.Ticket.Application.DTOs.Contact.ContactDto>
+﻿@model AN.Ticket.WebUI.ViewModels.Contact.ContactListViewModel
 
 @{
     ViewData["Title"] = "Clientes";
@@ -6,7 +6,187 @@
 
 @await Component.InvokeAsync("Breadcrumb")
 
-<div class="container">
+<div class="container mt-4">
+    <div class="mb-3">
+        <h1 class="h4">Gerenciamento de Clientes</h1>
+        <p class="text-muted">Gerencie seus clientes e suas informações de contato aqui.</p>
+    </div>
+
+    <div class="card">
+        <div class="card-body p-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="text-muted">Todos os clientes @Model.TotalItems</h6>
+                <div class="d-flex align-items-center">
+                    <div class="input-group me-2" style="width: 300px;">
+                        <input type="text" class="form-control" placeholder="Pesquisar" value="@Model.SearchTerm" id="searchTerm">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    </div>
+                    <button class="btn btn-outline-secondary me-2 px-4" style="height: 40px;" onclick="applyFilter()">
+                        <i class="bi bi-funnel"></i> Filtros
+                    </button>
+                    <a href="/Contact/CreateContact" class="btn btn-dark px-4" style="height: 40px;">+ Adicionar cliente</a>
+                    <button id="deleteSelectedBtn" class="btn btn-outline-danger ms-2 px-4" style="height: 40px; display: none;" onclick="deleteSelected()">
+                        <i class="bi bi-trash"></i> Excluir Selecionados
+                    </button>
+                </div>
+            </div>
+
+            <form asp-action="DeleteContacts" method="post" id="deleteForm">
+                @Html.AntiForgeryToken()
+                <table class="table table-borderless table-hover align-middle mb-0">
+                    <thead style="background-color: #F4F5F7; border-radius: 10px 10px 0 0;">
+                        <tr style="border-radius: 10px; background-color: #F4F5F7;">
+                            <th scope="col" style="width: 1%; border-top-left-radius: 10px;">
+                                <input type="checkbox" id="selectAll">
+                            </th>
+                            <th scope="col" style="width: 30%;">Nome do cliente</th>
+                            <th scope="col">E-mail</th>
+                            <th scope="col">Telefone</th>
+                            <th scope="col">Departamento</th>
+                            <th scope="col">Data de adição</th>
+                            <th scope="col" style="width: 5%; border-top-right-radius: 10px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var contact in Model.Contacts)
+                        {
+                            <tr style="border-bottom: 1px solid #E0E0E0;">
+                                <td>
+                                    <input type="checkbox" class="selectContact" name="ids" value="@contact.Id">
+                                </td>
+                                <td class="d-flex align-items-center">
+                                    <span class="badge rounded-circle bg-success text-white me-2" style="height: 40px; width: 40px; display: flex; align-items: center; justify-content: center;">
+                                        @GetInitials(contact.FullName)
+                                    </span>                                    
+                                    <div>
+                                        <div class="fw-bold">@contact.FullName</div>
+                                        <div class="text-muted small">@contact.PrimaryEmail</div>
+                                    </div>
+                                </td>
+                                <td>@contact.PrimaryEmail</td>
+                                <td>@contact.Phone</td>
+                                <td>@contact.Department</td>
+                                <td>@contact.CreatedAt.ToString("dd 'de' MMMM 'de' yyyy")</td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button class="btn btn-link text-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="bi bi-three-dots"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <a class="dropdown-item" href="#">
+                                                    <i class="bi bi-eye me-2"></i> Ver perfil
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" asp-action="EditContact" asp-route-id="@contact.Id">
+                                                    <i class="bi bi-pencil-square me-2"></i> Editar detalhes
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item text-danger" href="#">
+                                                    <i class="bi bi-trash me-2"></i> Remover
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </form>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-3">
+        <div>
+            <span class="text-muted">Mostrando @((Model.PageNumber - 1) * Model.PageSize + 1) a @(Model.PageNumber * Model.PageSize) de @Model.TotalItems entradas</span>
+        </div>
+        @if (Model.TotalItems > 10)
+        {
+            <nav aria-label="Navegação de página">
+                <ul class="pagination mb-0">
+                    @if (Model.PageNumber > 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="@Url.Action("GetContact", new { pageNumber = Model.PageNumber - 1, pageSize = Model.PageSize, searchTerm = Model.SearchTerm })" aria-label="Anterior">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    }
+                    @for (var i = 1; i <= Model.TotalPages; i++)
+                    {
+                        <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                            <a class="page-link" href="@Url.Action("GetContact", new { pageNumber = i, pageSize = Model.PageSize, searchTerm = Model.SearchTerm })">@i</a>
+                        </li>
+                    }
+                    @if (Model.PageNumber < Model.TotalPages)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="@Url.Action("GetContact", new { pageNumber = Model.PageNumber + 1, pageSize = Model.PageSize, searchTerm = Model.SearchTerm })" aria-label="Próximo">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        }
+    </div>
+</div>
+
+@functions {
+    public static string GetInitials(string fullName)
+    {
+        if (string.IsNullOrEmpty(fullName))
+            return string.Empty;
+
+        var names = fullName.Split(' ');
+        if (names.Length == 1)
+            return names[0].Substring(0, 1).ToUpper();
+
+        return (names[0].Substring(0, 1) + names[names.Length - 1].Substring(0, 1)).ToUpper();
+    }
+}
+
+@section Scripts {
+    <script>
+        document.getElementById('selectAll').addEventListener('change', function () {
+            var checkboxes = document.querySelectorAll('.selectContact');
+            var selectAll = this.checked;
+            checkboxes.forEach(function (checkbox) {
+                checkbox.checked = selectAll;
+            });
+            toggleDeleteButton();
+        });
+
+        document.querySelectorAll('.selectContact').forEach(function (checkbox) {
+            checkbox.addEventListener('change', function () {
+                toggleDeleteButton();
+            });
+        });
+
+        function toggleDeleteButton() {
+            var anyChecked = document.querySelectorAll('.selectContact:checked').length > 0;
+            var deleteButton = document.getElementById('deleteSelectedBtn');
+            deleteButton.style.display = anyChecked ? 'inline-block' : 'none';
+        }
+
+        function deleteSelected() {
+            var form = document.getElementById('deleteForm');
+            form.submit();
+        }
+
+        function applyFilter() {
+            var searchTerm = document.getElementById('searchTerm').value;
+            var url = '@Url.Action("GetContact", new { pageNumber = 1, pageSize = Model.PageSize })';
+            window.location.href = url + '&searchTerm=' + encodeURIComponent(searchTerm);
+        }
+    </script>
+}
+
+
+@* <div class="container">
     <h2>Clientes</h2>
     <table class="table table-striped display" id="table-contactDto">
         <thead>
@@ -48,5 +228,5 @@
             }
         </tbody>
     </table>
-</div>
+</div> *@
 

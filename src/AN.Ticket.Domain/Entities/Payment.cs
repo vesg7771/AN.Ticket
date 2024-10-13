@@ -30,6 +30,7 @@ public class Payment : EntityBase
         ContactId = contactId;
         MonthlyFee = monthlyFee;
         DueDate = dueDate;
+        PaymentPlanId = paymentPlanId;
         Paid = false;
     }
 

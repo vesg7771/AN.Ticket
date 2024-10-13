@@ -14,6 +14,7 @@ public class ContactDto
     public List<SocialNetworkDto>? SocialNetworks { get; set; }
     public Guid? UserId { get; set; }
     public UserDto? User { get; set; }
+    public DateTime CreatedAt { get; set; }
 }
 
 public class SocialNetworkDto

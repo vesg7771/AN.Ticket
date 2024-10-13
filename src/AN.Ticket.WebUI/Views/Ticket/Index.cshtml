@@ -188,53 +188,47 @@
         </div>
     </div>
 
-    <div class="row mb-2">
-        <div class="col-md-12">
+<div class="row mb-2">
+        <div class="col-12">
             <table class="table table-borderless align-middle" style="color: white;">
                 <thead>
                     <tr>
                         <th scope="col">Assunto</th>
-                        <th scope="col">Prioridade</th>
-                        <th scope="col">Status</th>
-                        <th scope="col">Data de Vencimento</th>
-                        <th scope="col">Conclusão</th>
+                        <th scope="col" class="d-none d-sm-table-cell">Prioridade</th>
+                        <th scope="col" class="d-none d-md-table-cell">Status</th>
+                        <th scope="col" class="d-none d-lg-table-cell">Data de Vencimento</th>
+                        <th scope="col" class="d-none d-lg-table-cell">Conclusão</th>
                         <th scope="col">Ação</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var ticket in Model.DashboardData.RecentTickets.Items)
                     {
-                        <tr>
-                            <td>
-                                <i class="bi bi-ticket-detailed-fill me-2"></i> @ticket.Subject
-                            </td>
-                            <td>
-                                @Html.Raw(GetPriorityBadge(ticket.Priority))
-                            </td>
-                            <td>
-                                @Html.Raw(GetStatusBadge(ticket.Status))
-                            </td>
-                            <td>
-                                @ticket.DueDate.ToString("dd/MM/yyyy")
-                            </td>
-                            <td>
-                                <div class="progress" style="height: 6px;">
-                                    <div class="progress-bar @(GetProgressBarClass(ticket.Status))"
-                                         role="progressbar"
-                                         style="width: @(GetCompletionPercentage(ticket.Status))%;"
-                                         aria-valuenow="@GetCompletionPercentage(ticket.Status)"
-                                         aria-valuemin="0"
-                                         aria-valuemax="100"
-                                         data-bs-toggle="tooltip"
-                                         data-bs-placement="top"
-                                         title="@GetTooltipText(ticket.Status)">
+                            <tr>
+                                <td>
+                                    <span class="d-inline-block text-truncate" style="max-width: 150px;" data-bs-toggle="tooltip" title="@ticket.Subject">
+                                        <i class="bi bi-ticket-detailed-fill me-2 d-none d-md-inline-block"></i> @ticket.Subject
+                                    </span>
+                                </td>
+                                <td class="d-none d-sm-table-cell">@Html.Raw(GetPriorityBadge(ticket.Priority))</td>
+                                <td class="d-none d-md-table-cell">@Html.Raw(GetStatusBadge(ticket.Status))</td>
+                                <td class="d-none d-lg-table-cell">@ticket.DueDate.ToString("dd/MM/yyyy")</td>
+                                <td class="d-none d-lg-table-cell">
+                                    <div class="progress" style="height: 6px;">
+                                        <div class="progress-bar @(GetProgressBarClass(ticket.Status))"
+                                             role="progressbar"
+                                             style="width: @(GetCompletionPercentage(ticket.Status))%;"
+                                             aria-valuenow="@GetCompletionPercentage(ticket.Status)"
+                                             aria-valuemin="0"
+                                             aria-valuemax="100"
+                                             data-bs-toggle="tooltip"
+                                             data-bs-placement="top"
+                                             title="@GetTooltipText(ticket.Status)">
+                                        </div>
                                     </div>
-                                </div>
-                            </td>
-                            <td>
-                                <a href="/Ticket/Details/@ticket.Id" class="btn btn-sm btn-primary">Responder</a>
-                            </td>
-                        </tr>
+                                </td>
+                                <td><a href="/Ticket/Details/@ticket.Id" class="btn btn-sm btn-primary">Responder</a></td>
+                            </tr>
                     }
                 </tbody>
             </table>
@@ -278,13 +272,11 @@
 </div>
 
 <div class="row mt-5">
-    <div class="col-md-6">
+    <div class="col-md-6 mb-4 mb-md-0">
         <div class="card p-3">
             <h5 class="card-title">Atividades</h5>
             <div class="half-doughnut-container">
-                <div class="on-track-badge">
-                    <i class="bi bi-check-circle"></i> Abertas/Fechadas
-                </div>
+                <div class="on-track-badge"><i class="bi bi-check-circle"></i> Abertas/Fechadas</div>
                 <canvas id="activityDoughnutChart" class="half-doughnut-chart"></canvas>
             </div>
             <div class="activity-info">
@@ -298,65 +290,34 @@
     <div class="col-md-6">
         <div class="card p-3">
             <h5 class="card-title">Atividades Recentes</h5>
-
             @if (!Model.DashboardData.PagedActivities.Items.Any())
             {
-                <div class="alert alert-info" role="alert">
-                    Nenhuma atividade encontrada.
-                </div>
+                    <div class="alert alert-info" role="alert">
+                        Nenhuma atividade encontrada.
+                    </div>
             }
             else
             {
-                <ul class="list-group list-group-flush">
+                    <ul class="list-group list-group-flush">
                     @foreach (var activity in Model.DashboardData.PagedActivities.Items)
                     {
-                        <li class="list-group-item d-flex align-items-center">
-                            <div class="col-md-6">
-                                <strong>@activity.Subject</strong>
-                                <p class="text-muted mb-0">@activity.Description</p>
-                            </div>
-                            <div class="col-md-2 text-center">
-                                <span class="badge bg-warning text-dark">Aberto</span>
-                            </div>
-                            <div class="col-md-2 text-center">
-                                <span>@activity.ScheduledDate.ToString("dd/MM/yyyy")</span>
-                            </div>
-                            <div class="col-md-2 text-end">
+                                <li class="list-group-item d-flex align-items-center">
+                                    <div class="col-6">
+                                        <strong>@activity.Subject</strong>
+                                        <p class="text-muted mb-0">@activity.Description</p>
+                                    </div>
+                                    <div class="col-2 text-center">
+                                        <span class="badge bg-warning text-dark">Aberto</span>
+                                    </div>
+                                    <div class="col-2 text-center">
+                                        <span>@activity.ScheduledDate.ToString("dd/MM/yyyy")</span>
+                                    </div>
+                                    <div class="col-2 text-end">
                                 @await Html.PartialAsync("~/Views/Shared/Partials/Activity/_ActivityActionsDropdown.cshtml", activity.Id)
-                            </div>
-                        </li>
+                                    </div>
+                                </li>
                     }
-                </ul>
-            }
-
-            @if (Model.DashboardData.PagedActivities.TotalPages > 1)
-            {
-                <nav aria-label="Activity pagination">
-                    <ul class="pagination justify-content-center mt-3">
-                        @if (Model.ActivityPageNumber > 1)
-                        {
-                            <li class="page-item">
-                                <a class="page-link" href="@Url.Action("Index", new { ticketPageNumber = Model.TicketPageNumber, activityPageNumber = Model.ActivityPageNumber - 1 })" aria-label="Anterior">
-                                    <span aria-hidden="true">&laquo;</span>
-                                </a>
-                            </li>
-                        }
-                        @for (int i = 1; i <= Model.DashboardData.PagedActivities.TotalPages; i++)
-                        {
-                            <li class="page-item @(i == Model.ActivityPageNumber ? "active" : "")">
-                                <a class="page-link" href="@Url.Action("Index", new { ticketPageNumber = Model.TicketPageNumber, activityPageNumber = i })">@i</a>
-                            </li>
-                        }
-                        @if (Model.ActivityPageNumber < Model.DashboardData.PagedActivities.TotalPages)
-                        {
-                            <li class="page-item">
-                                <a class="page-link" href="@Url.Action("Index", new { ticketPageNumber = Model.TicketPageNumber, activityPageNumber = Model.ActivityPageNumber + 1 })" aria-label="Próximo">
-                                    <span aria-hidden="true">&raquo;</span>
-                                </a>
-                            </li>
-                        }
                     </ul>
-                </nav>
             }
         </div>
     </div>

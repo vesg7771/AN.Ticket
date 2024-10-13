@@ -66,5 +66,28 @@ public class Contact : EntityBase
     {
         Cpf = cpf;
     }
+
+    public void Update(
+        string firstName,
+        string lastName,
+        string cpf,
+        string primaryEmail,
+        string secondaryEmail,
+        string phone,
+        string mobile,
+        string department,
+        string title
+    )
+    {
+        FirstName = firstName ?? throw new ArgumentNullException(nameof(firstName));
+        LastName = lastName ?? throw new ArgumentNullException(nameof(lastName));
+        Cpf = cpf ?? throw new ArgumentNullException(nameof(cpf));
+        PrimaryEmail = primaryEmail ?? throw new ArgumentNullException(nameof(primaryEmail));
+        SecondaryEmail = secondaryEmail;
+        Phone = phone;
+        Mobile = mobile ?? throw new ArgumentNullException(nameof(mobile));
+        Department = department;
+        Title = title;
+    }
 }
 

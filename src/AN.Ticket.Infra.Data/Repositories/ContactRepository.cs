@@ -20,4 +20,10 @@ public class ContactRepository
 
     public async Task<bool> ExistContactCpfAsync(string cpf)
         => await Entities.AnyAsync(c => c.Cpf.Equals(cpf));
+
+    public async Task<List<Contact>> GetByUserAsync(Guid userId)
+        => await Entities.Where(c => c.UserId == userId).ToListAsync();
+
+    public async Task<List<Contact>> GetByIdsAsync(List<Guid> ids)
+        => await Entities.Where(c => ids.Contains(c.Id)).ToListAsync();
 }
