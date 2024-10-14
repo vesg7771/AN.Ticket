@@ -27,7 +27,7 @@ public class BreadcrumbViewComponent : ViewComponent
         {
             "Contact", new Dictionary<string, string>
             {
-                { "GetContact", "Contatos" },
+                { "Index", "Contatos" },
                 { "CreateContact", "Criar Contato" }
             }
         },

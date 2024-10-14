@@ -71,11 +71,11 @@ public class ContactController : Controller
         }
 
         TempData["SuccessMessage"] = "Cliente criado com sucesso!";
-        return Redirect(nameof(GetContact));
+        return Redirect(nameof(Index));
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetContact(int pageNumber = 1, int pageSize = 10, string searchTerm = "")
+    public async Task<IActionResult> Index(int pageNumber = 1, int pageSize = 10, string searchTerm = "")
     {
         var userId = await GetCurrentUserId();
         var paginatedContacts = await _contactService.GetPaginatedContactsAsync(userId, pageNumber, pageSize, searchTerm);
@@ -114,18 +114,18 @@ public class ContactController : Controller
         if (ids == null || !ids.Any())
         {
             TempData["ErrorMessage"] = "Nenhum contato foi selecionado.";
-            return RedirectToAction(nameof(GetContact));
+            return RedirectToAction(nameof(Index));
         }
 
         var success = await _contactService.DeleteContactsAsync(ids);
         if (!success)
         {
             TempData["ErrorMessage"] = "Erro ao deletar os contatos selecionados.";
-            return RedirectToAction(nameof(GetContact));
+            return RedirectToAction(nameof(Index));
         }
 
         TempData["SuccessMessage"] = "Contatos deletados com sucesso!";
-        return RedirectToAction(nameof(GetContact));
+        return RedirectToAction(nameof(Index));
     }
 
     [HttpGet]
@@ -133,13 +133,13 @@ public class ContactController : Controller
     {
         if (id is null)
         {
-            return RedirectToAction(nameof(GetContact));
+            return RedirectToAction(nameof(Index));
         }
 
         var contact = await _contactService.GetByIdAsync(id.Value);
         if (contact is null)
         {
-            return RedirectToAction(nameof(GetContact));
+            return RedirectToAction(nameof(Index));
         }
 
         var paymentPlans = await _paymantPlanService.GetAllAsync();
@@ -182,7 +182,7 @@ public class ContactController : Controller
         }
 
         TempData["SuccessMessage"] = "Contato atualizado com sucesso!";
-        return RedirectToAction(nameof(GetContact));
+        return RedirectToAction(nameof(Index));
     }
 
     private async Task<ApplicationUser?> GetCurrentUserAsync()
