@@ -128,6 +128,29 @@ public class ContactController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteContact(Guid id)
+    {
+        if (id == Guid.Empty)
+        {
+            TempData["ErrorMessage"] = "Nenhum contato foi selecionado.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        var ids = new List<Guid> { id };
+
+        var success = await _contactService.DeleteContactsAsync(ids);
+        if (!success)
+        {
+            TempData["ErrorMessage"] = "Erro ao deletar o contato selecionado.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        TempData["SuccessMessage"] = "Contato deletado com sucesso!";
+        return RedirectToAction(nameof(Index));
+    }
+
     [HttpGet]
     public async Task<IActionResult> EditContact(Guid? id)
     {
@@ -183,6 +206,12 @@ public class ContactController : Controller
 
         TempData["SuccessMessage"] = "Contato atualizado com sucesso!";
         return RedirectToAction(nameof(Index));
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Details()
+    {
+        return View();
     }
 
     private async Task<ApplicationUser?> GetCurrentUserAsync()

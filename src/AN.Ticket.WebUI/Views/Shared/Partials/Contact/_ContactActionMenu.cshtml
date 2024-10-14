@@ -1,0 +1,45 @@
+﻿@model Guid
+
+<div class="dropdown">
+    <button class="btn btn-link bg-white text-secondary border" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="bi bi-three-dots"></i>
+    </button>
+    <ul class="dropdown-menu">
+        <li>
+            <a class="dropdown-item" href="/Contact/Details">
+                <i class="bi bi-eye me-2"></i> Ver perfil
+            </a>
+        </li>
+        <li>
+            <a class="dropdown-item" asp-action="EditContact" asp-route-id="@Model">
+                <i class="bi bi-pencil-square me-2"></i> Editar detalhes
+            </a>
+        </li>
+        <li>
+            <a class="dropdown-item text-danger" href="#" data-bs-toggle="modal" data-bs-target="#deleteModal-@Model">
+                <i class="bi bi-trash"></i> Excluir
+            </a>
+        </li>
+    </ul>
+</div>
+
+<div class="modal fade" id="deleteModal-@Model" tabindex="-1" aria-labelledby="deleteModalLabel-@Model" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="DeleteContact" asp-controller="Contact" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel-@Model">Confirmar Exclusão</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    Você tem certeza que deseja excluir esse Cliente?
+                </div>
+                <div class="modal-footer">
+                    <input type="hidden" name="id" value="@Model" />
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger">Excluir</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -99,28 +99,7 @@
                                 <td class="d-none d-lg-table-cell">@contact.Department</td>
                                 <td class="d-none d-lg-table-cell">@contact.CreatedAt.ToString("dd 'de' MMMM 'de' yyyy")</td>
                                 <td>
-                                    <div class="dropdown">
-                                        <button class="btn btn-link text-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                            <i class="bi bi-three-dots"></i>
-                                        </button>
-                                        <ul class="dropdown-menu">
-                                            <li>
-                                                <a class="dropdown-item" href="#">
-                                                    <i class="bi bi-eye me-2"></i> Ver perfil
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a class="dropdown-item" asp-action="EditContact" asp-route-id="@contact.Id">
-                                                    <i class="bi bi-pencil-square me-2"></i> Editar detalhes
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a class="dropdown-item text-danger" href="#">
-                                                    <i class="bi bi-trash me-2"></i> Remover
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </div>
+                                    @await Html.PartialAsync("~/Views/Shared/Partials/Contact/_ContactActionMenu.cshtml", contact.Id)
                                 </td>
                             </tr>
                         }
@@ -217,9 +196,15 @@
 
         function applyFilter() {
             var searchTerm = document.getElementById('searchTerm').value;
-            var url = '@Url.Action("GetContact", new { pageNumber = 1, pageSize = Model.PageSize })';
+            var url = '@Url.Action("Index", new { pageNumber = 1, pageSize = Model.PageSize })';
             window.location.href = url + '&searchTerm=' + encodeURIComponent(searchTerm);
         }
+
+        document.getElementById('searchTerm').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                applyFilter();
+            }
+        });
     </script>
 }
 
