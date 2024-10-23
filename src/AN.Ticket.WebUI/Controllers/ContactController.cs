@@ -209,9 +209,10 @@ public class ContactController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Details()
+    public async Task<IActionResult> Details(Guid id)
     {
-        return View();
+        var contactDetails = await _contactService.GetContactDetailsAsync(id);
+        return View(contactDetails);
     }
 
     private async Task<ApplicationUser?> GetCurrentUserAsync()

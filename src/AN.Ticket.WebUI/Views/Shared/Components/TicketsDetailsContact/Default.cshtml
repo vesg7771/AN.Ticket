@@ -1,0 +1,79 @@
+﻿@using AN.Ticket.Domain.Enums
+@model IEnumerable<AN.Ticket.Application.Services.TicketContactDetailsDto>
+
+@if (Model != null && Model.Any())
+{
+    @foreach (var ticket in Model)
+    {
+        <div class="card border-1 rounded-3 mb-4">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="d-flex align-items-center">
+                        <strong class="me-3" style="font-size: 1.2rem;">#@ticket.TicketCode</strong>
+                        <span class="text-muted">@ticket.TicketTitle</span>
+                    </div>
+                    <span class="badge bg-primary" style="font-size: 0.85rem;">@TranslateStatus(ticket.TicketStatus)</span>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-3 d-flex align-items-center">
+                        <i class="bi bi-question-circle me-2" style="font-size: 1.2rem;"></i>
+                        <div>
+                            <small class="text-muted d-block">Tipo de Ticket</small>
+                            <span>@ticket.TicketType</span>
+                        </div>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-center">
+                        <i class="bi bi-exclamation-circle-fill me-2" style="font-size: 1.2rem; color: #f0ad4e;"></i>
+                        <div>
+                            <small class="text-muted d-block">Prioridade</small>
+                            <span class="badge bg-warning text-dark">@TranslatePriority(ticket.Priority)</span>
+                        </div>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-center">
+                        <img src="~/img/user-default.webp" alt="Responsável" class="rounded-circle me-2" style="width: 30px; height: 30px; object-fit: cover;">
+                        <div>
+                            <small class="text-muted d-block">Atribuído a</small>
+                            <span>@ticket.AssignedTo</span>
+                        </div>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-center">
+                        <i class="bi bi-calendar3 me-2" style="font-size: 1.2rem;"></i>
+                        <div>
+                            <small class="text-muted d-block">Data de Solicitação</small>
+                            <span>@ticket.RequestDate.ToString("dd/MM/yyyy, hh:mm tt")</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}
+else
+{
+    <div class="alert alert-info">Nenhum ticket encontrado.</div>
+}
+
+@functions {
+    public string TranslateStatus(TicketStatus status)
+    {
+        return status switch
+        {
+            TicketStatus.Onhold => "Em Espera",
+            TicketStatus.Open => "Aberto",
+            TicketStatus.InProgress => "Em Progresso",
+            TicketStatus.Closed => "Fechado",
+            _ => status.ToString(),
+        };
+    }
+
+    public string TranslatePriority(TicketPriority priority)
+    {
+        return priority switch
+        {
+            TicketPriority.Low => "Baixo",
+            TicketPriority.Medium => "Médio",
+            TicketPriority.High => "Alta",
+            _ => priority.ToString(),
+        };
+    }
+}

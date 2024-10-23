@@ -12,4 +12,5 @@ public interface ITicketRepository : IRepository<DomainEntity.Ticket>
     Task<DomainEntity.Ticket> GetByTicketCodeAsync(int ticketCode);
     Task<bool> IsTicketClosedAsync(Guid ticketId);
     Task<List<DomainEntity.Ticket>> GetTicketWithDetailsByUserAsync(Guid userId);
+    Task<IEnumerable<DomainEntity.Ticket>> GetByContactEmailAsync(List<string> emails);
 }

@@ -21,4 +21,12 @@ public class PaymentRepository
             .Where(p => contactIds.Contains(p.ContactId))
             .ToListAsync();
     }
+
+    public async Task<IEnumerable<Payment>> GetByContactIdAsync(Guid contactId)
+    {
+        return await Entities
+            .Where(p => p.ContactId == contactId)
+            .Include(p => p.PaymentPlan)
+            .ToListAsync();
+    }
 }

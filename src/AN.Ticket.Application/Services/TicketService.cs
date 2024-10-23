@@ -579,4 +579,27 @@ public class TicketService
 
         return percentageChange;
     }
+
+    public async Task<IEnumerable<TicketContactDetailsDto>> GetTicketsByContactIdAsync(List<string> emails, bool showAll)
+    {
+        var tickets = await _ticketRepository.GetByContactEmailAsync(emails);
+        if (!showAll)
+        {
+            tickets = tickets.OrderByDescending(t => t.CreatedAt).Take(1).ToList();
+        }
+
+        tickets = tickets.Where(t => t.Status != TicketStatus.Closed).ToList();
+
+        return tickets.Select(t => new TicketContactDetailsDto
+        {
+            TicketId = t.Id,
+            TicketCode = t.TicketCode.ToString(),
+            TicketTitle = t.Subject,
+            TicketStatus = t.Status,
+            TicketType = t.Classification ?? "Sem classificação",
+            Priority = t.Priority,
+            AssignedTo = t.User?.FullName ?? "Não atribuído",
+            RequestDate = t.CreatedAt
+        });
+    }
 }

@@ -1,10 +1,13 @@
 ﻿using AN.Ticket.Application.DTOs.Contact;
+using AN.Ticket.Application.DTOs.PaymantPlan;
+using AN.Ticket.Application.Exceptions;
 using AN.Ticket.Application.Extensions;
 using AN.Ticket.Application.Helpers.Pagination;
 using AN.Ticket.Application.Interfaces;
 using AN.Ticket.Application.Services.Base;
 using AN.Ticket.Domain.Entities;
 using AN.Ticket.Domain.EntityValidations;
+using AN.Ticket.Domain.Enums;
 using AN.Ticket.Domain.Interfaces;
 using AN.Ticket.Domain.Interfaces.Base;
 using AN.Ticket.Domain.ValueObjects;
@@ -17,13 +20,15 @@ public class ContactService
     private readonly IPaymentRepository _paymentRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IPaymentPlanRepository _paymentPlanRepository;
+    private readonly ITicketRepository _ticketRepository;
 
     public ContactService(
         IRepository<Contact> repository,
         IContactRepository contactRepository,
         IPaymentRepository paymentRepository,
         IUnitOfWork unitOfWork,
-        IPaymentPlanRepository paymentPlanRepository
+        IPaymentPlanRepository paymentPlanRepository,
+        ITicketRepository ticketRepository
     )
         : base(repository)
     {
@@ -31,6 +36,7 @@ public class ContactService
         _paymentRepository = paymentRepository;
         _unitOfWork = unitOfWork;
         _paymentPlanRepository = paymentPlanRepository;
+        _ticketRepository = ticketRepository;
 
     }
 
@@ -207,5 +213,97 @@ public class ContactService
         _contactRepository.Update(contact);
         await _unitOfWork.CommitAsync();
         return true;
+    }
+
+    public async Task<ContactDetailsDto> GetContactDetailsAsync(Guid contactId)
+    {
+        var contact = await _contactRepository.GetByIdIncludeUserAsync(contactId);
+        if (contact is null)
+            throw new NotFoundException("Contato não encontrado.");
+
+        var emails = new List<string> { contact.PrimaryEmail, contact.SecondaryEmail };
+        var tickets = await _ticketRepository.GetByContactEmailAsync(emails);
+
+        var totalTickets = tickets.Count();
+        var onHoldTickets = tickets.Count(t => t.Status == TicketStatus.Onhold);
+        var averageResponseTime = tickets
+            .Where(t => t.Messages != null && t.Messages.Any(m => m.UserId == null))
+            .Average(t => t.Messages!
+                .Where(m => m.UserId == null)
+                .Average(m => (m.SentAt - t.CreatedAt)?.TotalMinutes ?? 0));
+
+        var totalResponseTime = tickets
+            .Where(t => t.Status == TicketStatus.Open)
+            .Sum(t => (t.FirstResponseAt - t.CreatedAt)?.TotalHours ?? 0);
+
+        var paymentActivities = await _paymentRepository.GetByContactIdAsync(contactId);
+
+        DateTime? lastInteraction = null;
+        var lastTicket = tickets.OrderByDescending(t => t.CreatedAt).FirstOrDefault();
+        if (lastTicket != null)
+        {
+            var lastMessage = lastTicket.Messages?.Where(m => m.UserId == null).OrderByDescending(m => m.CreatedAt).FirstOrDefault();
+            if (lastMessage != null)
+            {
+                lastInteraction = lastMessage.CreatedAt;
+            }
+            else
+            {
+                lastInteraction = lastTicket.CreatedAt;
+            }
+        }
+
+        var contactDetailsDto = new ContactDetailsDto
+        {
+            ContactId = contact.Id,
+            FullName = $"{contact.FirstName} {contact.LastName}",
+            Departament = contact.Department ?? "Sem departamento",
+            ProfileImageUrl = "~/img/user-default.webp",
+            Tag = "Tag exemplo",
+            LastInteraction = lastInteraction,
+
+            TotalTickets = totalTickets,
+            OnHoldTickets = onHoldTickets,
+            AverageResponseTime = TimeSpan.FromMinutes(averageResponseTime),
+            TotalResponseTime = TimeSpan.FromHours(totalResponseTime),
+
+            Source = "Fonte exemplo",
+            PhoneNumber = contact.Phone,
+            Email = contact.PrimaryEmail,
+
+            ResponseTimeStatus = GetResponseTimeStatus(averageResponseTime),
+            AssignedTo = contact.User?.FullName ?? "Não atribuído",
+            FirstContactDate = contact.CreatedAt,
+
+            PaymentActivities = paymentActivities.Select(p => new PaymentActivityDto
+            {
+                PaymentId = p.Id,
+                Code = GeneratePaymentCode(p),
+                Status = p.Paid ? "Concluído" : "Pendente",
+                Method = p.PaymentPlan?.Description ?? "Desconhecido",
+                PaymentDate = p.DueDate,
+                Amount = (decimal)p.MonthlyFee
+            }).OrderBy(x => x.PaymentDate.Month).ToList()
+        };
+
+        return contactDetailsDto;
+    }
+
+    private string GetResponseTimeStatus(double averageResponseTime)
+    {
+        if (averageResponseTime < 30)
+            return "Rápido";
+        else if (averageResponseTime < 60)
+            return "Moderado";
+        else
+            return "Lento";
+    }
+
+    private string GeneratePaymentCode(Payment payment)
+    {
+        var monthNumber = payment.DueDate.Month.ToString("D2");
+        var lastThreeChars = payment.Id.ToString().Substring(payment.Id.ToString().Length - 3);
+
+        return $"{monthNumber}{lastThreeChars}";
     }
 }

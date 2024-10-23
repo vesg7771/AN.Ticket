@@ -9,4 +9,5 @@ public interface IContactRepository
     Task<bool> ExistContactCpfAsync(string cpf);
     Task<List<Contact>> GetByUserAsync(Guid userId);
     Task<List<Contact>> GetByIdsAsync(List<Guid> ids);
+    Task<Contact> GetByIdIncludeUserAsync(Guid id);
 }

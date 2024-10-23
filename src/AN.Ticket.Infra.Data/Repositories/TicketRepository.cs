@@ -93,4 +93,14 @@ public class TicketRepository
             .Where(x => x.Id == ticketId && x.Status == TicketStatus.Closed)
             .AnyAsync();
     }
+
+    public async Task<IEnumerable<DomainEntity.Ticket>> GetByContactEmailAsync(List<string> emails)
+    {
+        return await Entities
+            .AsNoTracking()
+            .Where(x => emails.Contains(x.Email))
+            .Include(x => x.User)
+            .Include(x => x.Messages)
+            .ToListAsync();
+    }
 }

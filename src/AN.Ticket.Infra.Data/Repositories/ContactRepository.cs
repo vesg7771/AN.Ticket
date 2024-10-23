@@ -1,4 +1,5 @@
-﻿using AN.Ticket.Domain.Entities;
+﻿using AN.Ticket.Application.Exceptions;
+using AN.Ticket.Domain.Entities;
 using AN.Ticket.Domain.Interfaces;
 using AN.Ticket.Infra.Data.Context;
 using AN.Ticket.Infra.Data.Repositories.Base;
@@ -26,4 +27,12 @@ public class ContactRepository
 
     public async Task<List<Contact>> GetByIdsAsync(List<Guid> ids)
         => await Entities.Where(c => ids.Contains(c.Id)).ToListAsync();
+
+    public async Task<Contact> GetByIdIncludeUserAsync(Guid id)
+    {
+        var contact = await Entities.Include(c => c.User).FirstOrDefaultAsync(c => c.Id == id);
+        if (contact is null)
+            throw new NotFoundException($"Contato com ID {id} não encontrado.");
+        return contact;
+    }
 }

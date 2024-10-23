@@ -1,6 +1,5 @@
 ﻿using AN.Ticket.Application.DTOs.Ticket;
 using AN.Ticket.Application.Interfaces;
-using AN.Ticket.Application.Services;
 using AN.Ticket.Domain.EntityValidations;
 using AN.Ticket.Infra.Data.Identity;
 using AN.Ticket.WebUI.Components;
@@ -345,6 +344,14 @@ public class TicketController : Controller
         var contactDetailsViewComponent = new ContactDetailsViewComponent(_contactService);
         var result = await contactDetailsViewComponent.InvokeAsync(contactId);
         return ViewComponent("ContactDetails", new { contactId });
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ShowAllTickets(List<string> emails)
+    {
+        var ticketDetailsViewComponent = new TicketsDetailsContactViewComponent(_ticketService);
+        var result = await ticketDetailsViewComponent.InvokeAsync(emails, true);
+        return ViewComponent("TicketsDetailsContact", new { emails = emails, showAll = true });
     }
 
     private async Task<ApplicationUser?> GetCurrentUserAsync()

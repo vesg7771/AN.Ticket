@@ -1,5 +1,9 @@
-﻿@{
+﻿@using AN.Ticket.Domain.Enums
+@model AN.Ticket.Application.DTOs.Contact.ContactDetailsDto
+
+@{
     ViewData["Title"] = "Detalhes do Cliente";
+    var listEmails = new List<string> { Model.Email };
 }
 
 @await Component.InvokeAsync("Breadcrumb")
@@ -9,11 +13,10 @@
         <div class="col-lg-12 d-flex align-items-center mb-4">
             <img src="~/img/user-default.webp" alt="Foto do Cliente" class="rounded-circle" style="width: 80px; height: 80px; object-fit: cover;">
             <div class="ms-3">
-                <h3 class="mb-1">Santi Cazorla</h3>
-                <p class="text-muted mb-1"><i class="bi bi-building"></i> Microsoft</p>
+                <h3 class="mb-1">@Model.FullName</h3>
+                <p class="text-muted mb-1"><i class="bi bi-building"></i> @Model.Departament</p>
                 <div class="d-flex align-items-center">
-                    <span class="badge bg-success me-2">Fikri Studio</span>
-                    <span class="text-muted">Fikri Studio - há 5 dias</span>
+                    <span class="text-muted">Última interação - @(Model.LastInteraction.HasValue ? Model.LastInteraction.Value.ToString("dd/MM/yyyy") : "Nenhuma interação registrada")</span>
                 </div>
             </div>
         </div>
@@ -23,16 +26,16 @@
         <div class="col-md-3">
             <div class="card text-center border-1">
                 <div class="card-body p-3">
-                    <h6 class="card-title text-muted">Tickets</h6>
-                    <h5 class="card-text">16</h5>
+                    <h6 class="card-title text-muted">Total de Tickets</h6>
+                    <h5 class="card-text">@Model.TotalTickets</h5>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card text-center border-1">
                 <div class="card-body p-3">
-                    <h6 class="card-title text-muted">Tickets em Atraso</h6>
-                    <h5 class="card-text">4</h5>
+                    <h6 class="card-title text-muted">Tickets em Espera (On Hold)</h6>
+                    <h5 class="card-text">@Model.OnHoldTickets</h5>
                 </div>
             </div>
         </div>
@@ -40,7 +43,7 @@
             <div class="card text-center border-1">
                 <div class="card-body p-3">
                     <h6 class="card-title text-muted">Tempo Médio de Resposta</h6>
-                    <h5 class="card-text">25:00 <span class="badge bg-success">2% Mais Rápido</span></h5>
+                    <h5 class="card-text">@Model.AverageResponseTime.ToString(@"hh\:mm")</h5>
                 </div>
             </div>
         </div>
@@ -48,7 +51,7 @@
             <div class="card text-center border-1">
                 <div class="card-body p-3">
                     <h6 class="card-title text-muted">Tempo Total de Resposta</h6>
-                    <h5 class="card-text">1:32:08</h5>
+                    <h5 class="card-text">@Model.TotalResponseTime.ToString(@"hh\:mm\:ss")</h5>
                 </div>
             </div>
         </div>
@@ -59,24 +62,12 @@
             <h6>Detalhes do Cliente</h6>
             <ul class="list-group border-0">
                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                    Fonte
-                    <span>Formulário de Contato</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between align-items-center">
                     Número de Telefone
-                    <a href="tel:+2095550104">(209) 555-0104</a>
+                    <a href="tel:@Model.PhoneNumber">@Model.PhoneNumber</a>
                 </li>
                 <li class="list-group-item d-flex justify-content-between align-items-center">
                     E-mail
-                    <a href="mailto:hello@santi.com">hello@santi.com</a>
-                </li>
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    Localização
-                    <span>Reino Unido, Europa</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    Idiomas Falados
-                    <span>Inglês, Italiano</span>
+                    <a href="mailto:@Model.Email">@Model.Email</a>
                 </li>
             </ul>
         </div>
@@ -85,23 +76,15 @@
             <ul class="list-group border-0">
                 <li class="list-group-item d-flex justify-content-between align-items-center">
                     Tempo de Resposta
-                    <span class="badge bg-danger">Resposta Lenta</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    Localização
-                    <span>Microsoft</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    Descrição
-                    <a href="#">Adicionar Descrição</a>
+                    <span class="badge @(Model.ResponseTimeStatus == "Rápido" ? "bg-success" : (Model.ResponseTimeStatus == "Moderado" ? "bg-warning" : "bg-danger"))">@Model.ResponseTimeStatus</span>
                 </li>
                 <li class="list-group-item d-flex justify-content-between align-items-center">
                     Atribuído a
-                    <span>Fikri Studio</span>
+                    <span>@Model.AssignedTo</span>
                 </li>
                 <li class="list-group-item d-flex justify-content-between align-items-center">
                     Primeiro Contato
-                    <span>17 de Março, 2023</span>
+                    <span>@Model.FirstContactDate.ToString("dd/MM/yyyy")</span>
                 </li>
             </ul>
         </div>
@@ -110,49 +93,11 @@
     <div class="row mt-4">
         <div class="col-md-12">
             <div class="d-flex justify-content-between align-items-center mb-2">
-                <h6 class="mb-0">Ticket Ativo</h6>
-                <a href="#" class="text-decoration-none text-primary">Ver Mais Tickets</a>
+                <h6 class="mb-0">Tickets</h6>
+                <a href="javascript:void(0)" class="text-decoration-none text-primary" id="verMaisTickets">Ver Mais Tickets</a>
             </div>
-            <div class="card border-1 rounded-3">
-                <div class="card-body p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div class="d-flex align-items-center">
-                            <strong class="me-3" style="font-size: 1.2rem;">#TC-196</strong>
-                            <span class="text-muted">Item Defeituoso Recebido</span>
-                        </div>
-                        <span class="badge bg-primary" style="font-size: 0.85rem;">Aberto</span>
-                    </div>
-                    <div class="row mt-3">
-                        <div class="col-md-3 d-flex align-items-center">
-                            <i class="bi bi-question-circle me-2" style="font-size: 1.2rem;"></i>
-                            <div>
-                                <small class="text-muted d-block">Tipo de Ticket</small>
-                                <span>Pergunta</span>
-                            </div>
-                        </div>
-                        <div class="col-md-3 d-flex align-items-center">
-                            <i class="bi bi-exclamation-circle-fill me-2" style="font-size: 1.2rem; color: #f0ad4e;"></i>
-                            <div>
-                                <small class="text-muted d-block">Prioridade</small>
-                                <span class="badge bg-warning text-dark">Média</span>
-                            </div>
-                        </div>
-                        <div class="col-md-3 d-flex align-items-center">
-                            <img src="~/img/user-default.webp" alt="Bagus Fikri" class="rounded-circle me-2" style="width: 30px; height: 30px; object-fit: cover;">
-                            <div>
-                                <small class="text-muted d-block">Atribuído a</small>
-                                <span>Bagus Fikri</span>
-                            </div>
-                        </div>
-                        <div class="col-md-3 d-flex align-items-center">
-                            <i class="bi bi-calendar3 me-2" style="font-size: 1.2rem;"></i>
-                            <div>
-                                <small class="text-muted d-block">Data de Solicitação</small>
-                                <span>01/08/2023, 09:00AM</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div id="ticketListComponent">
+                @await Component.InvokeAsync("TicketsDetailsContact", new { emails = listEmails, showAll = false })
             </div>
         </div>
     </div>
@@ -161,50 +106,81 @@
         <div class="col-md-12">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h6 class="mb-0">Atividade de Pagamento</h6>
-                <a href="#" class="text-decoration-none text-primary">Ver Mais Pagamentos</a>
-            </div>
+@*                 <a href="#" class="text-decoration-none text-primary">Ver Mais Pagamentos</a>
+ *@            </div>
             <div class="list-group">
-                <div class="list-group-item d-flex justify-content-between align-items-center">
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-check-circle-fill text-success me-3"></i>
-                        <div>
-                            <strong>#2453</strong> Pagamento Concluído
-                            <div class="text-muted">Cartão de Crédito - 12 de Dez, 12:56 PM</div>
+                @foreach (var payment in Model.PaymentActivities)
+                {
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <i class="@(payment.Status == "Concluído" ? "bi bi-check-circle-fill text-success" : payment.Status == "Pendente" ? "bi bi-exclamation-circle-fill text-warning" : "bi bi-x-circle-fill text-danger") me-3"></i>
+                            <div>
+                                <strong>#@payment.Code</strong> Pagamento @payment.Status
+                                <div class="text-muted">@payment.Method - @payment.PaymentDate.ToString("dd 'de' MMM, hh:mm tt")</div>
+                            </div>
                         </div>
+                        <span class="@(payment.Status == "Concluído" ? "text-success" : "text-danger") fw-bold">R$@payment.Amount</span>
                     </div>
-                    <span class="text-success fw-bold">$87</span>
-                </div>
-                <div class="list-group-item d-flex justify-content-between align-items-center">
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-exclamation-circle-fill text-warning me-3"></i>
-                        <div>
-                            <strong>#2452</strong> Pagamento Pendente
-                            <div class="text-muted">PayPal - 9 de Dez, 2:28 PM</div>
-                        </div>
-                    </div>
-                    <span class="text-warning fw-bold">$7264</span>
-                </div>
-                <div class="list-group-item d-flex justify-content-between align-items-center">
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-x-circle-fill text-danger me-3"></i>
-                        <div>
-                            <strong>#2451</strong> Pagamento Falhou
-                            <div class="text-muted">Transferência Bancária - 4 de Dez, 12:56 PM</div>
-                        </div>
-                    </div>
-                    <span class="text-danger fw-bold">$375</span>
-                </div>
-                <div class="list-group-item d-flex justify-content-between align-items-center">
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-arrow-repeat text-secondary me-3"></i>
-                        <div>
-                            <strong>#2450</strong> Pagamento Estornado
-                            <div class="text-muted">Cartão de Crédito - 1 de Dez, 4:07 AM</div>
-                        </div>
-                    </div>
-                    <span class="text-secondary fw-bold">$657</span>
-                </div>
+                }
             </div>
         </div>
     </div>
 </div>
+
+@functions{
+    public string GetPaymentStatusClass(string status)
+    {
+        return status switch
+        {
+            "Concluído" => "text-success",
+            "Pendente" => "text-warning",
+            _ => "text-danger"
+        };
+    }
+
+    public string TranslateStatus(TicketStatus status)
+    {
+        return status switch
+        {
+            TicketStatus.Onhold => "Em Espera",
+            TicketStatus.Open => "Aberto",
+            TicketStatus.InProgress => "Em Progresso",
+            TicketStatus.Closed => "Fechado",
+            _ => status.ToString(),
+        };
+    }
+
+    public string TranslatePriority(TicketPriority priority)
+    {
+        return priority switch
+        {
+            TicketPriority.Low => "Baixo",
+            TicketPriority.Medium => "Médio",
+            TicketPriority.High => "Alta",
+            _ => priority.ToString(),
+        };
+    }
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#verMaisTickets').on('click', function () {
+                const list = ["@Model.Email"];
+
+                $.ajax({
+                    url: '/Ticket/ShowAllTickets',
+                    type: 'GET',
+                    data: { emails: list },
+                    traditional: true,
+                    success: function (data) {
+                        $('#ticketListComponent').html(data);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Erro ao carregar os tickets:', error);
+                    }
+                });
+            });
+        });
+    </script>
+}
