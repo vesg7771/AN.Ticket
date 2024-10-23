@@ -58,7 +58,7 @@
                         </div>
                         <div class="mb-3">
                             <label asp-for="Phone" class="form-label">Telefone</label>
-                            <input asp-for="Phone" class="form-control" />
+                            <input asp-for="Phone" id="Phone" class="form-control" />
                             <span asp-validation-for="Phone" class="text-danger"></span>
                         </div>
                         <div class="mb-3">
@@ -122,5 +122,6 @@
 </div>
 
 @section Scripts {
+    <script src="~/js/formatCampus.js"></script>
     <script src="~/js/contactDropdown.js"></script>
 }
