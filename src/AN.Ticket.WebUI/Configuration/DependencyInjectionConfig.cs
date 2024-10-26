@@ -37,8 +37,9 @@ public static class DependencyInjectionConfig
         services.AddScoped<IContactService, ContactService>();
         services.AddScoped<IAttachmentService, AttachmentService>();
         services.AddScoped<IActivityService, ActivityService>();
-        services.AddScoped<IPaymantPlanService,PaymantPlanService>(); 
+        services.AddScoped<IPaymantPlanService, PaymantPlanService>();
         services.AddScoped<IHomeService, HomeService>();
+        services.AddScoped<ISatisfactionRatingService, SatisfactionRatingService>();
         #endregion
 
         #region Repositories
@@ -57,6 +58,7 @@ public static class DependencyInjectionConfig
 
         #region SMTP
         services.Configure<SmtpSettings>(configuration.GetSection("SmtpSettings"));
+        services.Configure<BaseUrlSettings>(configuration.GetSection("BaseUrlSettings"));
         services.AddSingleton<CancellationTokenProvider>();
         services.AddScoped<IEmailSenderService, EmailSenderService>();
         #endregion

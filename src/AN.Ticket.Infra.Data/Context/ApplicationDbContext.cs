@@ -16,16 +16,16 @@ public class ApplicationDbContext
         : base(options)
     { }
 
-    DbSet<Contact> Contacts { get; set; }
-    DbSet<SocialNetwork> SocialNetworks { get; set; }
-    DbSet<DomainEntity.Ticket> Tickets { get; set; }
-    DbSet<SatisfactionRating> SatisfactionRatings { get; set; }
-    DbSet<Activity> Activities { get; set; }
-    DbSet<InteractionHistory> InteractionHistories { get; set; }
-    DbSet<Payment> Payments { get; set; }
-    DbSet<Team> Teams { get; set; }
-    DbSet<User> Users { get; set; }
-    DbSet<PaymentPlan> PaymentPlans { get; set; }
+    public DbSet<Contact> Contacts { get; set; }
+    public DbSet<SocialNetwork> SocialNetworks { get; set; }
+    public DbSet<DomainEntity.Ticket> Tickets { get; set; }
+    public DbSet<SatisfactionRating> SatisfactionRatings { get; set; }
+    public DbSet<Activity> Activities { get; set; }
+    public DbSet<InteractionHistory> InteractionHistories { get; set; }
+    public DbSet<Payment> Payments { get; set; }
+    public DbSet<Team> Teams { get; set; }
+    public DbSet<User> Users { get; set; }
+    public DbSet<PaymentPlan> PaymentPlans { get; set; }
     public DbSet<Attachment> Attachments { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

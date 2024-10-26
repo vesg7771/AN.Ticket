@@ -67,8 +67,6 @@ public class TicketMap : IEntityTypeConfiguration<DomainEntity.Ticket>
             .WithOne(a => a.Ticket)
             .HasForeignKey(a => a.TicketId);
 
-        builder.OwnsOne(t => t.SatisfactionRating);
-
         builder.Property(t => t.FirstResponseAt);
 
         builder.Property(t => t.ClosedAt);

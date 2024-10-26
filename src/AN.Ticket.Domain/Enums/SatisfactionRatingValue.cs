@@ -2,7 +2,7 @@
 
 public enum SatisfactionRatingValue
 {
-    VeryDissatisfied = 1,
+    VeryDissatisfied = 0,
     Dissatisfied,
     Neutral,
     Satisfied,

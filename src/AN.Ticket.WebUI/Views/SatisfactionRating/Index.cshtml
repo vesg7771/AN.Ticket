@@ -1,0 +1,79 @@
+﻿@model AN.Ticket.Application.DTOs.SatisfactionRating.SatisfactionRatingDto
+
+@{
+    ViewBag.Title = "Avaliação do Atendimento";
+    Layout = "~/Views/Shared/_LayoutAuth.cshtml";
+}
+
+<div class="d-flex align-items-center justify-content-center" style="min-height: 90vh;">
+    <div class="container mt-5">
+        <div class="card p-4">
+            <h3 class="mb-4">Como você avalia o atendimento deste ticket?</h3>
+            <p class="mb-4">Sua opinião é muito importante para nós. Por favor, escolha uma das opções abaixo para avaliar o atendimento recebido:</p>
+
+            @if (ViewData.ModelState["Rating"]?.Errors?.Count > 0)
+            {
+                <div class="alert alert-danger">
+                    @Html.ValidationMessageFor(model => model.Rating)
+                </div>
+            }
+
+            <form asp-action="Save" method="post">
+                <input type="hidden" asp-for="TicketId" />
+                <div class="row mb-4 text-center">
+                    <div class="col">
+                        <button type="button" class="btn btn-outline-secondary w-100 feedback-btn" data-value="0">
+                            <i class="bi bi-emoji-frown"></i><br>
+                            Muito Ruim
+                        </button>
+                    </div>
+                    <div class="col">
+                        <button type="button" class="btn btn-outline-secondary w-100 feedback-btn" data-value="1">
+                            <i class="bi bi-emoji-neutral"></i><br>
+                            Regular
+                        </button>
+                    </div>
+                    <div class="col">
+                        <button type="button" class="btn btn-outline-secondary w-100 feedback-btn" data-value="2">
+                            <i class="bi bi-emoji-smile"></i><br>
+                            Bom
+                        </button>
+                    </div>
+                    <div class="col">
+                        <button type="button" class="btn btn-outline-secondary w-100 feedback-btn" data-value="3">
+                            <i class="bi bi-emoji-smile-upside-down"></i><br>
+                            Muito Bom
+                        </button>
+                    </div>
+                    <div class="col">
+                        <button type="button" class="btn btn-outline-secondary w-100 feedback-btn" data-value="4">
+                            <i class="bi bi-emoji-laughing"></i><br>
+                            Excelente
+                        </button>
+                    </div>
+                </div>
+
+                <input type="hidden" asp-for="Rating" id="rating" />
+
+                <div class="form-group">
+                    <label for="feedback">Tem algum comentário ou sugestão para melhorar nosso atendimento?</label>
+                    <textarea class="form-control" asp-for="Comment" rows="3" placeholder="Escreva seu comentário aqui..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary mt-3 w-100">Enviar Avaliação</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $(".feedback-btn").click(function () {
+                var value = $(this).data("value");
+                $("#rating").val(value);
+                $(".feedback-btn").removeClass("btn-primary").addClass("btn-outline-secondary");
+                $(this).removeClass("btn-outline-secondary").addClass("btn-primary");
+            });
+        });
+    </script>
+}

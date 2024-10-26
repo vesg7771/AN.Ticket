@@ -2,6 +2,7 @@
 using AN.Ticket.Application.DTOs.Email;
 using AN.Ticket.Application.DTOs.SatisfactionRating;
 using AN.Ticket.Application.DTOs.Ticket;
+using AN.Ticket.Application.Helpers.EmailSender;
 using AN.Ticket.Application.Helpers.Pagination;
 using AN.Ticket.Application.Interfaces;
 using AN.Ticket.Application.Services.Base;
@@ -12,13 +13,16 @@ using AN.Ticket.Domain.Interfaces;
 using AN.Ticket.Domain.Interfaces.Base;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Options;
 using System.Globalization;
+using System.Text;
 using DomainEntity = AN.Ticket.Domain.Entities;
 
 namespace AN.Ticket.Application.Services;
 public class TicketService
     : Service<TicketDto, DomainEntity.Ticket>, ITicketService
 {
+    private readonly BaseUrlSettings _baseUrlSettings;
     private readonly IRepository<DomainEntity.Ticket> _ticketService;
     private readonly ITicketRepository _ticketRepository;
     private readonly ITicketMessageRepository _ticketMessageRepository;
@@ -30,6 +34,7 @@ public class TicketService
     private readonly IUnitOfWork _unitOfWork;
 
     public TicketService(
+        IOptions<BaseUrlSettings> baseUrlSettings,
         IRepository<DomainEntity.Ticket> service,
         ITicketRepository ticketRepository,
         ITicketMessageRepository ticketMessageRepository,
@@ -42,6 +47,7 @@ public class TicketService
     )
         : base(service)
     {
+        _baseUrlSettings = baseUrlSettings.Value;
         _ticketService = service;
         _ticketRepository = ticketRepository;
         _ticketMessageRepository = ticketMessageRepository;
@@ -238,26 +244,42 @@ public class TicketService
 
         _ticketRepository.Update(ticket);
 
+        await _unitOfWork.CommitAsync();
+
         if (ticketResolutionDto.NotifyContact)
         {
+            string emailContent = $@"
+            <html>
+                <body>
+                    <h1>Ticket Fechado</h1>
+                    <p>O ticket com o código {ticket.TicketCode} foi fechado.</p>
+                    <p>Assunto: {ticket.Subject}</p>
+                    <p>Data de Fechamento: {ticket.ClosedAt?.ToString("dd/MM/yyyy HH:mm:ss")}</p>
+                    <p>Obrigado por utilizar nossos serviços.</p>";
+
+            bool existsSatisfactionRating = await _satisfactionRatingRepository.ExistsByTicketIdAsync(ticket.Id);
+            if (!existsSatisfactionRating)
+            {
+                var satisfactionRatingContent = GenerateSatisfactionRatingEmailContent(ticket.Id);
+                emailContent += $@"
+                    <hr style='border: 0; border-top: 1px solid #eee;' />
+                    <p>Por favor, avalie o seu atendimento:</p>
+                    {satisfactionRatingContent}";
+            }
+
+            emailContent += @"
+                    <hr style='border: 0; border-top: 1px solid #eee;' />
+                    <p style='font-size: 14px; color: #777;'>Atenciosamente,<br />Equipe de Suporte</p>
+                </body>
+            </html>";
+
             await _emailSenderService.SendEmailResponseAsync(
                 ticket.Email,
                 "Ticket Resolvido",
-                $@"
-                <html>
-                    <body>
-                        <h1>Ticket Fechado</h1>
-                        <p>O ticket com o código {ticket.TicketCode} foi fechado.</p>
-                        <p>Assunto: {ticket.Subject}</p>
-                        <p>Data de Fechamento: {ticket.ClosedAt?.ToString("dd/MM/yyyy HH:mm:ss")}</p>
-                        <p>Obrigado por utilizar nossos serviços.</p>
-                    </body>
-                </html>",
+                emailContent,
                 ticket.EmailMessageId!
             );
         }
-
-        await _unitOfWork.CommitAsync();
 
         return true;
     }
@@ -306,23 +328,36 @@ public class TicketService
         _ticketRepository.Update(ticket);
         await _unitOfWork.CommitAsync();
 
+        string emailContent = $@"
+        <html>
+            <body>
+                <h1 style='color: #0056b3;'>Resposta ao seu ticket</h1>
+                <p>Olá {ticket.ContactName},</p>
+                <p>Você recebeu uma nova resposta ao seu ticket:</p>
+                <p>#{ticket.TicketCode}</p>
+                <p><strong>Mensagem:</strong> {messageText}</p>
+                <p>Se precisar de mais assistência, por favor, responda a este e-mail.</p>
+                <p>Obrigado por utilizar nossos serviços!</p>";
+
+        bool existsSatisfactionRating = await _satisfactionRatingRepository.ExistsByTicketIdAsync(ticket.Id);
+        if (!existsSatisfactionRating)
+        {
+            var satisfactionRatingContent = GenerateSatisfactionRatingEmailContent(ticket.Id);
+            emailContent += $@"
+                <hr style='border: 0; border-top: 1px solid #eee;' />
+                {satisfactionRatingContent}";
+        }
+
+        emailContent += @"
+                <hr style='border: 0; border-top: 1px solid #eee;' />
+                <p style='font-size: 14px; color: #777;'>Atenciosamente,<br />Equipe de Suporte</p>
+            </body>
+        </html>";
+
         await _emailSenderService.SendEmailResponseAsync(
             ticket.Email,
             $"{ticket.Subject}",
-            $@"
-            <html>
-                <body>
-                    <h1 style='color: #0056b3;'>Resposta ao seu ticket</h1>
-                    <p>Olá {ticket.ContactName},</p>
-                    <p>Você recebeu uma nova resposta ao seu ticket:</p>
-                    <p>#{ticket.TicketCode}</p>
-                    <p><strong>Mensagem:</strong> {messageText}</p>
-                    <p>Se precisar de mais assistência, por favor, responda a este e-mail.</p>
-                    <p>Obrigado por utilizar nossos serviços!</p>
-                    <hr style='border: 0; border-top: 1px solid #eee;' />
-                    <p style='font-size: 14px; color: #777;'>Atenciosamente,<br />Equipe de Suporte</p>
-                </body>
-            </html>",
+            emailContent,
             ticket.EmailMessageId!,
             emailAttachments
         );
@@ -601,5 +636,29 @@ public class TicketService
             AssignedTo = t.User?.FullName ?? "Não atribuído",
             RequestDate = t.CreatedAt
         });
+    }
+
+    private string GenerateSatisfactionRatingEmailContent(Guid ticketId)
+    {
+        try
+        {
+            var emailContent = new StringBuilder();
+            emailContent.AppendLine("<p style='color: #0056b3;'>Sua opinião é importante para nós!</p>");
+
+            var ratingUrl = $"{_baseUrlSettings.BaseUrl}/SatisfactionRating/Index/{ticketId}";
+
+            emailContent.AppendLine($"<p><a href=\"{ratingUrl}\" style='color: #0056b3; text-decoration: none; font-weight: bold;'>Clique aqui para nos avaliar</a></p>");
+            emailContent.AppendLine("<p>Agradecemos pela sua colaboração e ficamos à disposição para ajudá-lo sempre que precisar.</p>");
+
+            emailContent.AppendLine("<hr style='border: 0; border-top: 1px solid #eee;' />");
+            emailContent.AppendLine("<p style='font-size: 14px; color: #777;'>Atenciosamente,<br />Equipe de Suporte</p>");
+
+            return emailContent.ToString();
+        }
+        catch (Exception ex)
+        {
+
+            throw new Exception(ex.Message);
+        }
     }
 }

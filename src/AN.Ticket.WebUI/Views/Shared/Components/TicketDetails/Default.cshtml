@@ -83,7 +83,7 @@
                 <div class="mb-4">
                     <h6>Histórico de Mensagens</h6>
                     <ul class="list-group list-group-flush">
-                        @foreach (var message in Model.Messages.Take(3))
+                        @foreach (var message in Model.Messages.OrderByDescending(x => x.SentAt).Take(3))
                         {
                             <li class="list-group-item d-flex justify-content-between align-items-start border rounded @GetMessageBackgroundClass(message.IsFromSupport)">
                                 <div class="flex-grow-1">
@@ -137,13 +137,13 @@ else
             padding: 1rem;
         }
 
-        .list-group-item.border {
-            border: 1px solid #ddd;
-        }
+            .list-group-item.border {
+                border: 1px solid #ddd;
+            }
 
-        .list-group-item:hover {
-            background-color: #f1f1f1;
-        }
+            .list-group-item:hover {
+                background-color: #f1f1f1;
+            }
 
         .badge {
             font-size: 0.9em;

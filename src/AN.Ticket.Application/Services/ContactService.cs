@@ -226,11 +226,16 @@ public class ContactService
 
         var totalTickets = tickets.Count();
         var onHoldTickets = tickets.Count(t => t.Status == TicketStatus.Onhold);
-        var averageResponseTime = tickets
-            .Where(t => t.Messages != null && t.Messages.Any(m => m.UserId == null))
-            .Average(t => t.Messages!
-                .Where(m => m.UserId == null)
-                .Average(m => (m.SentAt - t.CreatedAt)?.TotalMinutes ?? 0));
+
+        var averageResponseTime = 0.0;
+        if (tickets.Where(t => t.Messages != null && t.Messages.Any(m => m.UserId == null)).Count() > 0)
+        {
+            averageResponseTime = tickets
+                .Where(t => t.Messages != null && t.Messages.Any(m => m.UserId == null))
+                .Average(t => t.Messages!
+                    .Where(m => m.UserId == null)
+                    .Average(m => (m.SentAt - t.CreatedAt)?.TotalMinutes ?? 0));
+        }
 
         var totalResponseTime = tickets
             .Where(t => t.Status == TicketStatus.Open)
