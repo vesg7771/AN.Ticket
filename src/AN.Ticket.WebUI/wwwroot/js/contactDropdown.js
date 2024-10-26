@@ -13,7 +13,11 @@ $(document).ready(function () {
         var selectedContactId = $(this).data('contact-id');
         var selectedContactName = $(this).data('contact-name');
 
-        $('#contactInput').val(selectedContactName);
+        $('#contactInput').val(selectedContactName).focus();
+        $('#selectedContactName').val(selectedContactName);
+        var inputElement = $('#contactInput').get(0);
+        inputElement.setSelectionRange(selectedContactName.length, selectedContactName.length);
+        $('#contactInput').trigger('input');
         $('#selectedContactId').val(selectedContactId);
 
         loadContactDetails(selectedContactId);
