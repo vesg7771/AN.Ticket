@@ -29,4 +29,16 @@ public class PaymentRepository
             .Include(p => p.PaymentPlan)
             .ToListAsync();
     }
+
+    public async Task<Guid?> GetPaymentPlanIdByContactIdAsync(Guid contactId)
+    {
+        if (contactId == Guid.Empty) throw new ArgumentException("ContactId cannot be empty.", nameof(contactId));
+
+        var paymentPlanId = await Entities
+            .Where(p => p.ContactId == contactId)
+            .Select(p => p.PaymentPlanId)
+            .FirstOrDefaultAsync();
+
+        return paymentPlanId != Guid.Empty ? paymentPlanId : (Guid?)null;
+    }
 }

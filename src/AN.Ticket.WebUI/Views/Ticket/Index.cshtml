@@ -329,16 +329,31 @@
         <div class="row">
             <div class="col-md-4 text-center">
                 <div class="d-flex justify-content-center align-items-center">
-                    <h1 class="display-4 fw-bold">@Model.DashboardData.RecentRatings.Average(r => (double)r.Rating).ToString("0.00")</h1>
+                    <h1 class="display-4 fw-bold">
+                        @(Model.DashboardData.RecentRatings.Any() 
+                            ? Model.DashboardData.RecentRatings.Average(r => (double)r.Rating).ToString("0.00") 
+                            : "0.00")
+                    </h1>
                     <div class="ms-2">
                         <span class="rating-stars">
-                            @for (int i = 0; i < 5; i++)
+                            @if (Model.DashboardData.RecentRatings.Any())
                             {
-                                if (i < @Model.DashboardData.RecentRatings.Average(r => (double)r.Rating))
+                                var averageRating = Model.DashboardData.RecentRatings.Average(r => (double)r.Rating);
+                                @for (int i = 0; i < 5; i++)
                                 {
-                                    <i class="bi bi-star-fill"></i>
+                                    if (i < averageRating)
+                                    {
+                                        <i class="bi bi-star-fill"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-star"></i>
+                                    }
                                 }
-                                else
+                            }
+                            else
+                            {
+                                @for (int i = 0; i < 5; i++)
                                 {
                                     <i class="bi bi-star"></i>
                                 }

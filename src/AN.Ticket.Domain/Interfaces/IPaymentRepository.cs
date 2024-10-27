@@ -7,4 +7,5 @@ public interface IPaymentRepository
 {
     Task<IEnumerable<Payment>> GetByContactIdAsync(Guid contactId);
     Task<IEnumerable<Payment>> GetByContacts(List<Guid> contactIds);
+    Task<Guid?> GetPaymentPlanIdByContactIdAsync(Guid contactId);
 }

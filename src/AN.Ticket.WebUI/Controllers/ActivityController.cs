@@ -3,6 +3,7 @@ using AN.Ticket.Application.Interfaces;
 using AN.Ticket.Domain.EntityValidations;
 using AN.Ticket.Domain.Enums;
 using AN.Ticket.WebUI.Components;
+using AN.Ticket.WebUI.ViewModels.Activity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -27,23 +28,18 @@ public class ActivityController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(int pageNumber = 1, int pageSize = 10, string searchTerm = "")
     {
-        var activities = await _activityService.GetAllAsync();
-        var activitiesDto = activities.Select(x => new ActivityDto
-        {
-            Id = x.Id,
-            Description = x.Description,
-            Duration = x.Duration ?? TimeSpan.Zero,
-            Priority = x.Priority,
-            ScheduledDate = x.ScheduledDate,
-            Subject = x.Subject!,
-            TicketId = x.TicketId ?? Guid.Empty,
-            Type = x.Type,
-            ContactId = x.ContactId
-        });
+        var paginatedActivities = await _activityService.GetPaginatedActivitiesAsync(pageNumber, pageSize, searchTerm);
 
-        return View(activitiesDto);
+        return View(new ActivityListViewModel
+        {
+            Activities = paginatedActivities.Items,
+            PageNumber = paginatedActivities.PageNumber,
+            PageSize = paginatedActivities.PageSize,
+            TotalItems = paginatedActivities.TotalItems,
+            SearchTerm = searchTerm
+        });
     }
 
     [HttpGet]
@@ -166,6 +162,28 @@ public class ActivityController : Controller
             return RedirectToAction("Details", "Ticket", new { id });
         }
 
+        return RedirectToAction(nameof(Index));
+    }
+
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteActivities(List<Guid> ids)
+    {
+        if (ids == null || !ids.Any())
+        {
+            TempData["ErrorMessage"] = "Nenhuma atividade foi selecionada.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        var success = await _activityService.DeleteActivitiesAsync(ids);
+        if (!success)
+        {
+            TempData["ErrorMessage"] = "Erro ao deletar as atividades selecionadas.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        TempData["SuccessMessage"] = "Atividades deletadas com sucesso!";
         return RedirectToAction(nameof(Index));
     }
 

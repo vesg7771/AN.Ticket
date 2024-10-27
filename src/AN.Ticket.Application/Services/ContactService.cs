@@ -311,4 +311,16 @@ public class ContactService
 
         return $"{monthNumber}{lastThreeChars}";
     }
+
+    public async Task<Guid?> GetContactPaymentPlanIdAsync(Guid contactId)
+    {
+        if (contactId == Guid.Empty) throw new EntityValidationException("O id do usuário não pode ser nulo.");
+
+        var paymentPlanId = await _paymentRepository.GetPaymentPlanIdByContactIdAsync(contactId);
+
+        if (!paymentPlanId.HasValue)
+            throw new NotFoundException("Plano de pagamento não encontrado para o contato especificado.");
+
+        return paymentPlanId;
+    }
 }

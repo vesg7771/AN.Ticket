@@ -17,7 +17,7 @@ internal class ContactMap : IEntityTypeConfiguration<Contact>
 
         builder.Property(c => c.Cpf)
             .IsRequired()
-            .HasMaxLength(12);
+            .HasMaxLength(16);
 
         builder.Property(c => c.PrimaryEmail)
             .IsRequired()

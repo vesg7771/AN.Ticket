@@ -166,6 +166,7 @@ public class ContactController : Controller
         }
 
         var paymentPlans = await _paymantPlanService.GetAllAsync();
+        var paymentPlanContactId = await _contactService.GetContactPaymentPlanIdAsync(contact.Id);
         var viewModel = new ContactCreateViewModel
         {
             Contact = new ContactCreateDto
@@ -177,7 +178,8 @@ public class ContactController : Controller
                 PrimaryEmail = contact.PrimaryEmail,
                 SecondaryEmail = contact.SecondaryEmail,
                 Phone = contact.Phone,
-                Mobile = contact.Mobile
+                Mobile = contact.Mobile,
+                PaymentPlanId = paymentPlanContactId ?? Guid.Empty
             },
             PaymentPlans = paymentPlans.ToList(),
             IsEditedContact = true

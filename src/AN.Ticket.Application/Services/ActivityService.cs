@@ -1,4 +1,5 @@
 ﻿using AN.Ticket.Application.DTOs.Activity;
+using AN.Ticket.Application.Helpers.Pagination;
 using AN.Ticket.Application.Interfaces;
 using AN.Ticket.Application.Services.Base;
 using AN.Ticket.Domain.Entities;
@@ -94,5 +95,43 @@ public class ActivityService
 
         _activityRepository.Delete(activity);
         await _unitOfWork.CommitAsync();
+    }
+
+    public async Task<PagedResult<ActivityDto>> GetPaginatedActivitiesAsync(int pageNumber, int pageSize, string searchTerm = "")
+    {
+        var (activities, totalItems) = await _activityRepository.GetPaginatedActivitiesAsync(pageNumber, pageSize, searchTerm);
+
+        var activityDTOs = activities.Select(a => new ActivityDto
+        {
+            Id = a.Id,
+            Subject = a.Subject,
+            Description = a.Description,
+            ScheduledDate = a.ScheduledDate,
+            Duration = a.Duration ?? TimeSpan.Zero,
+            Priority = a.Priority,
+            Type = a.Type,
+            ContactId = a.ContactId,
+            TicketId = a.TicketId ?? Guid.Empty
+        }).ToList();
+
+        return new PagedResult<ActivityDto>
+        {
+            Items = activityDTOs,
+            TotalItems = totalItems,
+            PageNumber = pageNumber,
+            PageSize = pageSize
+        };
+    }
+
+    public async Task<bool> DeleteActivitiesAsync(List<Guid> ids)
+    {
+        var activities = await _activityRepository.GetByIdsAsync(ids);
+        if (!activities.Any()) return false;
+
+        foreach (var activity in activities)
+            _activityRepository.Delete(activity);
+
+        await _unitOfWork.CommitAsync();
+        return true;
     }
 }
