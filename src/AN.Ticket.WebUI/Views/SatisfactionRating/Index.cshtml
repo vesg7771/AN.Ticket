@@ -19,34 +19,34 @@
             }
 
             <form asp-action="Save" method="post">
-                <input type="hidden" asp-for="TicketId" />
+                <input type="hidden" asp-for="TicketId" value="@ViewBag.TicketId" />
                 <div class="row mb-4 text-center">
                     <div class="col">
-                        <button type="button" class="btn btn-outline-secondary w-100 feedback-btn" data-value="0">
+                        <button type="button" class="btn btn-outline-secondary w-100 feedback-btn" data-value="1">
                             <i class="bi bi-emoji-frown"></i><br>
                             Muito Ruim
                         </button>
                     </div>
                     <div class="col">
-                        <button type="button" class="btn btn-outline-secondary w-100 feedback-btn" data-value="1">
+                        <button type="button" class="btn btn-outline-secondary w-100 feedback-btn" data-value="2">
                             <i class="bi bi-emoji-neutral"></i><br>
                             Regular
                         </button>
                     </div>
                     <div class="col">
-                        <button type="button" class="btn btn-outline-secondary w-100 feedback-btn" data-value="2">
+                        <button type="button" class="btn btn-outline-secondary w-100 feedback-btn" data-value="3">
                             <i class="bi bi-emoji-smile"></i><br>
                             Bom
                         </button>
                     </div>
                     <div class="col">
-                        <button type="button" class="btn btn-outline-secondary w-100 feedback-btn" data-value="3">
+                        <button type="button" class="btn btn-outline-secondary w-100 feedback-btn" data-value="4">
                             <i class="bi bi-emoji-smile-upside-down"></i><br>
                             Muito Bom
                         </button>
                     </div>
                     <div class="col">
-                        <button type="button" class="btn btn-outline-secondary w-100 feedback-btn" data-value="4">
+                        <button type="button" class="btn btn-outline-secondary w-100 feedback-btn" data-value="5">
                             <i class="bi bi-emoji-laughing"></i><br>
                             Excelente
                         </button>

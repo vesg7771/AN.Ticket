@@ -54,7 +54,6 @@ public class Ticket : EntityBase
         Classification = classification;
         Activities = new List<Activity>();
         InteractionHistories = new List<InteractionHistory>();
-        SatisfactionRating = new SatisfactionRating();
     }
 
     public void AssignUsers(Guid userId)

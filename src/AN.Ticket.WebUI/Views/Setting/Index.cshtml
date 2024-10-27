@@ -1,6 +1,207 @@
 @{
     ViewData["Title"] = "Configurações";
 }
+
+<style>
+    .nav-tabs .nav-link.active {
+        background-color: #f8f9fa;
+        border-color: #dee2e6 #dee2e6 #fff;
+        font-weight: bold;
+    }
+
+    .btn-dark {
+        background-color: #000;
+        color: #fff;
+    }
+
+    .profile-container {
+        display: flex;
+        align-items: flex-start;
+        gap: 20px;
+    }
+
+    .profile-picture {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background-color: #e9ecef;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        color: #6c757d;
+    }
+
+    .team-section {
+        margin-top: 2rem;
+    }
+
+    .team-card {
+        background-color: #f8f9fa;
+        padding: 10px;
+        border-radius: 8px;
+        margin-right: 10px;
+        text-align: center;
+        width: 150px;
+    }
+
+    .team-role {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+
+    .save-button {
+        background-color: #000;
+        color: #fff;
+        width: 100%;
+    }
+</style>
+
+<div class="container mt-5">
+    <h1 class="mb-3">Configurações do Sistema</h1>
+    <p class="text-muted">Gerencie os membros da equipe e as permissões de conta aqui.</p>
+
+    <ul class="nav nav-tabs mb-4" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" id="profile-tab" data-bs-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="true">Perfil</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="password-tab" data-bs-toggle="tab" href="#password" role="tab" aria-controls="password" aria-selected="false">Senha</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="team-tab" data-bs-toggle="tab" href="#team" role="tab" aria-controls="team" aria-selected="false">Equipe</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="plan-tab" data-bs-toggle="tab" href="#plan" role="tab" aria-controls="plan" aria-selected="false">Plano</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="billing-tab" data-bs-toggle="tab" href="#billing" role="tab" aria-controls="billing" aria-selected="false">Faturamento</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="notifications-tab" data-bs-toggle="tab" href="#notifications" role="tab" aria-controls="notifications" aria-selected="false">Notificações</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="integrations-tab" data-bs-toggle="tab" href="#integrations" role="tab" aria-controls="integrations" aria-selected="false">Integrações</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="api-tab" data-bs-toggle="tab" href="#api" role="tab" aria-controls="api" aria-selected="false">API</a>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        <!-- Perfil Section -->
+        <div class="tab-pane fade show active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+            <div class="card p-4 mb-4">
+                <h2 class="card-title mb-3">Perfil</h2>
+                <div class="profile-container mb-4">
+                    <div class="profile-picture">
+                        <i class="bi bi-person"></i>
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-outline-secondary mb-3">Change picture</button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="firstName" class="form-label">Primeiro nome</label>
+                        <input type="text" class="form-control" id="firstName" value="John">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="lastName" class="form-label">Último nome</label>
+                        <input type="text" class="form-control" id="lastName" value="Doe">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" value="john.doe@example.com">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="accessLevel" class="form-label">Nível de Acesso</label>
+                        <select id="accessLevel" class="form-select">
+                            <option selected>Admin</option>
+                            <option>User</option>
+                            <option>Viewer</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="bio" class="form-label">Bio</label>
+                    <textarea class="form-control" id="bio" rows="3" placeholder="Write a short bio about yourself"></textarea>
+                </div>
+
+                <!-- Equipe Section -->
+                <div class="team-section">
+                    <h3>Teams</h3>
+                    <div class="mb-4">
+                        <h5>Design Team</h5>
+                        <div class="d-flex">
+                            <div class="team-card">
+                                <div class="profile-picture"></div>
+                                <div><strong>Olivia Rhye</strong></div>
+                                <div class="team-role">Product Designer</div>
+                            </div>
+                            <div class="team-card">
+                                <div class="profile-picture"></div>
+                                <div><strong>Phoenix Baker</strong></div>
+                                <div class="team-role">UX Researcher</div>
+                            </div>
+                            <div class="team-card">
+                                <div class="profile-picture"></div>
+                                <div><strong>Lana Steiner</strong></div>
+                                <div class="team-role">UI Designer</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <h5>Engineering Team</h5>
+                        <div class="d-flex">
+                            <div class="team-card">
+                                <div class="profile-picture"></div>
+                                <div><strong>Demi Wilkinson</strong></div>
+                                <div class="team-role">Frontend Developer</div>
+                            </div>
+                            <div class="team-card">
+                                <div class="profile-picture"></div>
+                                <div><strong>Candice Wu</strong></div>
+                                <div class="team-role">Backend Developer</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="btn save-button mt-4">Salvar Alterações</button>
+            </div>
+        </div>
+
+        <!-- Other Sections (Placeholder) -->
+        <div class="tab-pane fade" id="password" role="tabpanel" aria-labelledby="password-tab">
+            <p>Configurações de Senha</p>
+        </div>
+        <div class="tab-pane fade" id="team" role="tabpanel" aria-labelledby="team-tab">
+            <p>Configurações de Equipe</p>
+        </div>
+        <div class="tab-pane fade" id="plan" role="tabpanel" aria-labelledby="plan-tab">
+            <p>Configurações de Plano</p>
+        </div>
+        <div class="tab-pane fade" id="billing" role="tabpanel" aria-labelledby="billing-tab">
+            <p>Configurações de Faturamento</p>
+        </div>
+        <div class="tab-pane fade" id="notifications" role="tabpanel" aria-labelledby="notifications-tab">
+            <p>Configurações de Notificações</p>
+        </div>
+        <div class="tab-pane fade" id="integrations" role="tabpanel" aria-labelledby="integrations-tab">
+            <p>Configurações de Integrações</p>
+        </div>
+        <div class="tab-pane fade" id="api" role="tabpanel" aria-labelledby="api-tab">
+            <p>Configurações da API</p>
+        </div>
+    </div>
+</div>
+
+
+@* @{
+    ViewData["Title"] = "Configurações";
+}
 <div class="container mt-5">
     <div class="card text-center" style="max-width: 80%; margin: auto;">
         <div class="card-header">
@@ -40,4 +241,4 @@
             </div>
         </div>
     </div>
-</div>
+</div> *@

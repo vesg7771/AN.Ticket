@@ -645,7 +645,7 @@ public class TicketService
             var emailContent = new StringBuilder();
             emailContent.AppendLine("<p style='color: #0056b3;'>Sua opinião é importante para nós!</p>");
 
-            var ratingUrl = $"{_baseUrlSettings.BaseUrl}/SatisfactionRating/Index/{ticketId}";
+            var ratingUrl = $"{_baseUrlSettings.BaseUrl}/SatisfactionRating/Index?ticketId={ticketId}";
 
             emailContent.AppendLine($"<p><a href=\"{ratingUrl}\" style='color: #0056b3; text-decoration: none; font-weight: bold;'>Clique aqui para nos avaliar</a></p>");
             emailContent.AppendLine("<p>Agradecemos pela sua colaboração e ficamos à disposição para ajudá-lo sempre que precisar.</p>");
