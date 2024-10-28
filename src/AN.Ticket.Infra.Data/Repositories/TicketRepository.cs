@@ -1,4 +1,5 @@
-﻿using AN.Ticket.Domain.Enums;
+﻿using AN.Ticket.Domain.Entities;
+using AN.Ticket.Domain.Enums;
 using AN.Ticket.Domain.Interfaces;
 using AN.Ticket.Infra.Data.Context;
 using AN.Ticket.Infra.Data.Repositories.Base;
@@ -102,5 +103,18 @@ public class TicketRepository
             .Include(x => x.User)
             .Include(x => x.Messages)
             .ToListAsync();
+    }
+
+    public async Task<(int Total, int Onhold)> GetTicketAssocieteContactTotalAndOnhold(string contactEmail)
+    {
+        var totalTickets = await Entities
+           .AsNoTracking()
+           .Where(x => x.Email.Equals(contactEmail))
+           .CountAsync();
+        var onHoldTickets = await Entities
+            .AsNoTracking()
+            .Where(x => x.Email.Equals(contactEmail) && x.Status == TicketStatus.Onhold) // Substitua "OnHold" pela condição que define o ticket em aberto
+            .CountAsync();
+        return (totalTickets, onHoldTickets);
     }
 }
