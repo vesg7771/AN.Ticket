@@ -40,9 +40,7 @@
         background-color: #f8f9fa;
         padding: 10px;
         border-radius: 8px;
-        margin-right: 10px;
         text-align: center;
-        width: 150px;
     }
 
     .team-role {
@@ -89,7 +87,6 @@
     </ul>
 
     <div class="tab-content">
-        <!-- Perfil Section -->
         <div class="tab-pane fade show active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
             <div class="card p-4 mb-4">
                 <h2 class="card-title mb-3">Perfil</h2>
@@ -101,70 +98,71 @@
                         <button type="button" class="btn btn-outline-secondary mb-3">Change picture</button>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="firstName" class="form-label">Primeiro nome</label>
-                        <input type="text" class="form-control" id="firstName" value="John">
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="lastName" class="form-label">Último nome</label>
-                        <input type="text" class="form-control" id="lastName" value="Doe">
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="email" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="email" value="john.doe@example.com">
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="accessLevel" class="form-label">Nível de Acesso</label>
-                        <select id="accessLevel" class="form-select">
-                            <option selected>Admin</option>
-                            <option>User</option>
-                            <option>Viewer</option>
-                        </select>
-                    </div>
+                <div class="mb-3">
+                    <label for="fullName" class="form-label">Nome Completo</label>
+                    <input type="text" class="form-control" id="fullName" value="Nome Completo do Usuário">
                 </div>
                 <div class="mb-3">
-                    <label for="bio" class="form-label">Bio</label>
-                    <textarea class="form-control" id="bio" rows="3" placeholder="Write a short bio about yourself"></textarea>
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" value="email@example.com">
                 </div>
 
-                <!-- Equipe Section -->
                 <div class="team-section">
-                    <h3>Teams</h3>
+                    <h3>Equipes</h3>
+
                     <div class="mb-4">
-                        <h5>Design Team</h5>
-                        <div class="d-flex">
-                            <div class="team-card">
-                                <div class="profile-picture"></div>
-                                <div><strong>Olivia Rhye</strong></div>
-                                <div class="team-role">Product Designer</div>
+                        <h5>Equipe de Design</h5>
+                        <div class="row">
+                            <div class="col-12 col-sm-6 col-md-3 mb-3">
+                                <div class="d-flex align-items-center team-card p-2">
+                                    <div class="profile-picture bg-secondary me-2" style="width: 50px; height: 50px;"></div>
+                                    <div>
+                                        <strong>Olivia Rhye</strong>
+                                        <div class="team-role">Product Designer</div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="team-card">
-                                <div class="profile-picture"></div>
-                                <div><strong>Phoenix Baker</strong></div>
-                                <div class="team-role">UX Researcher</div>
+                            <div class="col-12 col-sm-6 col-md-3 mb-3">
+                                <div class="d-flex align-items-center team-card p-2">
+                                    <div class="profile-picture bg-secondary me-2" style="width: 50px; height: 50px;"></div>
+                                    <div>
+                                        <strong>Phoenix Baker</strong>
+                                        <div class="team-role">UX Researcher</div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="team-card">
-                                <div class="profile-picture"></div>
-                                <div><strong>Lana Steiner</strong></div>
-                                <div class="team-role">UI Designer</div>
+                            <div class="col-12 col-sm-6 col-md-3 mb-3">
+                                <div class="d-flex align-items-center team-card p-2">
+                                    <div class="profile-picture bg-secondary me-2" style="width: 50px; height: 50px;"></div>
+                                    <div>
+                                        <strong>Lana Steiner</strong>
+                                        <div class="team-role">UI Designer</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
+
                     <div class="mb-4">
-                        <h5>Engineering Team</h5>
-                        <div class="d-flex">
-                            <div class="team-card">
-                                <div class="profile-picture"></div>
-                                <div><strong>Demi Wilkinson</strong></div>
-                                <div class="team-role">Frontend Developer</div>
+                        <h5>Equipe de Engenharia</h5>
+                        <div class="row">
+                            <div class="col-12 col-sm-6 col-md-3 mb-3">
+                                <div class="d-flex align-items-center team-card p-2">
+                                    <div class="profile-picture bg-secondary me-2" style="width: 50px; height: 50px;"></div>
+                                    <div>
+                                        <strong>Demi Wilkinson</strong>
+                                        <div class="team-role">Frontend Developer</div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="team-card">
-                                <div class="profile-picture"></div>
-                                <div><strong>Candice Wu</strong></div>
-                                <div class="team-role">Backend Developer</div>
+                            <div class="col-12 col-sm-6 col-md-3 mb-3">
+                                <div class="d-flex align-items-center team-card p-2">
+                                    <div class="profile-picture bg-secondary me-2" style="width: 50px; height: 50px;"></div>
+                                    <div>
+                                        <strong>Candice Wu</strong>
+                                        <div class="team-role">Backend Developer</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -173,7 +171,6 @@
             </div>
         </div>
 
-        <!-- Other Sections (Placeholder) -->
         <div class="tab-pane fade" id="password" role="tabpanel" aria-labelledby="password-tab">
             <p>Configurações de Senha</p>
         </div>
