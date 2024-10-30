@@ -40,6 +40,8 @@ public static class DependencyInjectionConfig
         services.AddScoped<IPaymantPlanService, PaymantPlanService>();
         services.AddScoped<IHomeService, HomeService>();
         services.AddScoped<ISatisfactionRatingService, SatisfactionRatingService>();
+        services.AddScoped<ITeamService, TeamService>();
+        services.AddScoped<IFileService, FileService>();
         #endregion
 
         #region Repositories
@@ -54,6 +56,7 @@ public static class DependencyInjectionConfig
         services.AddScoped<IInteractionHistoryRepository, InteractionHistoryRepository>();
         services.AddScoped<IActivityRepository, ActivityRepository>();
         services.AddScoped<IAttachmentRepository, AttachmentRepository>();
+        services.AddScoped<ITeamRepository, TeamRepository>();
         #endregion
 
         #region SMTP

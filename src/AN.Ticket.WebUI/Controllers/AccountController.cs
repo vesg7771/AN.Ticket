@@ -18,6 +18,7 @@ public class AccountController : Controller
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly IEmailSenderService _emailSenderService;
     private readonly IUserRepository _userRepository;
+    private readonly IFileService _fileService;
     private readonly IUnitOfWork _unitOfWork;
 
     public AccountController(
@@ -26,6 +27,7 @@ public class AccountController : Controller
         SignInManager<ApplicationUser> signInManager,
         IEmailSenderService emailSenderService,
         IUserRepository userRepository,
+        IFileService fileService,
         IUnitOfWork unitOfWork
     )
     {
@@ -34,6 +36,7 @@ public class AccountController : Controller
         _signInManager = signInManager;
         _emailSenderService = emailSenderService;
         _userRepository = userRepository;
+        _fileService = fileService;
         _unitOfWork = unitOfWork;
     }
 
@@ -294,5 +297,96 @@ public class AccountController : Controller
         await _signInManager.SignOutAsync();
         _logger.LogInformation("Usuário deslogado.");
         return RedirectToAction(nameof(Login), "Account");
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UploadProfilePicture(IFormFile profilePicture)
+    {
+        if (profilePicture == null || profilePicture.Length == 0)
+        {
+            return RedirectToAction("Index", "Settings");
+        }
+
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+
+        var filePath = await _fileService.SaveFileAsync(profilePicture);
+        user.UpdateProfilePicture(filePath);
+
+        var userEntity = await _userRepository.GetByIdAsync(Guid.Parse(user.Id));
+        userEntity.UpdateProfilePicture(filePath);
+
+        await _userManager.UpdateAsync(user);
+        _userRepository.Update(userEntity);
+        await _unitOfWork.CommitAsync();
+
+        return RedirectToAction("Index", "Setting");
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteProfilePicture()
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user is null)
+        {
+            return Unauthorized();
+        }
+
+        if (!string.IsNullOrEmpty(user.ProfilePicture))
+        {
+            await _fileService.DeleteFileAsync(user.ProfilePicture);
+            user.UpdateProfilePicture(null);
+
+            var userEntity = await _userRepository.GetByIdAsync(Guid.Parse(user.Id));
+            userEntity.UpdateProfilePicture(null);
+            _userRepository.Update(userEntity);
+            await _unitOfWork.CommitAsync();
+
+            await _userManager.UpdateAsync(user);
+        }
+
+        return RedirectToAction("Index", "Setting");
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateProfileDetails(string fullName, string email)
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user is null)
+        {
+            return Unauthorized();
+        }
+
+        user.UpdateFullName(fullName);
+        user.Email = email;
+
+        var userEntity = await _userRepository.GetByIdAsync(Guid.Parse(user.Id));
+        if (userEntity is null)
+        {
+            TempData["ErrorMessage"] = "Usuário não encontrado no repositório.";
+            return RedirectToAction("Index", "Setting");
+        }
+
+        userEntity.UpdateFullName(fullName);
+        userEntity.UpdateEmail(email);
+
+        var result = await _userManager.UpdateAsync(user);
+        if (!result.Succeeded)
+        {
+            TempData["ErrorMessage"] = "Erro ao atualizar perfil.";
+            return RedirectToAction("Index", "Setting");
+        }
+
+        _userRepository.Update(userEntity);
+        await _unitOfWork.CommitAsync();
+
+        TempData["SuccessMessage"] = "Detalhes do perfil atualizados com sucesso!";
+        return RedirectToAction("Index", "Setting");
     }
 }
