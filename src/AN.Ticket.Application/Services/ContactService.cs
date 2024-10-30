@@ -323,4 +323,18 @@ public class ContactService
 
         return paymentPlanId;
     }
+
+    public async Task<(int Total, int Onhold)> GetTotalAndOnholdTicketsAsyn(string contactEmail)
+    {
+        try
+        {
+            var (totalTicketsAtribuied, totalTicketsonHold) = await _ticketRepository.GetTicketAssocieteContactTotalAndOnhold(contactEmail);
+            return (totalTicketsAtribuied, totalTicketsonHold);
+        }
+        catch (System.Exception)
+        {
+            throw;
+        }
+
+    }
 }
