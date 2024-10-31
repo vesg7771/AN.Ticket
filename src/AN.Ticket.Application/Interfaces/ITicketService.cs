@@ -1,6 +1,5 @@
 ﻿using AN.Ticket.Application.DTOs.Ticket;
 using AN.Ticket.Application.Interfaces.Base;
-using AN.Ticket.Application.Services;
 using Microsoft.AspNetCore.Http;
 using DomainEntity = AN.Ticket.Domain.Entities;
 
@@ -20,5 +19,4 @@ public interface ITicketService
     Task<List<TicketDto>> GetTicketWithDetailsByUserAsync(Guid userId);
     Task<SupportDashboardDto> GetSupportDashboardAsync(Guid userId, TicketFilterDto filters, int pageNumber, int pageSize, int activityPageNumber, int activityPageSize);
     Task<IEnumerable<TicketContactDetailsDto>> GetTicketsByContactIdAsync(List<string> emails, bool showAll);
-    
 }

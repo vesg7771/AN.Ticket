@@ -4,9 +4,11 @@ using AN.Ticket.Domain.Interfaces;
 using AN.Ticket.Domain.Interfaces.Base;
 using AN.Ticket.Infra.Data.Identity;
 using AN.Ticket.WebUI.ViewModels.Account;
+using AN.Ticket.WebUI.ViewModels.Setting;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace AN.Ticket.WebUI.Controllers;
 
@@ -388,5 +390,44 @@ public class AccountController : Controller
 
         TempData["SuccessMessage"] = "Detalhes do perfil atualizados com sucesso!";
         return RedirectToAction("Index", "Setting");
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ChangePassword(SecuritySettingViewModel securityViewModel)
+    {
+        var settingViewModel = new SettingViewModel
+        {
+            SecuritySetting = securityViewModel,
+            tabActive = false
+        };
+
+        if (!ModelState.IsValid)
+        {
+            TempData["SettingViewModel"] = JsonConvert.SerializeObject(settingViewModel);
+            return RedirectToAction("Index", "Setting");
+        }
+
+        var user = await _userManager.GetUserAsync(User);
+        if (user is null)
+        {
+            return Unauthorized();
+        }
+
+        var result = await _userManager.ChangePasswordAsync(user, securityViewModel.CurrentPassword, securityViewModel.NewPassword);
+        if (!result.Succeeded)
+        {
+            foreach (var error in result.Errors)
+            {
+                TempData["info"] = string.Join("<br>", result.Errors.Select(e => e.Description));
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+
+            TempData["SettingViewModel"] = JsonConvert.SerializeObject(settingViewModel);
+            return RedirectToAction("Index", "Setting", settingViewModel);
+        }
+
+        TempData["SuccessMessage"] = "Senha alterada com sucesso!";
+        return RedirectToAction("Index", "Setting", settingViewModel);
     }
 }

@@ -1,15 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
 using AN.Ticket.Application.DTOs.PaymantPlan;
 using AN.Ticket.Application.Interfaces;
-using AN.Ticket.Application.Services;
 using AN.Ticket.Domain.Entities;
+using AN.Ticket.WebUI.ViewModels.Setting;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace AN.Ticket.WebUI.Controllers
 {
@@ -27,9 +21,20 @@ namespace AN.Ticket.WebUI.Controllers
             _paymentPlanService = paymentPlanService;
             _logger = logger;
         }
-        public IActionResult Index()
+
+        [HttpGet]
+        public IActionResult Index(SettingViewModel settingViewModel)
         {
-            return View();
+            if (TempData["SettingViewModel"] != null)
+            {
+                settingViewModel = JsonConvert.DeserializeObject<SettingViewModel>(TempData["SettingViewModel"].ToString());
+            }
+            else
+            {
+                settingViewModel = new SettingViewModel();
+            }
+
+            return View(settingViewModel);
         }
 
         [HttpGet]
@@ -55,9 +60,10 @@ namespace AN.Ticket.WebUI.Controllers
         }
 
         [HttpPost]
-         public async Task<IActionResult> EditPaymentPlan(PaymantPlanDto paymentPlanDto){
+        public async Task<IActionResult> EditPaymentPlan(PaymantPlanDto paymentPlanDto)
+        {
 
-             if (ModelState.IsValid)
+            if (ModelState.IsValid)
             {
                 try
                 {
@@ -66,14 +72,16 @@ namespace AN.Ticket.WebUI.Controllers
                 }
                 catch (System.Exception error)
                 {
-                    TempData["ErrorMessage"] = $"Ocorreu um erro ao editar o plano de pagamento: {error.Message}"; 
+                    TempData["ErrorMessage"] = $"Ocorreu um erro ao editar o plano de pagamento: {error.Message}";
                 }
 
-            }else{
+            }
+            else
+            {
                 TempData["ErrorMessage"] = $"Ocorreu um erro ao tentar editar o plano de pagamento: Dados inválidos";
             }
             return RedirectToAction("PaymentPlan");
-         }
+        }
 
         [HttpPost]
         public async Task<IActionResult> CreatePaymentPlan(PaymantPlanDto paymentPlanDto)
@@ -88,13 +96,15 @@ namespace AN.Ticket.WebUI.Controllers
                 }
                 catch (System.Exception error)
                 {
-                    TempData["ErrorMessage"] = $"Ocorreu um erro ao criar o plano de pagamento: {error.Message}"; 
+                    TempData["ErrorMessage"] = $"Ocorreu um erro ao criar o plano de pagamento: {error.Message}";
                 }
 
-            }else{
+            }
+            else
+            {
                 TempData["ErrorMessage"] = $"Ocorreu um erro ao tentar criar o plano de pagamento: Dados inválidos";
             }
-           
+
             return RedirectToAction("PaymentPlan");
 
         }
