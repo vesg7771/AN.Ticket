@@ -2,6 +2,7 @@
 using AN.Ticket.Application.DTOs.Attachment;
 using AN.Ticket.Application.DTOs.InteractionHistory;
 using AN.Ticket.Application.DTOs.SatisfactionRating;
+using AN.Ticket.Application.DTOs.Team;
 using AN.Ticket.Application.DTOs.Ticket;
 using AN.Ticket.Application.DTOs.User;
 using AN.Ticket.Domain.Entities;
@@ -19,7 +20,8 @@ public class DomainToDTOMappingProfile
         CreateMap<Activity, ActivityDto>();
         CreateMap<InteractionHistory, InteractionHistoryDto>();
         CreateMap<SatisfactionRating, SatisfactionRatingDto>();
-        CreateMap<User, UserDto>();
+        CreateMap<User, UserDto>().ReverseMap();
         CreateMap<Attachment, AttachmentDto>();
+        CreateMap<Team, TeamDto>().ReverseMap();
     }
 }

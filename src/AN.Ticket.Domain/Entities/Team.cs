@@ -26,5 +26,16 @@ public class Team : EntityBase
         if (user == null) throw new ArgumentNullException(nameof(user));
         Members.Remove(user);
     }
+
+    public void UpdateName(string name)
+    {
+        if (string.IsNullOrEmpty(name)) throw new EntityValidationException("Team name is required.");
+        Name = name;
+    }
+
+    public void ClearMembers()
+    {
+        Members.Clear();
+    }
 }
 

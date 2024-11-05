@@ -1,0 +1,28 @@
+﻿@model (Guid TeamId, Guid MemberId, string MemberName)
+
+<button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteMemberModal-@Model.MemberId" title="Excluir">
+    <i class="bi bi-trash"></i>
+</button>
+
+<div class="modal fade" id="deleteMemberModal-@Model.MemberId" tabindex="-1" aria-labelledby="deleteMemberModalLabel-@Model.MemberId" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteMemberModalLabel-@Model.MemberId">Confirmar Exclusão</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                Tem certeza de que deseja excluir o membro <strong>@Model.MemberName</strong> do time?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form asp-action="DeleteMember" asp-controller="Team" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="teamId" value="@Model.TeamId" />
+                    <input type="hidden" name="memberId" value="@Model.MemberId" />
+                    <button type="submit" class="btn btn-danger">Excluir</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,176 @@
+﻿@model AN.Ticket.Application.DTOs.Team.TeamDto
+
+<div class="modal fade" id="addMemberModal-@Model.Id" tabindex="-1" aria-labelledby="addMemberModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addMemberModalLabel">Gerenciar Membros do Time - @Model.Name</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addMemberForm-@Model.Id">
+                    <input type="hidden" name="teamId" value="@Model.Id" />
+
+                    <div class="mb-4">
+                        <h6 class="fw-bold">Convidar Membros</h6>
+                        <p class="text-muted">Para adicionar membros ao time, selecione-os abaixo.</p>
+                        <div class="d-flex justify-content-between align-items-center input-group mb-3">
+                            <label class="form-label mb-0">Membros do Time</label>
+                            <button type="button" class="btn btn-outline-primary dropdown-toggle ms-1" data-bs-toggle="dropdown" aria-expanded="false">
+                                Selecionar Membros
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end" id="availableMembersDropdown-@Model.Id" style="width: 100%;">
+                                @{
+                                    var availableUsers = (List<AN.Ticket.Application.DTOs.User.UserDto>)ViewBag.AvailableUsers;
+                                    var hasMembers = availableUsers.Any(user => !Model.Members.Any(m => m.Id == user.Id));
+
+                                    if (hasMembers)
+                                    {
+                                        foreach (var user in availableUsers)
+                                        {
+                                            var alreadyInTeam = Model.Members.Any(m => m.Id == user.Id);
+                                            if (!alreadyInTeam)
+                                            {
+                                                <li id="dropdown-item-@user.Id">
+                                                    <a class="dropdown-item d-flex align-items-center" href="javascript:void(0);" onclick="addUserToInput('@Model.Id', '@user.Id', '@user.FullName')">
+                                                        @if (!string.IsNullOrEmpty(user.ProfilePicture))
+                                                        {
+                                                            <img src="@user.ProfilePicture" alt="@user.FullName" class="rounded-circle me-2" style="width: 30px; height: 30px; object-fit: cover;">
+                                                        }
+                                                        else
+                                                        {
+                                                            <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-2" style="width: 30px; height: 30px;">
+                                                                @user.FullName.Substring(0, 1).ToUpper()
+                                                            </div>
+                                                        }
+                                                        <span>@user.FullName</span>
+                                                    </a>
+                                                </li>
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <li class="dropdown-item text-muted">Nenhum membro disponível</li>
+                                    }
+                                }
+                            </ul>
+                        </div>
+                        <div id="selectedMembers-@Model.Id" class="d-flex flex-wrap gap-2">
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="fw-bold">Membros Atuais</h6>
+                        <div class="row">
+                            @foreach (var member in Model.Members)
+                            {
+                                <div class="col-12 d-flex align-items-center mb-2">
+                                    @if (!string.IsNullOrEmpty(member.ProfilePicture))
+                                    {
+                                        <img src="@member.ProfilePicture" alt="@member.FullName" class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                                    }
+                                    else
+                                    {
+                                        <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px;">
+                                            @member.FullName.Substring(0, 1).ToUpper()
+                                        </div>
+                                    }
+                                    <div class="d-flex flex-column">
+                                        <strong>@member.FullName</strong>
+                                    </div>
+                                    <span class="badge bg-light text-dark ms-auto">Membro</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Adicionar Membro(s)</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function addUserToInput(teamId, userId, userName) {
+        const selectedContainer = document.getElementById(`selectedMembers-${teamId}`);
+        const dropdownItem = document.getElementById(`dropdown-item-${userId}`);
+        if (!document.getElementById(`selected-${teamId}-${userId}`)) {
+            const newMemberDiv = document.createElement("div");
+            newMemberDiv.className = "badge bg-light text-dark d-flex align-items-center";
+            newMemberDiv.style.borderRadius = "20px";
+            newMemberDiv.style.padding = "5px 10px";
+            newMemberDiv.id = `selected-${teamId}-${userId}`;
+            newMemberDiv.innerHTML = `${userName} <span class="ms-2" style="cursor:pointer;" onclick="removeUser('${teamId}', '${userId}')">&times;</span>`;
+
+            const hiddenInput = document.createElement("input");
+            hiddenInput.type = "hidden";
+            hiddenInput.name = "selectedUserIds";
+            hiddenInput.value = userId;
+            hiddenInput.id = `input-${teamId}-${userId}`;
+
+            selectedContainer.appendChild(newMemberDiv);
+            selectedContainer.appendChild(hiddenInput);
+
+            if (dropdownItem) {
+                dropdownItem.style.display = 'none';
+            }
+        }
+    }
+
+    function removeUser(teamId, userId) {
+        document.getElementById(`selected-${teamId}-${userId}`).remove();
+        document.getElementById(`input-${teamId}-${userId}`).remove();
+
+        const dropdownItem = document.getElementById(`dropdown-item-${userId}`);
+        if (dropdownItem) {
+            dropdownItem.style.display = 'block';
+        }
+    }
+
+    document.getElementById(`addMemberModal-@Model.Id`).addEventListener('hidden.bs.modal', function () {
+        const selectedContainer = document.getElementById(`selectedMembers-@Model.Id`);
+        selectedContainer.innerHTML = '';
+
+        document.querySelectorAll(`#availableMembersDropdown-@Model.Id li`).forEach(item => {
+            item.style.display = 'block';
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('addMemberForm-@Model.Id');
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(form);
+            const data = new URLSearchParams(formData);
+
+            fetch('/Team/AddMember', {
+                method: 'POST',
+                body: data,
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        const modal = document.getElementById(`addMemberModal-@Model.Id`);
+                        const bootstrapModal = bootstrap.Modal.getInstance(modal);
+                        bootstrapModal.hide();
+
+                        window.location.reload();
+                    } else {
+                        toastr.error(result.error);
+                    }
+                })
+                .catch(error => {
+                    toastr.error("Erro ao processar a solicitação.");
+                });
+        });
+    });
+</script>

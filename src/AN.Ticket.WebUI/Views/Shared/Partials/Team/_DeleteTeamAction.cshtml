@@ -1,0 +1,44 @@
+﻿@model (string Name, Guid Id)
+
+<!-- Responsividade para Desktop -->
+<div class="d-none d-lg-block">
+    <button class="btn btn-outline-danger me-2" data-bs-toggle="modal" data-bs-target="#deleteTeamModal-@Model.Id">
+        <i class="bi bi-trash"></i> Excluir Equipe
+    </button>
+</div>
+
+<!-- Responsividade para Tablet -->
+<div class="d-none d-md-block d-lg-none">
+    <button class="btn btn-outline-danger me-2 mb-2" data-bs-toggle="modal" data-bs-target="#deleteTeamModal-@Model.Id">
+        <i class="bi bi-trash"></i> Excluir Equipe
+    </button>
+</div>
+
+<!-- Responsividade para Mobile -->
+<div class="d-block d-md-none">
+    <button class="btn btn-outline-danger w-100 mb-2" data-bs-toggle="modal" data-bs-target="#deleteTeamModal-@Model.Id">
+        <i class="bi bi-trash"></i> Excluir Equipe
+    </button>
+</div>
+
+<div class="modal fade" id="deleteTeamModal-@Model.Id" tabindex="-1" aria-labelledby="deleteTeamModalLabel-@Model.Id" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteTeamModalLabel-@Model.Id">Confirmar Exclusão</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Tem certeza de que deseja excluir a equipe <strong>@Model.Name</strong> e todos os seus membros?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form asp-action="DeleteTeam" asp-controller="Team" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="teamId" value="@Model.Id" />
+                    <button type="submit" class="btn btn-danger">Excluir</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

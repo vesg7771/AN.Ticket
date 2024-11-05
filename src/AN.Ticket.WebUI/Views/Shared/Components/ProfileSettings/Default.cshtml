@@ -36,7 +36,7 @@
         </div>
 
         <div class="team-section">
-            <h3>Equipes</h3>
+            <h3 class="mb-2">Equipes</h3>
 
             @if (Model.Teams == null || !Model.Teams.Any())
             {
@@ -55,12 +55,16 @@
                             {
                                 <div class="col-12 col-sm-6 col-md-3 mb-3">
                                     <div class="d-flex align-items-center team-card p-2">
-                                        <div class="profile-picture bg-secondary me-2" style="width: 50px; height: 50px;">
-                                            @if (!string.IsNullOrEmpty(member.ProfilePicture))
-                                            {
-                                                <img src="@member.ProfilePicture" alt="Profile Picture" />
-                                            }
-                                        </div>
+                                        @if (!string.IsNullOrEmpty(member.ProfilePicture))
+                                        {
+                                            <img src="@member.ProfilePicture" class="profile-picture me-2" alt="Profile Picture" style="width: 50px; height: 50px; object-fit: cover;" />
+                                        }
+                                        else
+                                        {
+                                            <div class="profile-not-picture me-2" style="width: 50px; height: 50px;">
+                                                @GetInitials(member.FullName)
+                                            </div>
+                                        }
                                         <div>
                                             <strong>@member.FullName</strong>
                                             <div class="team-role">@member.Email</div>
@@ -76,3 +80,17 @@
         <button type="submit" class="btn btn-dark mt-4 w-100">Salvar Alterações</button>
     </form>
 </div>
+
+@functions {
+    public static string GetInitials(string fullName)
+    {
+        if (string.IsNullOrEmpty(fullName))
+            return string.Empty;
+
+        var names = fullName.Split(' ');
+        if (names.Length == 1)
+            return names[0].Substring(0, 1).ToUpper();
+
+        return (names[0].Substring(0, 1) + names[names.Length - 1].Substring(0, 1)).ToUpper();
+    }
+}

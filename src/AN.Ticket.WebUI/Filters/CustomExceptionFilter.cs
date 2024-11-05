@@ -21,7 +21,7 @@ public class CustomExceptionFilter : IExceptionFilter
     public void OnException(ExceptionContext context)
     {
         var tempData = _tempDataDictionaryFactory.GetTempData(context.HttpContext);
-        var errorMessage = "Ocorreu um erro ao processar a solicitação. Verifique os dados e tente novamente";
+        var errorMessage = $"Ocorreu um erro ao processar a solicitação. Verifique os dados e tente novamente. {context.Exception.Message}";
         var statusCode = 500;
 
         if (context.Exception is EntityValidationException ex)

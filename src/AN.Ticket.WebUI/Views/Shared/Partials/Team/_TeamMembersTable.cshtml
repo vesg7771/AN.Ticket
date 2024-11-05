@@ -1,0 +1,106 @@
+﻿@model AN.Ticket.WebUI.ViewModels.Team.TeamMemberListViewModel
+
+<form asp-action="DeleteMembers" asp-controller="Team" method="post" id="deleteForm-@Model.TeamId">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="teamId" value="@Model.TeamId" />
+    <div class="table-responsive">
+        <!-- Adicionando a classe responsiva -->
+        <table class="table table-borderless table-hover align-middle mb-0">
+            <thead style="background-color: #F4F5F7; border-radius: 10px 10px 0 0;">
+                <tr style="background-color: #F4F5F7;">
+                    <th scope="col" style="width: 1%; border-top-left-radius: 10px;">
+                        <input type="checkbox" id="selectAll-@Model.TeamId" onclick="toggleSelectAll('@Model.TeamId')">
+                    </th>
+                    <th scope="col" style="width: 30%;">Nome do Colaborador</th>
+                    <th scope="col" class="d-none d-md-table-cell">E-mail</th>
+                    <th scope="col" class="d-none d-md-table-cell">Data de Adição</th>
+                    <th scope="col" style="width: 5%; border-top-right-radius: 10px;">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var member in Model.Members)
+                {
+                    <tr style="border-bottom: 1px solid #E0E0E0;">
+                        <td>
+                            <input type="checkbox" class="selectMember-@Model.TeamId" name="memberIds" value="@member.Id" onclick="toggleDeleteButton('@Model.TeamId')">
+                        </td>
+                        <td>
+                            <div class="fw-bold">@member.FullName</div>
+                        </td>
+                        <td class="d-none d-md-table-cell">@member.Email</td>
+                        <td class="d-none d-md-table-cell">@member.CreatedAt.ToString("dd/MM/yyyy")</td>
+                        <td>
+                            @await Html.PartialAsync("~/Views/Shared/Partials/Team/_DeleteMemberAction.cshtml", (Model.TeamId, member.Id, member.FullName))
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</form>
+
+<div class="d-flex justify-content-between align-items-center mt-3">
+    <div>
+        <span class="text-muted">Mostrando @((Model.PageNumber - 1) * Model.PageSize + 1) a @(Model.PageNumber * Model.PageSize) de @Model.TotalItems entradas</span>
+    </div>
+    @if (Model.TotalItems > 10)
+    {
+        <nav aria-label="Navegação de página">
+            <ul class="pagination mb-0">
+                @if (Model.PageNumber > 1)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("Index", new { pageNumber = Model.PageNumber - 1, pageSize = Model.PageSize, searchTerm = Model.SearchTerm })" aria-label="Anterior">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                }
+                @for (var i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                        <a class="page-link" href="@Url.Action("Index", new { pageNumber = i, pageSize = Model.PageSize, searchTerm = Model.SearchTerm })">@i</a>
+                    </li>
+                }
+                @if (Model.PageNumber < Model.TotalPages)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("Index", new { pageNumber = Model.PageNumber + 1, pageSize = Model.PageSize, searchTerm = Model.SearchTerm })" aria-label="Próximo">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+</div>
+
+<script>
+    function toggleSelectAll(teamId) {
+        const checkboxes = document.querySelectorAll(`.selectMember-${teamId}`);
+        const selectAllCheckbox = document.getElementById(`selectAll-${teamId}`).checked;
+
+        checkboxes.forEach(function (checkbox) {
+            checkbox.checked = selectAllCheckbox;
+        });
+        toggleDeleteButton(teamId);
+    }
+
+    function toggleDeleteButton(teamId) {
+        const anyChecked = document.querySelectorAll(`.selectMember-${teamId}:checked`).length > 0;
+        const deleteButton = document.getElementById(`deleteSelectedBtn-${teamId}`);
+
+        if (deleteButton) {
+            deleteButton.style.display = anyChecked ? 'inline-block' : 'none';
+        }
+    }
+
+    function deleteSelected(teamId) {
+        const form = document.getElementById(`deleteForm-${teamId}`);
+        if (form) {
+            form.submit();
+        } else {
+            console.error(`Formulário com ID deleteForm-${teamId} não encontrado.`);
+            toastr.error("Erro ao localizar o formulário. Tente novamente.");
+        }
+    }
+</script>

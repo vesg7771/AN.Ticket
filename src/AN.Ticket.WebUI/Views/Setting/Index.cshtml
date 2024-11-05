@@ -34,6 +34,18 @@
         color: #6c757d;
     }
 
+    .profile-not-picture {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background-color: #e9ecef;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.0rem;
+        color: #6c757d;
+    }
+
     .team-section {
         margin-top: 2rem;
     }
@@ -42,7 +54,7 @@
         background-color: #f8f9fa;
         padding: 10px;
         border-radius: 8px;
-        text-align: center;
+        text-align: start;
     }
 
     .team-role {
@@ -63,7 +75,7 @@
 
     <ul class="nav nav-tabs mb-4" role="tablist">
         <li class="nav-item">
-            <a class="nav-link active" id="profile-tab" data-bs-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="true">Perfil</a>
+            <a class="nav-link" id="profile-tab" data-bs-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="true">Perfil</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" id="password-tab" data-bs-toggle="tab" href="#password" role="tab" aria-controls="password" aria-selected="false">Segurança</a>
@@ -95,45 +107,9 @@
 
         <div class="tab-pane fade" id="password" role="tabpanel" aria-labelledby="password-tab">
             @await Html.PartialAsync("~/Views/Shared/Partials/Account/_SecuritySettings.cshtml", Model.SecuritySetting)
-@*             <div class="card p-4 mb-4">
-                <h3>Alterar Senha</h3>
-                @if (TempData["info"] != null)
-                {
-                    <div class="alert alert-danger d-flex align-items-center" role="alert">
-                        <i class="bi bi-exclamation-triangle-fill flex-shrink-0 me-2"></i>
-                        <div>
-                            @Html.Raw(TempData["info"])
-                        </div>
-                    </div>
-                }
-                <form asp-action="ChangePassword" asp-controller="Account" method="post">
-                    <div class="mb-3">
-                        <label for="currentPassword" class="form-label">Senha Atual</label>
-                        <input type="password" class="form-control" id="currentPassword" name="currentPassword">
-                    </div>
-                    <div class="mb-3">
-                        <label for="newPassword" class="form-label">Nova Senha</label>
-                        <input type="password" class="form-control" id="newPassword" name="newPassword">
-                    </div>
-                    <div class="mb-3">
-                        <label for="confirmPassword" class="form-label">Confirmar Nova Senha</label>
-                        <input type="password" class="form-control" id="confirmPassword" name="confirmPassword">
-                    </div>
-                    <div class="mt-3">
-                        <h5>Requisitos da senha:</h5>
-                        <ul>
-                            <li>Mínimo de 8 caracteres - quanto mais, melhor</li>
-                            <li>Pelo menos um caractere minúsculo</li>
-                            <li>Pelo menos um caractere maiúsculo</li>
-                            <li>Pelo menos um número, símbolo ou caractere de especiais</li>
-                        </ul>
-                    </div>
-                    <button type="submit" class="btn btn-dark">Alterar Senha</button>
-                </form>
-            </div> *@
         </div>
         <div class="tab-pane fade" id="team" role="tabpanel" aria-labelledby="team-tab">
-            <p>Configurações de Equipe</p>
+            @await Component.InvokeAsync("Team")
         </div>
         <div class="tab-pane fade" id="plan" role="tabpanel" aria-labelledby="plan-tab">
             <p>Configurações de Plano</p>
@@ -155,17 +131,53 @@
 
 @section Scripts {
     <script>
-        $(document).ready(function () {
-            $('#profile-picture-div').click(function () {
-                $('#profile-picture-input').click();
+            $(document).ready(function () {
+                $('#profile-picture-div').click(function () {
+                    $('#profile-picture-input').click();
+                });
+
+                $('#profile-picture-input').change(function () {
+                    $('#profile-picture-form').submit();
+                });
             });
 
-            $('#profile-picture-input').change(function () {
-                $('#profile-picture-form').submit();
+        document.addEventListener('DOMContentLoaded', function () {
+            const successRedirect = @Html.Raw(TempData.ContainsKey("SuccessRedirect") ? "true" : "false");
+
+            if (!successRedirect) {
+                localStorage.removeItem('activeTab');
+            }
+
+            const activeTab = localStorage.getItem('activeTab') || '#profile';
+
+            document.querySelectorAll('.nav-tabs .nav-link').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-content .tab-pane').forEach(pane => {
+                pane.classList.remove('show', 'active');
+            });
+
+            const tabLink = document.querySelector(`a[href="${activeTab}"]`);
+            const tabPane = document.querySelector(activeTab);
+
+            if (tabLink && tabPane) {
+                tabLink.classList.add('active');
+                tabPane.classList.add('show', 'active');
+            }
+
+            document.querySelectorAll('.nav-tabs .nav-link').forEach(tab => {
+                tab.addEventListener('click', function () {
+                    const tabId = this.getAttribute('href');
+                    localStorage.setItem('activeTab', tabId);
+                });
             });
         });
     </script>
+
+    </script>
+    <script src="~/js/team.js"></script>
 }
+
 
 @* @{
     ViewData["Title"] = "Configurações";

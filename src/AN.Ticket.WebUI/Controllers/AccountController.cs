@@ -405,6 +405,7 @@ public class AccountController : Controller
         if (!ModelState.IsValid)
         {
             TempData["SettingViewModel"] = JsonConvert.SerializeObject(settingViewModel);
+            TempData["SuccessRedirect"] = true;
             return RedirectToAction("Index", "Setting");
         }
 
@@ -424,10 +425,12 @@ public class AccountController : Controller
             }
 
             TempData["SettingViewModel"] = JsonConvert.SerializeObject(settingViewModel);
+            TempData["SuccessRedirect"] = true;
             return RedirectToAction("Index", "Setting", settingViewModel);
         }
 
         TempData["SuccessMessage"] = "Senha alterada com sucesso!";
+        TempData["SuccessRedirect"] = true;
         return RedirectToAction("Index", "Setting", settingViewModel);
     }
 }

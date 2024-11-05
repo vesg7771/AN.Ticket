@@ -5,4 +5,5 @@ namespace AN.Ticket.Domain.Interfaces;
 public interface IUserRepository
     : IRepository<User>
 {
+    Task<IEnumerable<User>> GetAllByIds(List<Guid> ids);
 }

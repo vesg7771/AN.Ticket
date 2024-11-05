@@ -438,7 +438,7 @@ namespace AN.Ticket.Infra.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("TicketMessage");
+                    b.ToTable("TicketMessage", (string)null);
                 });
 
             modelBuilder.Entity("AN.Ticket.Domain.Entities.User", b =>
@@ -467,7 +467,7 @@ namespace AN.Ticket.Infra.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("AN.Ticket.Domain.ValueObjects.SocialNetwork", b =>

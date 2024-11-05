@@ -41,6 +41,7 @@ public static class DependencyInjectionConfig
         services.AddScoped<IHomeService, HomeService>();
         services.AddScoped<ISatisfactionRatingService, SatisfactionRatingService>();
         services.AddScoped<ITeamService, TeamService>();
+        services.AddScoped<IUserService, UserService>();
         services.AddScoped<IFileService, FileService>();
         #endregion
 

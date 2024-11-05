@@ -108,6 +108,41 @@
             </form>
         </div>
     </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-3">
+        <div>
+            <span class="text-muted">Mostrando @((Model.PageNumber - 1) * Model.PageSize + 1) a @(Model.PageNumber * Model.PageSize) de @Model.TotalItems entradas</span>
+        </div>
+        @if (Model.TotalItems > 10)
+        {
+            <nav aria-label="Navegação de página">
+                <ul class="pagination mb-0">
+                    @if (Model.PageNumber > 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="@Url.Action("Index", new { pageNumber = Model.PageNumber - 1, pageSize = Model.PageSize, searchTerm = Model.SearchTerm })" aria-label="Anterior">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    }
+                    @for (var i = 1; i <= Model.TotalPages; i++)
+                    {
+                        <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                            <a class="page-link" href="@Url.Action("Index", new { pageNumber = i, pageSize = Model.PageSize, searchTerm = Model.SearchTerm })">@i</a>
+                        </li>
+                    }
+                    @if (Model.PageNumber < Model.TotalPages)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="@Url.Action("Index", new { pageNumber = Model.PageNumber + 1, pageSize = Model.PageSize, searchTerm = Model.SearchTerm })" aria-label="Próximo">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        }
+    </div>
 </div>
 
 @functions {
@@ -188,95 +223,3 @@
         });
     </script>
 }
-
-
-
-@* <div class="container">
-    <div class="card">
-        <div class="card-header">
-            <h5 class="mb-0">Atividades</h5>
-        </div>
-        <div class="card-body">
-            <table id="activitiesTable" class="table table-hover table-bordered">
-                <thead class="table-light">
-                    <tr>
-                        <th>Assunto</th>
-                        <th>Tipo</th>
-                        <th>Data Agendada</th>
-                        <th>Duração</th>
-                        <th>Prioridade</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var activity in Model)
-                    {
-                        <tr>
-                            <td>@activity.Subject</td>
-                            <td>@TranslateActivityType(activity.Type)</td>
-                            <td>@activity.ScheduledDate.ToString("dd/MM/yyyy")</td>
-                            <td>@activity.Duration.ToString(@"hh\:mm")</td>
-                            <td>@TranslatePriority(activity.Priority)</td>
-                            <td>
-                                @await Html.PartialAsync("_ActivityActions", new ActivityActionViewModel { Id = activity.Id ?? Guid.Empty, IsEditTicket = true })
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-@section Scripts {
-    <script>
-        $(document).ready(function () {
-            $('#activitiesTable').DataTable({
-                "order": [[2, "desc"]],
-                "language": {
-                    "lengthMenu": "Mostrar _MENU_ registros",
-                    "zeroRecords": "Nenhum registro encontrado",
-                    "info": "Mostrando _START_ a _END_ de _TOTAL_ registros",
-                    "infoEmpty": "Mostrando 0 a 0 de 0 registros",
-                    "infoFiltered": "(filtrado de _MAX_ registros no total)",
-                    "search": "Buscar:",
-                    "paginate": {
-                        "first": "Primeiro",
-                        "last": "Último",
-                        "next": "Próximo",
-                        "previous": "Anterior"
-                    }
-                }
-            });
-        });
-
-        function confirmDelete(activityId) {
-            if (confirm("Tem certeza que deseja excluir esta atividade?")) {
-                window.location.href = '@Url.Action("Delete", "Activity")/' + activityId;
-            }
-        }
-    </script>
-}
-
-@functions {
-    public string TranslatePriority(ActivityPriority priority)
-    {
-        return priority switch
-        {
-            ActivityPriority.Low => "Baixo",
-            ActivityPriority.Medium => "Médio",
-            ActivityPriority.High => "Alta",
-            _ => priority.ToString(),
-        };
-    }
-
-    public string TranslateActivityType(ActivityType type)
-    {
-        return type switch
-        {
-            ActivityType.Task => "Tarefa",
-            ActivityType.Event => "Evento",
-            _ => type.ToString(),
-        };
-    }
-} *@
