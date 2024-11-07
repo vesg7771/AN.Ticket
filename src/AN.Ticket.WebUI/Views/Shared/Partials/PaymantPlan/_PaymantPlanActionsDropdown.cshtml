@@ -1,28 +1,28 @@
-﻿@model Guid
+﻿@model AN.Ticket.Application.DTOs.PaymantPlan.PaymantPlanDto
 
 <span class="dropdown">
-    <button class="btn btn-link bg-white text-secondary border" type="button" id="dropdownMenuButton-@Model" data-bs-toggle="dropdown" aria-expanded="false">
+    <button class="btn btn-link bg-white text-secondary border" type="button" id="dropdownMenuButton-@Model.Id" data-bs-toggle="dropdown" aria-expanded="false">
         <i class="bi bi-three-dots"></i>
     </button>
-    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-@Model">
+    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-@Model.Id">
         <li>
-            <a class="dropdown-item" asp-action="Edit" asp-controller="PaymantPlan" asp-route-id="@Model">
+            <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#editPaymantPlanModal-@Model.Id">
                 <i class="bi bi-pencil-square"></i> Editar
             </a>
         </li>
         <li>
-            <a class="dropdown-item text-danger" href="#" data-bs-toggle="modal" data-bs-target="#deleteModal-@Model">
+            <a class="dropdown-item text-danger" href="#" data-bs-toggle="modal" data-bs-target="#deleteModal-@Model.Id">
                 <i class="bi bi-trash"></i> Excluir
             </a>
         </li>
     </ul>
 </span>
 
-<div class="modal fade" id="deleteModal-@Model" tabindex="-1" aria-labelledby="deleteModalLabel-@Model" aria-hidden="true">
+<div class="modal fade" id="deleteModal-@Model.Id" tabindex="-1" aria-labelledby="deleteModalLabel-@Model.Id" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="deleteModalLabel-@Model">Confirmar Exclusão</h5>
+                <h5 class="modal-title" id="deleteModalLabel-@Model.Id">Confirmar Exclusão</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body text-start">
@@ -30,10 +30,88 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <form asp-action="Delete" asp-controller="PaymantPlan" asp-route-id="@Model" method="post" class="d-inline">
+                <form asp-action="Delete" asp-controller="PaymantPlan" asp-route-id="@Model.Id" method="post" class="d-inline">
                     <button type="submit" class="btn btn-danger">Excluir</button>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="editPaymantPlanModal-@Model.Id" tabindex="-1" aria-labelledby="editPaymantPlanModalLabel-@Model.Id" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editPaymantPlanModalLabel-@Model.Id">Editar Plano de Pagamento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editPaymentPlanForm-@Model.Id" action="/PaymantPlan/Edit" method="post">
+                <div class="modal-body">
+                    <input type="hidden" name="Id" value="@Model.Id" />
+
+                    <div class="mb-3">
+                        <label for="Description-@Model.Id" class="form-label">Descrição</label>
+                        <input type="text" name="Description" id="Description-@Model.Id" class="form-control" placeholder="Descrição do Plano" value="@Model.Description" />
+                        <span class="text-danger" id="Description-error-@Model.Id"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="Value-@Model.Id" class="form-label">Valor</label>
+                        <input type="number" name="Value" id="Value-@Model.Id" class="form-control" placeholder="Valor do Plano" min="1" value="@Model.Value" />
+                        <span class="text-danger" id="Value-error-@Model.Id"></span>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" onclick="submitEditForm('@Model.Id')" class="btn btn-primary">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function submitEditForm(planId) {
+        const form = document.getElementById(`editPaymentPlanForm-${planId}`);
+        const url = form.getAttribute('action');
+        const formData = new FormData(form);
+
+        fetch(url, {
+            method: 'POST',
+            body: new URLSearchParams(formData),
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        })
+            .then(response => response.json())
+            .then(response => {
+                if (response.success) {
+                    const modal = document.getElementById(`editPaymantPlanModal-${planId}`);
+                    const modalInstance = bootstrap.Modal.getInstance(modal);
+                    modalInstance.hide();
+                    location.reload();
+                } else {
+                    displayValidationErrors(planId, response.errors);
+                }
+            })
+            .catch(() => {
+                toastr.error("Erro ao atualizar o plano de pagamento.");
+            });
+    }
+
+    function displayValidationErrors(planId, errors) {
+        document.getElementById(`Description-error-${planId}`).textContent = '';
+        document.getElementById(`Value-error-${planId}`).textContent = '';
+
+        errors.forEach(function (error) {
+            if (error.includes("Descrição")) {
+                document.getElementById(`Description-error-${planId}`).textContent = error;
+            } else if (error.includes("Valor")) {
+                document.getElementById(`Value-error-${planId}`).textContent = error;
+            }
+        });
+    }
+</script>
+
+

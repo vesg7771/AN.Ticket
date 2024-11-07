@@ -60,7 +60,7 @@
                         </td>
                         <td class="text-end">@plan.Value.ToString("C")</td>
                         <td>
-                            @await Html.PartialAsync("~/Views/Shared/Partials/PaymantPlan/_PaymantPlanActionsDropdown.cshtml", plan.Id)
+                            @await Html.PartialAsync("~/Views/Shared/Partials/PaymantPlan/_PaymantPlanActionsDropdown.cshtml", plan)
                         </td>
                     </tr>
                 }
@@ -126,9 +126,7 @@
 
     function deleteSelectedPlans() {
         const form = document.getElementById('paymentPlansForm');
-        if (confirm("Deseja realmente excluir os planos selecionados?")) {
-            form.submit();
-        }
+        form.submit();
     }
 
     function searchPlans() {

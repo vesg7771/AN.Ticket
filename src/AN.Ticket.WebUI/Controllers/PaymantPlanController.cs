@@ -72,13 +72,13 @@ public class PaymantPlanController : Controller
 
             TempData["SuccessMessage"] = "Planos de pagamento excluídos com sucesso!";
             TempData["SuccessRedirect"] = true;
-            return Json(new { success = true });
+            return RedirectToAction("Index", "Setting");
         }
         catch
         {
             TempData["ErrorMessage"] = "Erro ao excluir os planos de pagamento!";
             TempData["SuccessRedirect"] = true;
-            return Json(new { success = false });
+            return RedirectToAction("Index", "Setting");
         }
     }
 
@@ -95,19 +95,6 @@ public class PaymantPlanController : Controller
         TempData["SuccessMessage"] = "Plano de pagamento criado com sucesso!";
         TempData["SuccessRedirect"] = true;
         return Json(new { success = true });
-    }
-
-    [HttpGet]
-    public async Task<IActionResult> Edit(Guid id)
-    {
-        var plan = await _paymentPlanService.GetByIdAsync(id);
-        if (plan is null)
-        {
-            TempData["ErrorMessage"] = "Plano de pagamento não encontrado!";
-            TempData["SuccessRedirect"] = true;
-        }
-
-        return PartialView("~/Views/Shared/Partials/PaymentPlan/_EditPaymantPlanModal.cshtml", plan);
     }
 
     [HttpPost]
