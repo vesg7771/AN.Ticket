@@ -1,0 +1,142 @@
+﻿@model AN.Ticket.WebUI.ViewModels.PaymantPlan.PaymantPlanListViewModel
+
+<div class="d-none d-md-flex justify-content-between align-items-center mb-3">
+    <h6 class="text-muted m-0">Todos os planos @Model.TotalItems</h6>
+    <div class="d-flex align-items-center">
+        <div class="input-group" style="width: 300px;">
+            <input type="text" class="form-control" placeholder="Pesquisar" id="searchTerm" value="@Model.SearchTerm">
+            <button class="btn btn-outline-secondary" onclick="searchPlans()">
+                <i class="bi bi-search"></i>
+            </button>
+        </div>
+        <button id="deleteSelectedBtn" class="btn btn-outline-danger ms-2" style="display: none;" onclick="deleteSelectedPlans()">
+            <i class="bi bi-trash"></i> Excluir Selecionados
+        </button>
+    </div>
+</div>
+
+<div class="d-md-none row mb-3">
+    <div class="col-12">
+        <h6 class="text-muted">Todos os planos @Model.TotalItems</h6>
+    </div>
+    <div class="col-12">
+        <div class="input-group">
+            <input type="text" class="form-control" placeholder="Pesquisar" id="searchTerm" value="@Model.SearchTerm">
+            <button class="btn btn-outline-secondary" onclick="searchPlans()">
+                <i class="bi bi-search"></i>
+            </button>
+        </div>
+    </div>
+    <div class="col-12 d-flex mt-2 mt-md-0">
+        <button id="deleteSelectedBtn" class="btn btn-outline-danger w-100" style="display: none;" onclick="deleteSelectedPlans()">
+            <i class="bi bi-trash"></i> Excluir Selecionados
+        </button>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <form asp-action="DeletePlans" asp-controller="PaymantPlan" method="post" id="paymentPlansForm">
+        @Html.AntiForgeryToken()
+        <table class="table table-borderless table-hover align-middle mb-0">
+            <thead style="background-color: #F4F5F7; border-radius: 10px 10px 0 0;">
+                <tr>
+                    <th style="width: 1%; border-top-left-radius: 10px;">
+                        <input type="checkbox" id="selectAll" onclick="toggleSelectAll()">
+                    </th>
+                    <th style="width: 40%;">Descrição do Plano</th>
+                    <th class="text-end">Valor</th>
+                    <th style="width: 5%; border-top-right-radius: 10px;">Ações</th>
+                </tr>
+            </thead>
+            <tbody id="paymentPlansTableBody">
+                @foreach (var plan in Model.PaymentPlans)
+                {
+                    <tr style="border-bottom: 1px solid #E0E0E0;">
+                        <td>
+                            <input type="checkbox" class="selectPlan" name="Ids" value="@plan.Id" onclick="toggleDeleteButton()">
+                        </td>
+                        <td>
+                            <div class="fw-bold">@plan.Description</div>
+                        </td>
+                        <td class="text-end">@plan.Value.ToString("C")</td>
+                        <td>
+                            @await Html.PartialAsync("~/Views/Shared/Partials/PaymantPlan/_PaymantPlanActionsDropdown.cshtml", plan.Id)
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </form>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mt-3">
+    <div>
+        <span class="text-muted">Mostrando @((Model.PageNumber - 1) * Model.PageSize + 1) a @(Model.PageNumber * Model.PageSize) de @Model.TotalItems entradas</span>
+    </div>
+    @if (Model.TotalItems > 10)
+    {
+        <nav aria-label="Navegação de página">
+            <ul class="pagination mb-0">
+                @if (Model.PageNumber > 1)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("Index", new { pageNumber = Model.PageNumber - 1, pageSize = Model.PageSize, searchTerm = Model.SearchTerm })" aria-label="Anterior">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                }
+                @for (var i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                        <a class="page-link" href="@Url.Action("Index", new { pageNumber = i, pageSize = Model.PageSize, searchTerm = Model.SearchTerm })">@i</a>
+                    </li>
+                }
+                @if (Model.PageNumber < Model.TotalPages)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("Index", new { pageNumber = Model.PageNumber + 1, pageSize = Model.PageSize, searchTerm = Model.SearchTerm })" aria-label="Próximo">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+</div>
+
+<script>
+    function toggleSelectAll() {
+        const checkboxes = document.querySelectorAll('.selectPlan');
+        const selectAllCheckbox = document.getElementById('selectAll').checked;
+
+        checkboxes.forEach(function (checkbox) {
+            checkbox.checked = selectAllCheckbox;
+        });
+        toggleDeleteButton();
+    }
+
+    function toggleDeleteButton() {
+        const anyChecked = document.querySelectorAll('.selectPlan:checked').length > 0;
+        var deleteButtons = document.querySelectorAll('#deleteSelectedBtn');
+
+        deleteButtons.forEach(function (button) {
+            button.style.display = anyChecked ? 'inline-block' : 'none';
+        });
+    }
+
+    function deleteSelectedPlans() {
+        const form = document.getElementById('paymentPlansForm');
+        if (confirm("Deseja realmente excluir os planos selecionados?")) {
+            form.submit();
+        }
+    }
+
+    function searchPlans() {
+        const searchTerm = document.getElementById('searchTerm').value;
+        const url = '@Url.Action("GetPagedPlans", "PaymantPlan")';
+
+        $.get(url, { searchTerm: searchTerm, pageNumber: 1, pageSize: @Model.PageSize }, function (html) {
+            $("#paymentPlansTableBody").html($(html).find("#paymentPlansTableBody").html());
+        });
+    }
+</script>

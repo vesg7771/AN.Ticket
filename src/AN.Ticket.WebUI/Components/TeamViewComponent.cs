@@ -10,7 +10,10 @@ public class TeamViewComponent : ViewComponent
     private readonly ITeamService _teamService;
     private readonly IUserService _userService;
 
-    public TeamViewComponent(ITeamService teamService, IUserService userService)
+    public TeamViewComponent(
+        ITeamService teamService,
+        IUserService userService
+    )
     {
         _teamService = teamService;
         _userService = userService;

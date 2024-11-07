@@ -1,0 +1,60 @@
+﻿@model AN.Ticket.Application.DTOs.PaymantPlan.PaymantPlanDto
+
+<div class="modal fade" id="createPaymentPlanModal" tabindex="-1" aria-labelledby="createPaymentPlanModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createPaymentPlanModalLabel">Criar Plano de Pagamento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createPaymentPlanForm" asp-action="Create" asp-controller="PaymantPlan" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label"></label>
+                        <input asp-for="Description" class="form-control" placeholder="Descrição do Plano" />
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Value" class="form-label"></label>
+                        <input asp-for="Value" class="form-control" placeholder="Valor do Plano" type="number" min="1" step="0.01" />
+                        <span asp-validation-for="Value" class="text-danger"></span>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="submitCreatePlan()">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('createPaymantPlanButton').addEventListener('click', function () {
+        $('#createPaymentPlanModal').modal('show');
+    });
+
+    function submitCreatePlan() {
+        const form = $('#createPaymentPlanForm');
+        $.ajax({
+            url: form.attr('action'),
+            type: 'POST',
+            data: form.serialize(),
+            success: function (response) {
+                if (response.success) {
+                    $('#createPaymentPlanModal').modal('hide');
+                    location.reload();
+                } else {
+                    const errorMessages = response.errors || ["Erro ao salvar o plano."];
+                    toastr.error(errorMessages.join("\n"));
+                }
+            },
+            error: function () {
+                toastr.error("Ocorreu um erro ao tentar criar o plano. Tente novamente.");
+            }
+        });
+    }
+</script>

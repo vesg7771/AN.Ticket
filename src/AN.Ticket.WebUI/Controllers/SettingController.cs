@@ -42,7 +42,7 @@ namespace AN.Ticket.WebUI.Controllers
         {
             try
             {
-                var paymentPlans = await _paymentPlanService.GetAllAsync(); // Supondo que retorne List<PaymentPlan>
+                var paymentPlans = await _paymentPlanService.GetAllAsync();
 
                 var paymentsPlanDTOs = paymentPlans.Select(plan => new PaymantPlanDto
                 {
