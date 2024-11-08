@@ -37,6 +37,13 @@ public class BreadcrumbViewComponent : ViewComponent
                 { "Index", "Atividades" },
                 { "Create", "Criar Atividade" }
             }
+        },
+        {
+            "Asset", new Dictionary<string, string>
+            {
+                { "Index", "Ativos" },
+                { "Create", "Criar Ativo" }
+            }
         }
     };
 
