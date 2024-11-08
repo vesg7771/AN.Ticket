@@ -19,8 +19,12 @@ public class Contact : EntityBase
     public Guid UserId { get; private set; }
 
     public User User { get; set; }
+    public ICollection<AssetAssignment> AssetAssignments { get; private set; }
 
-    protected Contact() { }
+    protected Contact()
+    {
+        AssetAssignments = new List<AssetAssignment>();
+    }
 
     public Contact(
         string firstName,

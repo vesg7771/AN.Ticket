@@ -27,6 +27,8 @@ public class ApplicationDbContext
     public DbSet<User> Users { get; set; }
     public DbSet<PaymentPlan> PaymentPlans { get; set; }
     public DbSet<Attachment> Attachments { get; set; }
+    public DbSet<Asset> Assets { get; set; }
+    public DbSet<AssetAssignment> AssetAssignments { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

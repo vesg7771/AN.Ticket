@@ -7,7 +7,12 @@ public class User : EntityBase
     public string Email { get; private set; }
     public string ProfilePicture { get; private set; }
 
-    protected User() { }
+    public ICollection<AssetAssignment> AssetAssignments { get; private set; }
+
+    protected User()
+    {
+        AssetAssignments = new List<AssetAssignment>();
+    }
 
     public User(
         Guid id,
