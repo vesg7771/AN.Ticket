@@ -121,22 +121,47 @@ public class TicketService
             ticket.Subject,
             $@"
             <html>
+                
                 <body>
-                    <h2 style='color: #0056b3;'>Olá {ticket.ContactName},</h2>
-                    <p>#{code}</p>
-                    <p>Obrigado por entrar em contato com o nosso suporte! Seu ticket foi <strong>criado com sucesso</strong> e nossa equipe já está trabalhando para resolvê-lo. Se você tiver mais detalhes ou informações para adicionar, basta responder este e-mail.</p>
+                    <div style='max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px; border-radius: 8px; background-color: #f9f9f9;'>
             
-                    <h3>Detalhes do Ticket:</h3>
-                    <ul style='list-style-type: none; padding: 0;'>
-                        <li><strong>Assunto:</strong> {ticket.Subject}</li>
-                        <li><strong>Descrição:</strong> {createTicket.Description}</li>
-                    </ul>
+                        
+                        <h2 style='color: #0056b3; text-align: center;'>AtlasNetworks Suporte ao Cliente</h2>
+                        
+                        
+                        <h3>Olá {ticket.ContactName}</h3>
+                        
+                      
+                        <p>Recebemos seu contato e um <strong>chamado de suporte</strong> foi aberto com sucesso! Nossa equipe está trabalhando para solucionar o seu problema o mais rápido possível.</p>
+                        
+                       
+                        <h3>Detalhes do Chamado:</h3>
+                        <ul style='list-style-type: none; padding: 0;'>
+                            <li><strong>Assunto:</strong> {ticket.Subject}</li>
+                            <li><strong>Descrição:</strong> {createTicket.Description}</li>
+                            <li><strong>Código do Chamado:</strong> #{code}</li>
+                            <li><strong>Data de Abertura:</strong> {DateTime.Now}</li>
+                        </ul>
+                        
+                       
+                        <h3>Contatos para Suporte:</h3>
+                        <p>Você também pode entrar em contato conosco pelos seguintes canais de atendimento:</p>
+                        <ul style='list-style-type: none; padding: 0;'>
+                            
+                            <li><strong>Email:</strong> suporte@atlasnetworks.com</li>
+                            <li><strong>WhatsApp:</strong> (11) 98765-4321</li>
+                            <li><strong>Horário de Atendimento:</strong> Segunda a Sexta, das 8h às 18h</li>
+                        </ul>
             
-                    <hr style='border: 0; border-top: 1px solid #eee;' />
-            
-                    <p style='font-size: 14px; color: #777;'>Atenciosamente,<br />Equipe de Suporte</p>
+                        
+                        <p style='font-size: 14px; color: #777;'>Atenciosamente,<br>Equipe de Suporte - AtlasNetworks</p>
+                        
+                        
+                        <hr style='border: 0; border-top: 1px solid #ddd; margin-top: 20px;' />
+                        <p style='font-size: 12px; color: #aaa; text-align: center;'>Este é um e-mail automático, por favor, não responda diretamente a esta mensagem.</p>
                 </body>
             </html>"
+
         );
 
         return true;
